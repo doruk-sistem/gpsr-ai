@@ -300,7 +300,7 @@ export default function Pricing() {
   ];
 
   // Function to format the monthly price from annual price correctly
-  const formatMonthlyFromAnnual = (annualPrice) => {
+  const formatMonthlyFromAnnual = (annualPrice: number) => {
     return Math.round(annualPrice / 12);
   };
 
@@ -680,8 +680,8 @@ export default function Pricing() {
 
               <div className="bg-background rounded-lg shadow-sm p-8">
                 <p className="text-lg text-muted-foreground mb-6">
-                  A "product type" in the context of GPSR compliance refers to a
-                  group of products that:
+                  A &quot;product type&quot; in the context of GPSR compliance
+                  refers to a group of products that:
                 </p>
 
                 <ul className="space-y-4">
@@ -845,7 +845,7 @@ export default function Pricing() {
                 </h3>
                 <p className="text-muted-foreground">
                   Yes, you can upgrade or downgrade your plan at any time. When
-                  upgrading, you'll only pay the prorated difference. When
+                  upgrading, you&apos;ll only pay the prorated difference. When
                   downgrading, the new rate will apply at your next billing
                   cycle.
                 </p>
