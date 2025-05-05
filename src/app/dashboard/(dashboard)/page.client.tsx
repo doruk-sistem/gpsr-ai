@@ -28,6 +28,8 @@ export default function DashboardPageClient() {
   const router = useRouter();
   const user = useCurrentUser();
 
+  console.log("testuser: ");
+
   console.log("user: ", user);
 
   useEffect(() => {
