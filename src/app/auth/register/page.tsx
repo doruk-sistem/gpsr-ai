@@ -129,20 +129,27 @@ export default function Register() {
     setIsLoading(true);
 
     try {
+      console.log("Starting registration process...");
       await registerMutation.mutateAsync({
         email: formData.email,
         password: formData.password,
       });
 
+      console.log("Registration successful, preparing to navigate to dashboard");
       toast.success("Account created successfully", {
-        description: "Redirecting...",
+        description: "Redirecting to dashboard...",
         duration: 3000,
       });
-
-      router.push("/dashboard");
-    } catch (error) {
+      
+      // Small delay to ensure toast is seen and authentication is complete
+      setTimeout(() => {
+        console.log("Navigating to dashboard now");
+        router.push("/dashboard");
+      }, 2000);
+    } catch (error: any) {
+      console.error("Registration error:", error);
       toast.error("Registration failed", {
-        description: "Please try again later",
+        description: error.message || "Please try again or contact support",
       });
     } finally {
       setIsLoading(false);
@@ -153,19 +160,27 @@ export default function Register() {
     setIsLoading(true);
 
     try {
+      console.log("Starting Google sign-in process...");
       const { error } = await signInWithGoogleMutation.mutateAsync();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Google sign-in error:", error);
+        throw error;
+      }
 
+      console.log("Google sign-in successful, preparing to navigate to dashboard");
       toast.success("Google login successful", {
         description: "Redirecting...",
         duration: 3000,
       });
 
-      router.push("/dashboard");
-    } catch (error) {
+      setTimeout(() => {
+        router.push("/dashboard");
+      }, 2000);
+    } catch (error: any) {
+      console.error("Google login error:", error);
       toast.error("Google login failed", {
-        description: "Please try again",
+        description: error.message || "Please try again",
       });
     } finally {
       setIsLoading(false);
@@ -187,7 +202,7 @@ export default function Register() {
                     Create Account
                   </CardTitle>
                   <CardDescription className="text-base">
-                    Start your GPSR compliance journey today
+                    Start your GPSR compliance journey today with a 14-day free trial
                   </CardDescription>
                 </CardHeader>
                 <form onSubmit={handleSubmit}>
@@ -366,7 +381,7 @@ export default function Register() {
                             Creating account...
                           </>
                         ) : (
-                          "Create Account"
+                          "Start Free 14-Day Trial"
                         )}
                       </Button>
 

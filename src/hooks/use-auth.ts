@@ -36,16 +36,35 @@ export const useCurrentUser = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        console.log("Fetching initial session...");
+        // Get the current session
+        const { data: sessionData } = await supabase.auth.getSession();
+        
+        if (sessionData?.session) {
+          console.log("Session found during initial check");
+          setUser(sessionData.session.user as User);
+        } else {
+          console.log("No session found during initial check");
+          setUser(null);
+        }
+      } catch (error) {
+        console.error("Error fetching initial session:", error);
+        setUser(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUser();
+
+    // Listen for auth state changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      setIsLoading(false);
-    });
-
-    // Initial session check
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log(`Auth state changed: ${event}, session:`, !!session);
+      setUser(session?.user as User || null);
       setIsLoading(false);
     });
 
