@@ -1,10 +1,9 @@
-// src/components/dashboard/dashboard-navbar.tsx
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { User, Bell, Clock } from "lucide-react";
+import { User, Bell, Clock, LogOut } from "lucide-react";
 import { ThemeToggle } from "../theme-toggle";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,10 +16,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useSubscription } from "@/hooks/use-stripe";
 import { differenceInDays } from "date-fns";
+import { useCurrentUser } from "@/hooks/use-auth";
+import { LogoutConfirmation } from "../logout-confirmation/logout-confirmation";
 
 export default function DashboardNavbar() {
   const router = useRouter();
   const { data: subscription } = useSubscription();
+  const { data: user } = useCurrentUser();
+  const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
   
   // Check if user is in trial period
   const isTrialing = subscription?.subscription_status === 'trialing';
@@ -72,7 +75,11 @@ export default function DashboardNavbar() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuLabel>
+                {user?.user_metadata?.first_name
+                  ? `${user.user_metadata.first_name} ${user.user_metadata.last_name || ""}`
+                  : user?.email || "My Account"}
+              </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => router.push('/dashboard/profile')}>
                 Profile
@@ -84,13 +91,20 @@ export default function DashboardNavbar() {
                 Settings
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => router.push('/auth/logout')}>
+              <DropdownMenuItem onClick={() => setIsLogoutDialogOpen(true)}>
+                <LogOut className="h-4 w-4 mr-2" />
                 Logout
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
       </div>
+
+      {/* Shared Logout Confirmation Component */}
+      <LogoutConfirmation 
+        isOpen={isLogoutDialogOpen} 
+        setIsOpen={setIsLogoutDialogOpen} 
+      />
     </div>
   );
 }

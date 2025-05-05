@@ -2,16 +2,30 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Shield, Menu, X } from "lucide-react";
+import { Shield, Menu, X, LogOut, User } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Button } from "@/components/ui/button";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils/cn";
+import { useCurrentUser } from "@/hooks/use-auth";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { LogoutConfirmation } from "./logout-confirmation/logout-confirmation";
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
+  const { data: user } = useCurrentUser();
 
   // Track scroll position to add background when scrolling
   useEffect(() => {
@@ -74,15 +88,64 @@ export function Navbar() {
           </div>
           <div className="hidden md:flex md:items-center md:space-x-4">
             <ThemeToggle />
-            <Link href="/auth/login">
-              <Button variant="ghost">Login</Button>
-            </Link>
-            <Link href="/auth/register">
-              <Button>Start Free Trial</Button>
-            </Link>
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost">
+                    {user.user_metadata?.first_name
+                      ? `${user.user_metadata.first_name} ${user.user_metadata.last_name?.charAt(0) || ""}.`
+                      : user.email}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem onClick={() => router.push("/dashboard")}>
+                      Dashboard
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => router.push("/account")}>
+                      Account Settings
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => setIsLogoutDialogOpen(true)}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Logout</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <>
+                <Link href="/auth/login">
+                  <Button variant="ghost">Login</Button>
+                </Link>
+                <Link href="/auth/register">
+                  <Button>Start Free Trial</Button>
+                </Link>
+              </>
+            )}
           </div>
           <div className="flex items-center md:hidden">
             <ThemeToggle />
+            {user && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="ml-2">
+                    <User className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => router.push("/dashboard")}>
+                    Dashboard
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => setIsLogoutDialogOpen(true)}>
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
             <button
               type="button"
               className="inline-flex items-center justify-center p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary ml-2"
@@ -124,18 +187,51 @@ export function Navbar() {
               </Link>
             ))}
             <div className="pt-6 pb-3 border-t border-border px-5 space-y-4">
-              <Link href="/auth/login" className="block w-full">
-                <Button variant="outline" className="w-full py-5 text-base">
-                  Login
-                </Button>
-              </Link>
-              <Link href="/auth/register" className="block w-full">
-                <Button className="w-full py-5 text-base">Start Free Trial</Button>
-              </Link>
+              {user ? (
+                <>
+                  <Button 
+                    onClick={() => {
+                      setIsOpen(false);
+                      router.push("/dashboard");
+                    }}
+                    className="w-full" 
+                    variant="outline"
+                  >
+                    Dashboard
+                  </Button>
+                  <Button 
+                    onClick={() => {
+                      setIsOpen(false);
+                      setIsLogoutDialogOpen(true);
+                    }}
+                    className="w-full"
+                    variant="destructive"
+                  >
+                    Logout
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Link href="/auth/login" className="block w-full">
+                    <Button variant="outline" className="w-full py-5 text-base">
+                      Login
+                    </Button>
+                  </Link>
+                  <Link href="/auth/register" className="block w-full">
+                    <Button className="w-full py-5 text-base">Start Free Trial</Button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
       )}
+      
+      {/* Shared Logout Confirmation Component */}
+      <LogoutConfirmation 
+        isOpen={isLogoutDialogOpen} 
+        setIsOpen={setIsLogoutDialogOpen} 
+      />
     </nav>
   );
 }
