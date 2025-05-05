@@ -1,7 +1,9 @@
+// src/app/dashboard/(dashboard)/layout.tsx
 "use client";
 
 import { Sidebar } from "@/components/sidebar";
 import DashboardNavbar from "@/components/dashboard/dashboard-navbar";
+import TrialExpirationModal from "@/components/dashboard/trial-expiration-modal";
 import React from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -13,6 +15,8 @@ export default function DashboardLayout({
 }) {
   const router = useRouter();
   const pathname = usePathname();
+
+  console.log('layout')
 
   const isRootPath = pathname === "/dashboard";
 
@@ -52,6 +56,9 @@ export default function DashboardLayout({
             <div>{children}</div>
           </div>
         </main>
+        
+        {/* Trial Expiration Modal */}
+        <TrialExpirationModal />
       </div>
     </div>
   );

@@ -5,7 +5,7 @@ import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { CheckCircle2, Shield, HelpCircle, ArrowRight, X } from "lucide-react";
+import { CheckCircle2, Shield, HelpCircle, ArrowRight, X, Gift } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -319,6 +319,22 @@ export default function Pricing() {
               Choose the plan that fits your business needs with no hidden fees
             </p>
 
+            {/* 14-Day Free Trial Banner */}
+            <div className="mt-8 max-w-3xl mx-auto bg-primary/10 border border-primary/20 rounded-xl p-5 flex flex-col md:flex-row items-center justify-center gap-4">
+              <div className="flex items-center text-center md:text-left">
+                <Gift className="h-8 w-8 text-primary mr-3 flex-shrink-0" />
+                <div>
+                  <h3 className="text-lg font-bold text-primary">14-Day Free Trial</h3>
+                  <p className="text-muted-foreground">Try free for 14 days, no credit card required</p>
+                </div>
+              </div>
+              <Link href="/auth/register" className="md:ml-auto">
+                <Button size="lg" className="font-medium">
+                  Start Free Trial
+                </Button>
+              </Link>
+            </div>
+
             <div className="flex items-center justify-center mt-10 space-x-2">
               <span
                 className={cn(
@@ -397,6 +413,14 @@ export default function Pricing() {
                         {tier.productLimit}
                       </CardDescription>
                       <div className="mt-4">
+                        {/* Free Trial Badge */}
+                        <div className="mb-2 flex items-center">
+                          <span className="inline-flex items-center px-2 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-medium dark:bg-emerald-900/30 dark:text-emerald-400">
+                            <Gift className="h-3 w-3 mr-1" />
+                            14 days free
+                          </span>
+                        </div>
+                        
                         <span className="text-4xl font-bold">
                           {billingCycle === "monthly"
                             ? `€${tier.monthlyPrice}`
@@ -464,7 +488,7 @@ export default function Pricing() {
                       </div>
                     </CardContent>
                     <CardFooter>
-                      <Link href="/contact" className="w-full">
+                      <Link href="/auth/register" className="w-full">
                         <Button
                           className={cn(
                             "w-full",
@@ -473,7 +497,7 @@ export default function Pricing() {
                               : ""
                           )}
                         >
-                          Get a Quote
+                          Start Free Trial
                         </Button>
                       </Link>
                     </CardFooter>
@@ -507,6 +531,14 @@ export default function Pricing() {
                       {tier.productLimit}
                     </CardDescription>
                     <div className="mt-4">
+                      {/* Free Trial Badge */}
+                      <div className="mb-2 flex items-center">
+                        <span className="inline-flex items-center px-2 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-medium dark:bg-emerald-900/30 dark:text-emerald-400">
+                          <Gift className="h-3 w-3 mr-1" />
+                          14 days free
+                        </span>
+                      </div>
+                      
                       <span className="text-3xl font-bold">
                         {billingCycle === "monthly"
                           ? `€${tier.monthlyPrice}`
@@ -572,7 +604,7 @@ export default function Pricing() {
                     </div>
                   </CardContent>
                   <CardFooter>
-                    <Link href="/contact" className="w-full">
+                    <Link href="/auth/register" className="w-full">
                       <Button
                         className={cn(
                           "w-full text-sm py-5",
@@ -581,7 +613,7 @@ export default function Pricing() {
                             : ""
                         )}
                       >
-                        Get a Quote
+                        Start Free Trial
                       </Button>
                     </Link>
                   </CardFooter>
@@ -601,6 +633,14 @@ export default function Pricing() {
                       {tier.productLimit}
                     </CardDescription>
                     <div className="mt-4">
+                      {/* Free Trial Badge */}
+                      <div className="mb-2 flex items-center">
+                        <span className="inline-flex items-center px-2 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-medium dark:bg-emerald-900/30 dark:text-emerald-400">
+                          <Gift className="h-3 w-3 mr-1" />
+                          14 days free
+                        </span>
+                      </div>
+                      
                       <span className="text-3xl font-bold">
                         {billingCycle === "monthly"
                           ? `€${tier.monthlyPrice}`
@@ -655,9 +695,9 @@ export default function Pricing() {
                     </div>
                   </CardContent>
                   <CardFooter>
-                    <Link href="/contact" className="w-full">
+                    <Link href="/auth/register" className="w-full">
                       <Button className="w-full text-sm py-5">
-                        Get a Quote
+                        Start Free Trial
                       </Button>
                     </Link>
                   </CardFooter>
@@ -797,6 +837,18 @@ export default function Pricing() {
                   </tr>
                 </thead>
                 <tbody>
+                  {/* 14-Day Free Trial Row */}
+                  <tr className="border-b bg-primary/5">
+                    <td className="py-4 px-6 text-primary font-medium">
+                      14-Day Free Trial
+                    </td>
+                    {Array(7).fill(true).map((value, index) => (
+                      <td key={index} className="py-4 px-3 text-center">
+                        <CheckCircle2 className="h-5 w-5 text-primary mx-auto" />
+                      </td>
+                    ))}
+                  </tr>
+                  
                   {featureComparison.map((feature, index) => (
                     <tr key={index} className="border-b">
                       <td className="py-4 px-6 text-muted-foreground font-medium">
@@ -839,6 +891,15 @@ export default function Pricing() {
             </h2>
 
             <div className="grid gap-6 md:grid-cols-2 max-w-4xl mx-auto">
+              <div className="bg-background rounded-lg p-6 shadow-sm">
+                <h3 className="text-lg font-bold mb-3">
+                  How does the free trial work?
+                </h3>
+                <p className="text-muted-foreground">
+                  All our plans come with a 14-day free trial. You can explore all features with no limitations and no credit card required. If you decide to continue, you'll only be charged after the trial period ends.
+                </p>
+              </div>
+
               <div className="bg-background rounded-lg p-6 shadow-sm">
                 <h3 className="text-lg font-bold mb-3">
                   Can I change my plan later?
@@ -885,17 +946,6 @@ export default function Pricing() {
 
               <div className="bg-background rounded-lg p-6 shadow-sm">
                 <h3 className="text-lg font-bold mb-3">
-                  Do you offer discounts for multiple companies?
-                </h3>
-                <p className="text-muted-foreground">
-                  Yes, we offer special pricing for groups or agencies managing
-                  multiple companies. Please contact our sales team to discuss
-                  your specific needs.
-                </p>
-              </div>
-
-              <div className="bg-background rounded-lg p-6 shadow-sm">
-                <h3 className="text-lg font-bold mb-3">
                   What happens after the GPSR deadline?
                 </h3>
                 <p className="text-muted-foreground">
@@ -917,16 +967,16 @@ export default function Pricing() {
                 Ready to comply with GPSR?
               </h2>
               <p className="mt-4 max-w-2xl text-xl text-primary-foreground/80 mx-auto">
-                Choose a plan that matches your needs and get started today
+                Try our 14-day free trial with no commitments, then choose a plan that matches your needs
               </p>
               <div className="mt-10 flex flex-wrap justify-center gap-4">
-                <Link href="/register">
+                <Link href="/auth/register">
                   <Button
                     size="lg"
                     variant="secondary"
                     className="bg-accent text-accent-foreground hover:bg-accent/90"
                   >
-                    Get Started Now
+                    Start Free Trial
                   </Button>
                 </Link>
                 <Link href="/contact">

@@ -74,15 +74,15 @@ export default function Login() {
     const newErrors = { ...errors };
 
     if (!formData.email.trim()) {
-      newErrors.email = "Email gereklidir";
+      newErrors.email = "Email is required";
       isValid = false;
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Geçerli bir email adresi giriniz";
+      newErrors.email = "Please enter a valid email address";
       isValid = false;
     }
 
     if (!formData.password) {
-      newErrors.password = "Şifre gereklidir";
+      newErrors.password = "Password is required";
       isValid = false;
     }
 
@@ -100,20 +100,28 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      await loginMutation.mutateAsync({
+      console.log("Attempting login...");
+      const result = await loginMutation.mutateAsync({
         email: formData.email,
         password: formData.password,
       });
 
-      toast.success("Giriş başarılı", {
-        description: "Yönlendiriliyorsunuz...",
+      console.log("Login successful, session established:", !!result.data.session);
+      
+      toast.success("Login successful", {
+        description: "Redirecting...",
         duration: 3000,
       });
 
-      router.push("/dashboard");
-    } catch (error) {
-      toast.error("Giriş başarısız", {
-        description: "Lütfen bilgilerinizi kontrol edin",
+      // Wait a moment for session to be properly established
+      setTimeout(() => {
+        console.log("Redirecting to dashboard after login");
+        router.push("/dashboard");
+      }, 2000);
+    } catch (error: any) {
+      console.error("Login error:", error);
+      toast.error("Login failed", {
+        description: error.message || "Please check your credentials",
       });
     } finally {
       setIsLoading(false);
@@ -124,19 +132,28 @@ export default function Login() {
     setIsLoading(true);
 
     try {
+      console.log("Attempting Google sign-in...");
       const { error } = await signInWithGoogleMutation.mutateAsync();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Google sign-in error:", error);
+        throw error;
+      }
 
-      toast.success("Google ile giriş başarılı", {
-        description: "Yönlendiriliyorsunuz...",
+      console.log("Google sign-in successful");
+      toast.success("Google login successful", {
+        description: "Redirecting...",
         duration: 3000,
       });
 
-      router.push("/dashboard");
-    } catch (error) {
-      toast.error("Google ile giriş başarısız", {
-        description: "Lütfen tekrar deneyin",
+      // Small delay to ensure auth is complete
+      setTimeout(() => {
+        router.push("/dashboard");
+      }, 2000);
+    } catch (error: any) {
+      console.error("Google login error:", error);
+      toast.error("Google login failed", {
+        description: error.message || "Please try again",
       });
     } finally {
       setIsLoading(false);
@@ -244,7 +261,7 @@ export default function Login() {
                       Password
                     </label>
                     <Link
-                      href="/forgot-password"
+                      href="/auth/forgot-password"
                       className="text-sm font-medium text-primary hover:underline"
                     >
                       Forgot password?
@@ -305,7 +322,7 @@ export default function Login() {
                       href="/auth/register"
                       className="text-primary hover:underline font-medium"
                     >
-                      Create account
+                      Start your free 14-day trial
                     </Link>
                   </div>
                 </div>

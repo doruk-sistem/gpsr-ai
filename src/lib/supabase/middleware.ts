@@ -38,75 +38,87 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Kullanıcı giriş yapmamışsa ve dashboard'a erişmeye çalışıyorsa
-  if (!user && request.nextUrl.pathname.startsWith("/dashboard")) {
-    const url = request.nextUrl.clone();
+  // Get the URL and pathname for debugging
+  const url = request.nextUrl.clone();
+  const pathname = url.pathname;
+  
+  console.log(`[Middleware] Path: ${pathname} | Auth: ${user ? 'Authenticated as ' + user.id : 'Not authenticated'}`);
+  
+  // Check for URL params that might indicate we should skip auth checks (for debugging)
+  const skipAuth = url.searchParams.get('skipAuth') === 'true';
+  if (skipAuth) {
+    console.log('[Middleware] Skipping auth checks due to skipAuth parameter');
+    return supabaseResponse;
+  }
+
+  // Get the auth cookie for debugging
+  const authCookie = request.cookies.get('sb-access-token');
+  console.log(`[Middleware] Auth cookie present: ${!!authCookie}`);
+  
+  // If user tried to access dashboard without authentication, redirect to login
+  if (!user && pathname.startsWith("/dashboard")) {
+    console.log("[Middleware] Unauthenticated user trying to access dashboard, redirecting to login");
     url.pathname = "/auth/login";
     return NextResponse.redirect(url);
   }
 
-  // Kullanıcı giriş yapmışsa ve auth sayfalarına erişmeye çalışıyorsa
-  if (user && request.nextUrl.pathname.startsWith("/auth")) {
-    const url = request.nextUrl.clone();
+  // If authenticated user tried to access auth pages, redirect to dashboard
+  if (user && pathname.startsWith("/auth")) {
+    console.log("[Middleware] Authenticated user trying to access auth pages, redirecting to dashboard");
     url.pathname = "/dashboard";
     return NextResponse.redirect(url);
   }
 
-  // Kullanıcı giriş yapmışsa ve dashboard sayfasına erişmeye çalışıyorsa
-  if (user && request.nextUrl.pathname.startsWith("/dashboard")) {
-    // Profil bilgileri eksikse ve complete-profile sayfasında değilse
+  // If authenticated user trying to access dashboard pages, handle profile completion check
+  if (user && pathname.startsWith("/dashboard")) {
+    // Missing profile info and not on complete-profile page
+    console.log(`[Middleware] User metadata:`, user.user_metadata);
+    
     if (
-      (!user?.user_metadata.first_name ||
-        !user?.user_metadata.last_name ||
-        !user?.user_metadata.company) &&
-      request.nextUrl.pathname !== "/dashboard/complete-profile"
+      (!user?.user_metadata?.first_name ||
+        !user?.user_metadata?.last_name ||
+        !user?.user_metadata?.company) &&
+      pathname !== "/dashboard/complete-profile"
     ) {
-      const url = request.nextUrl.clone();
+      console.log("[Middleware] User missing profile info, redirecting to complete profile page");
       url.pathname = "/dashboard/complete-profile";
       return NextResponse.redirect(url);
     }
 
-    // Profil bilgileri tamamsa ve complete-profile sayfasındaysa
+    // Profile complete but on complete-profile page
     if (
-      user?.user_metadata.first_name &&
-      user?.user_metadata.last_name &&
-      user?.user_metadata.company &&
-      request.nextUrl.pathname === "/dashboard/complete-profile"
+      user?.user_metadata?.first_name &&
+      user?.user_metadata?.last_name &&
+      user?.user_metadata?.company &&
+      pathname === "/dashboard/complete-profile"
     ) {
-      const url = request.nextUrl.clone();
+      console.log("[Middleware] User profile already complete, redirecting to dashboard");
       url.pathname = "/dashboard";
       return NextResponse.redirect(url);
     }
 
-    // Kullanıcı giriş yapmışsa ve bir ücretli plan seçmemişse
-    const privatePaths = [
-      "/dashboard/products",
-      "/dashboard/manufacturer",
-      "/dashboard/representative",
-    ];
-
+    // Check for paid plan requirement on certain paths - but only after profile is complete
     if (
-      !user?.user_metadata?.package_id &&
-      privatePaths.includes(request.nextUrl.pathname)
+      user?.user_metadata?.first_name &&
+      user?.user_metadata?.last_name &&
+      user?.user_metadata?.company
     ) {
-      const url = request.nextUrl.clone();
-      url.pathname = "/dashboard/billing";
-      return NextResponse.redirect(url);
+      const privatePaths = [
+        "/dashboard/products",
+        "/dashboard/manufacturer",
+        "/dashboard/representative",
+      ];
+
+      if (
+        !user?.user_metadata?.package_id &&
+        privatePaths.includes(pathname)
+      ) {
+        console.log("[Middleware] User without package_id trying to access restricted area, redirecting to billing");
+        url.pathname = "/dashboard/billing";
+        return NextResponse.redirect(url);
+      }
     }
   }
-
-  // IMPORTANT: You *must* return the supabaseResponse object as it is.
-  // If you're creating a new response object with NextResponse.next() make sure to:
-  // 1. Pass the request in it, like so:
-  //    const myNewResponse = NextResponse.next({ request })
-  // 2. Copy over the cookies, like so:
-  //    myNewResponse.cookies.setAll(supabaseResponse.cookies.getAll())
-  // 3. Change the myNewResponse object to fit your needs, but avoid changing
-  //    the cookies!
-  // 4. Finally:
-  //    return myNewResponse
-  // If this is not done, you may be causing the browser and server to go out
-  // of sync and terminate the user's session prematurely!
 
   return supabaseResponse;
 }
