@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
-import { Shield, Clock, FileCheck, CreditCard, CheckCircle2, ArrowRight } from "lucide-react";
+import { Shield, Clock, FileCheck, CreditCard, CheckCircle2, ArrowRight, Gift } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function Home() {
@@ -23,8 +23,8 @@ export default function Home() {
                 Secure EU market access with our complete Authorized Representative and GPSR compliance services. Stay compliant, stay competitive.
               </p>
               <div className="mt-10 flex justify-center gap-4">
-                <Link href="/register">
-                  <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">Get Started</Button>
+                <Link href="/auth/register">
+                  <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">Start Free Trial</Button>
                 </Link>
                 <Link href="/about-gpsr">
                   <Button size="lg" variant="outline">Learn More</Button>
@@ -32,7 +32,7 @@ export default function Home() {
               </div>
               <div className="mt-8 text-sm text-muted-foreground">
                 Already a customer?{" "}
-                <Link href="/login" className="font-medium text-primary hover:underline">
+                <Link href="/auth/login" className="font-medium text-primary hover:underline">
                   Log in
                 </Link>
               </div>
@@ -186,29 +186,39 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="mt-16 grid gap-8 md:grid-cols-3">
+            {/* Free Trial Banner */}
+            <div className="mt-8 max-w-3xl mx-auto bg-primary/10 border border-primary/20 rounded-xl p-5 flex flex-col md:flex-row items-center justify-center gap-4 mb-8">
+              <div className="flex items-center text-center md:text-left">
+                <Gift className="h-8 w-8 text-primary mr-3 flex-shrink-0" />
+                <div>
+                  <h3 className="text-lg font-bold text-primary">14-Day Free Trial</h3>
+                  <p className="text-muted-foreground">Try free for 14 days, no credit card required</p>
+                </div>
+              </div>
+              <Link href="/auth/register" className="md:ml-auto">
+                <Button size="lg" className="font-medium">
+                  Start Free Trial
+                </Button>
+              </Link>
+            </div>
+
+            <div className="mt-8 grid gap-8 md:grid-cols-3">
               <Card className="border shadow-sm hover:shadow-md transition-shadow relative flex flex-col">
                 <CardHeader>
-                  <CardTitle>GPSR 1</CardTitle>
-                  <CardDescription className="mt-2">For businesses with 1 product type</CardDescription>
+                  <CardTitle>Starter</CardTitle>
+                  <CardDescription className="mt-2">For businesses with up to 5 product types</CardDescription>
                 </CardHeader>
                 <CardContent className="flex-grow">
+                  <div className="text-3xl font-bold mb-4">£39<span className="text-lg text-muted-foreground ml-1">/month</span></div>
+                  <div className="text-sm text-muted-foreground mb-6">or £390 billed annually</div>
                   <ul className="space-y-2">
                     <li className="flex items-start">
                       <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mr-2" />
-                      <span>1 product type</span>
+                      <span>EU REP compliance</span>
                     </li>
                     <li className="flex items-start">
                       <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mr-2" />
-                      <span>EU Authorized Representative</span>
-                    </li>
-                    <li className="flex items-start">
-                      <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mr-2" />
-                      <span>Document storage</span>
-                    </li>
-                    <li className="flex items-start">
-                      <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mr-2" />
-                      <span>Basic support</span>
+                      <span>GPSR compliance</span>
                     </li>
                   </ul>
                   <Link href="/pricing" className="block w-full mt-6">
@@ -225,26 +235,20 @@ export default function Home() {
                   Most Popular
                 </div>
                 <CardHeader>
-                  <CardTitle>GPSR 6</CardTitle>
-                  <CardDescription className="mt-2">For businesses with up to 6 product types</CardDescription>
+                  <CardTitle>Growth</CardTitle>
+                  <CardDescription className="mt-2">For businesses with up to 20 product types</CardDescription>
                 </CardHeader>
                 <CardContent className="flex-grow">
+                  <div className="text-3xl font-bold mb-4">£49<span className="text-lg text-muted-foreground ml-1">/month</span></div>
+                  <div className="text-sm text-muted-foreground mb-6">or £490 billed annually</div>
                   <ul className="space-y-2">
                     <li className="flex items-start">
                       <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mr-2" />
-                      <span>Up to 6 product types</span>
+                      <span>EU REP compliance</span>
                     </li>
                     <li className="flex items-start">
                       <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mr-2" />
-                      <span>EU Authorized Representative</span>
-                    </li>
-                    <li className="flex items-start">
-                      <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mr-2" />
-                      <span>Document storage & management</span>
-                    </li>
-                    <li className="flex items-start">
-                      <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mr-2" />
-                      <span>Priority support</span>
+                      <span>GPSR compliance</span>
                     </li>
                   </ul>
                   <Link href="/pricing" className="block w-full mt-6">
@@ -258,36 +262,42 @@ export default function Home() {
 
               <Card className="border shadow-sm hover:shadow-md transition-shadow flex flex-col">
                 <CardHeader>
-                  <CardTitle>GPSR Enterprise</CardTitle>
-                  <CardDescription className="mt-2">For businesses with 7+ product types</CardDescription>
+                  <CardTitle>Scale</CardTitle>
+                  <CardDescription className="mt-2">For businesses with up to 50 product types</CardDescription>
                 </CardHeader>
                 <CardContent className="flex-grow">
+                  <div className="text-3xl font-bold mb-4">£59<span className="text-lg text-muted-foreground ml-1">/month</span></div>
+                  <div className="text-sm text-muted-foreground mb-6">or £590 billed annually</div>
                   <ul className="space-y-2">
                     <li className="flex items-start">
                       <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mr-2" />
-                      <span>Unlimited product types</span>
+                      <span>EU REP compliance</span>
                     </li>
                     <li className="flex items-start">
                       <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mr-2" />
-                      <span>EU Authorized Representative</span>
-                    </li>
-                    <li className="flex items-start">
-                      <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mr-2" />
-                      <span>Advanced document management</span>
-                    </li>
-                    <li className="flex items-start">
-                      <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mr-2" />
-                      <span>Dedicated account manager</span>
+                      <span>GPSR compliance</span>
                     </li>
                   </ul>
-                  <Link href="/contact" className="block w-full mt-6">
+                  <Link href="/pricing" className="block w-full mt-6">
                     <Button className="w-full flex items-center justify-center" variant="outline">
-                      Contact Sales
+                      View Details
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </Link>
                 </CardContent>
               </Card>
+            </div>
+            
+            <div className="text-center mt-12">
+              <p className="text-muted-foreground mb-6">
+                Find more options for larger businesses with our Professional, Business, Enterprise, and Ultimate plans
+              </p>
+              <Link href="/pricing">
+                <Button size="lg">
+                  See All Pricing Plans
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
             </div>
           </div>
         </section>
@@ -303,8 +313,8 @@ export default function Home() {
                 The GPSR deadline is December 13, 2024. Start your compliance journey today.
               </p>
               <div className="mt-10">
-                <Link href="/register">
-                  <Button size="lg" variant="secondary" className="bg-accent text-accent-foreground hover:bg-accent/90">Get Started Now</Button>
+                <Link href="/auth/register">
+                  <Button size="lg" variant="secondary" className="bg-accent text-accent-foreground hover:bg-accent/90">Start Free Trial</Button>
                 </Link>
               </div>
             </div>

@@ -359,11 +359,11 @@ export default function Services() {
                 Ready to secure your EU market access?
               </h2>
               <p className="mt-4 max-w-2xl text-xl text-primary-foreground/80 mx-auto">
-                Get compliant with GPSR before the December 2024 deadline
+                Try our service free for 14 days and get compliant with GPSR before the December 2024 deadline
               </p>
               <div className="mt-10 flex flex-col sm:flex-row justify-center gap-4">
-                <Link href="/register">
-                  <Button size="lg" variant="secondary" className="w-full sm:w-auto">Get Started Now</Button>
+                <Link href="/auth/register">
+                  <Button size="lg" variant="secondary" className="w-full sm:w-auto">Start Free Trial</Button>
                 </Link>
                 <Link href="/pricing">
                   <Button size="lg" variant="outline" className="w-full sm:w-auto bg-transparent text-primary-foreground border-primary-foreground hover:bg-primary-foreground/10">
