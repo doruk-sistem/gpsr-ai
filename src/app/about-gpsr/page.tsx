@@ -376,9 +376,9 @@ export default function AboutGPSR() {
                 requirements before the December 2024 deadline.
               </p>
               <div className="mt-10 flex justify-center gap-4">
-                <Link href="/register">
+                <Link href="/auth/register">
                   <Button size="lg" variant="secondary">
-                    Get Started Now
+                    Start Free Trial
                   </Button>
                 </Link>
                 <Link href="/services">

@@ -78,7 +78,7 @@ export function Navbar() {
               <Button variant="ghost">Login</Button>
             </Link>
             <Link href="/auth/register">
-              <Button>Get Started</Button>
+              <Button>Start Free Trial</Button>
             </Link>
           </div>
           <div className="flex items-center md:hidden">
@@ -124,13 +124,13 @@ export function Navbar() {
               </Link>
             ))}
             <div className="pt-6 pb-3 border-t border-border px-5 space-y-4">
-              <Link href="/login" className="block w-full">
+              <Link href="/auth/login" className="block w-full">
                 <Button variant="outline" className="w-full py-5 text-base">
                   Login
                 </Button>
               </Link>
-              <Link href="/register" className="block w-full">
-                <Button className="w-full py-5 text-base">Get Started</Button>
+              <Link href="/auth/register" className="block w-full">
+                <Button className="w-full py-5 text-base">Start Free Trial</Button>
               </Link>
             </div>
           </div>
