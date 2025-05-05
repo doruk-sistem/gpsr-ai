@@ -1,22 +1,94 @@
+// src/components/dashboard/dashboard-navbar.tsx
+"use client";
+
 import React from "react";
-import { User } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { User, Bell, Clock } from "lucide-react";
 import { ThemeToggle } from "../theme-toggle";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useSubscription } from "@/hooks/use-stripe";
+import { differenceInDays } from "date-fns";
 
 export default function DashboardNavbar() {
+  const router = useRouter();
+  const { data: subscription } = useSubscription();
+  
+  // Check if user is in trial period
+  const isTrialing = subscription?.subscription_status === 'trialing';
+  
+  // Calculate days remaining in trial if applicable
+  let daysRemaining = 0;
+  if (isTrialing && subscription?.trial_end) {
+    const trialEndDate = new Date(subscription.trial_end * 1000);
+    const today = new Date();
+    daysRemaining = Math.max(0, differenceInDays(trialEndDate, today));
+  }
+
   return (
     <div className="border-b">
       <div className="flex h-16 items-center px-4">
+        {/* Trial indicator */}
+        {isTrialing && (
+          <div className="mr-auto flex items-center">
+            <div 
+              className={`flex items-center py-1 px-3 text-sm rounded-full border 
+                ${daysRemaining <= 2 
+                  ? "bg-destructive/10 text-destructive border-destructive/30" 
+                  : "bg-primary/10 text-primary border-primary/30"}`}
+            >
+              <Clock className="h-3.5 w-3.5 mr-1.5" />
+              <span>
+                {daysRemaining === 0 
+                  ? "Trial ends today" 
+                  : `${daysRemaining} day${daysRemaining !== 1 ? 's' : ''} left in trial`}
+              </span>
+              <Button 
+                variant="link" 
+                onClick={() => router.push('/dashboard/billing/manage')}
+                className="ml-1 p-0 h-auto text-xs underline"
+              >
+                Manage
+              </Button>
+            </div>
+          </div>
+        )}
+        
         <div className="ml-auto flex items-center space-x-4">
           <ThemeToggle />
-
-          <Link
-            href="/dashboard/profile"
-            className="flex items-center space-x-2 text-sm font-medium transition-colors hover:text-primary"
-          >
-            <User className="h-4 w-4" />
-            <span>Profil</span>
-          </Link>
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="rounded-full">
+                <User className="h-5 w-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => router.push('/dashboard/profile')}>
+                Profile
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push('/dashboard/billing')}>
+                Billing
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push('/dashboard/settings')}>
+                Settings
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => router.push('/auth/logout')}>
+                Logout
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </div>

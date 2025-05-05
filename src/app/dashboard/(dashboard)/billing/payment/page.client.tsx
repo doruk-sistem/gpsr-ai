@@ -1,3 +1,4 @@
+// src/app/dashboard/(dashboard)/billing/payment/page.client.tsx
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -28,6 +29,15 @@ export default function PaymentPageClient() {
       updateCurrentUser({ package_id: selectedPlanId });
     }
   };
+
+  // Calculate trial end date (14 days from now)
+  const trialEndDate = new Date();
+  trialEndDate.setDate(trialEndDate.getDate() + 14);
+  const formattedTrialEndDate = trialEndDate.toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric'
+  });
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -100,7 +110,7 @@ export default function PaymentPageClient() {
         </div>
 
         <p className="text-muted-foreground mb-6">
-          Your first payment is due after the free trial ends on 30 Apr 2025.
+          Your first payment is due after the free trial ends on {formattedTrialEndDate}.
         </p>
 
         <div className="flex justify-between items-center mb-6">

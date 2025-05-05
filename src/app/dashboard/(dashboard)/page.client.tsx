@@ -1,3 +1,4 @@
+// src/app/dashboard/(dashboard)/page.client.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -23,6 +24,7 @@ import {
 import Link from "next/link";
 import { toast } from "sonner";
 import { useCurrentUser } from "@/hooks/use-auth";
+import { TrialStatus } from "@/components/dashboard/trial-status";
 
 export default function DashboardPageClient() {
   const router = useRouter();
@@ -64,6 +66,9 @@ export default function DashboardPageClient() {
           </Button>
         </div>
       </div>
+
+      {/* Trial Status Component */}
+      <TrialStatus />
 
       {/* Progress Section */}
       <Card className="mb-8">

@@ -1,3 +1,4 @@
+// src/hooks/use-stripe.ts
 "use client";
 
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -33,5 +34,18 @@ export const useCreateCheckoutSession = () => {
       priceId: string;
       mode: "payment" | "subscription";
     }) => stripeService.createCheckoutSession(priceId, mode),
+  });
+};
+
+export const useTrialStatus = () => {
+  return useQuery({
+    queryKey: ["trial-status"],
+    queryFn: () => stripeService.getTrialStatus(),
+  });
+};
+
+export const useCancelSubscription = () => {
+  return useMutation({
+    mutationFn: () => stripeService.cancelSubscription(),
   });
 };

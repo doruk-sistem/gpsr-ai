@@ -1,3 +1,4 @@
+// supabase/functions/stripe-webhook/index.ts
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 import Stripe from 'npm:stripe@17.7.0';
 import { createClient } from 'npm:@supabase/supabase-js@2.49.1';
@@ -86,6 +87,61 @@ async function handleEvent(event: Stripe.Event) {
 
     const { mode, payment_status } = stripeData as Stripe.Checkout.Session;
 
+    // Trial-related event handling
+    if (event.type === 'customer.subscription.created' || 
+        event.type === 'customer.subscription.updated') {
+      const subscription = stripeData as Stripe.Subscription;
+      
+      // Check if this is a trial subscription
+      if (subscription.status === 'trialing') {
+        console.info(`Processing trial subscription for customer: ${customerId}`);
+        
+        // Get user ID from customer data
+        const { data: customerData } = await supabase
+          .from('stripe_customers')
+          .select('user_id')
+          .eq('customer_id', customerId)
+          .single();
+          
+        if (customerData?.user_id) {
+          // Send trial start notification email
+          await sendTrialEmail(customerData.user_id, 'trial_started', subscription);
+          
+          // Calculate trial end date for reminders
+          const trialEnd = new Date(subscription.trial_end! * 1000);
+          const now = new Date();
+          const daysToTrialEnd = Math.ceil((trialEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+          
+          // Schedule reminders based on days remaining
+          if (daysToTrialEnd <= 7) {
+            // Send 7-day reminder
+            await sendTrialEmail(customerData.user_id, 'trial_reminder_7days', subscription);
+          }
+          
+          if (daysToTrialEnd <= 2) {
+            // Send 48-hour reminder
+            await sendTrialEmail(customerData.user_id, 'trial_reminder_48hours', subscription);
+          }
+        }
+      }
+      
+      // If subscription was previously trialing and is now active, send conversion email
+      if (event.type === 'customer.subscription.updated') {
+        const prevAttr = (event.data.previous_attributes as any)?.status;
+        if (prevAttr === 'trialing' && subscription.status === 'active') {
+          const { data: customerData } = await supabase
+            .from('stripe_customers')
+            .select('user_id')
+            .eq('customer_id', customerId)
+            .single();
+            
+          if (customerData?.user_id) {
+            await sendTrialEmail(customerData.user_id, 'trial_converted', subscription);
+          }
+        }
+      }
+    }
+
     if (isSubscription) {
       console.info(`Starting subscription sync for customer: ${customerId}`);
       await syncCustomerFromStripe(customerId);
@@ -121,6 +177,62 @@ async function handleEvent(event: Stripe.Event) {
         console.error('Error processing one-time payment:', error);
       }
     }
+  }
+}
+
+// Helper function to send trial-related emails
+async function sendTrialEmail(userId: string, emailType: string, subscription: Stripe.Subscription) {
+  try {
+    // Get user email
+    const { data: userData } = await supabase.auth.admin.getUserById(userId);
+    
+    if (!userData?.user?.email) {
+      console.error(`Could not find email for user ${userId}`);
+      return;
+    }
+    
+    const email = userData.user.email;
+    const trialEndDate = new Date(subscription.trial_end! * 1000).toLocaleDateString('en-GB');
+    
+    let emailSubject = '';
+    let emailContent = '';
+    
+    switch(emailType) {
+      case 'trial_started':
+        emailSubject = 'Welcome to Your 14-Day Free Trial!';
+        emailContent = `Your trial has started and will end on ${trialEndDate}. Enjoy full access to all features!`;
+        break;
+      case 'trial_reminder_7days':
+        emailSubject = '7 Days Left in Your Free Trial';
+        emailContent = `Your trial will end on ${trialEndDate}. Upgrade now to continue enjoying our services.`;
+        break;
+      case 'trial_reminder_48hours':
+        emailSubject = 'Your Trial Ends in 48 Hours';
+        emailContent = `Your trial will end on ${trialEndDate}. Don't lose access - upgrade today!`;
+        break;
+      case 'trial_ended':
+        emailSubject = 'Your Free Trial Has Ended';
+        emailContent = 'Your free trial period has ended. Upgrade now to continue using our services.';
+        break;
+      case 'trial_converted':
+        emailSubject = 'Thank You for Subscribing!';
+        emailContent = 'Your subscription is now active. Thank you for choosing our service!';
+        break;
+    }
+    
+    // In a real implementation, you would send an actual email here
+    // For now, we'll just log it
+    console.log(`Would send email to ${email}: ${emailSubject} - ${emailContent}`);
+    
+    // Record email in database for tracking
+    await supabase.from('trial_emails').insert({
+      user_id: userId,
+      email_type: emailType,
+      sent_at: new Date().toISOString(),
+    });
+    
+  } catch (error) {
+    console.error('Error sending trial email:', error);
   }
 }
 

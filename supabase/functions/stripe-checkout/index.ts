@@ -1,3 +1,4 @@
+// supabase/functions/stripe-checkout/index.ts
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 import Stripe from 'npm:stripe@17.7.0';
 import { createClient } from 'npm:@supabase/supabase-js@2.49.1';
@@ -43,7 +44,7 @@ Deno.serve(async (req) => {
       return corsResponse({ error: 'Method not allowed' }, 405);
     }
 
-    const { price_id, success_url, cancel_url, mode } = await req.json();
+    const { price_id, success_url, cancel_url, mode, trial_period_days = 14 } = await req.json();
 
     const error = validateParameters(
       { price_id, success_url, cancel_url, mode },
@@ -177,6 +178,18 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Create additional parameters for subscription mode
+    const additionalParams = mode === 'subscription' 
+      ? {
+          subscription_data: {
+            trial_period_days: trial_period_days,
+            metadata: {
+              user_id: user.id
+            }
+          }
+        } 
+      : {};
+
     // create Checkout Session
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
@@ -190,6 +203,7 @@ Deno.serve(async (req) => {
       mode,
       success_url,
       cancel_url,
+      ...additionalParams
     });
 
     console.log(`Created checkout session ${session.id} for customer ${customerId}`);

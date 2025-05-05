@@ -1,3 +1,4 @@
+// src/components/sidebar.tsx
 "use client";
 
 import Link from "next/link";
@@ -14,6 +15,7 @@ import {
   User,
   Shield,
 } from "lucide-react";
+import { TrialNotification } from "@/components/dashboard/trial-notification";
 
 const routes = [
   {
@@ -62,6 +64,10 @@ export function Sidebar() {
             </div>
           </div>
         </Link>
+        
+        {/* Trial Notification Component */}
+        <TrialNotification />
+        
         <div className="space-y-1">
           {routes.map((route) => (
             <Link
