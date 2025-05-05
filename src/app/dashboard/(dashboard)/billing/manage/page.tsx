@@ -9,7 +9,6 @@ import {
   CalendarDays,
   Clock,
   AlertTriangle,
-  CheckCircle,
   AlertCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -44,12 +43,13 @@ export default function ManageSubscriptionPage() {
   const router = useRouter();
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
-  
-  const { data: subscription, isLoading: isLoadingSubscription } = useSubscription();
+
+  const { data: subscription, isLoading: isLoadingSubscription } =
+    useSubscription();
   const { data: activePlan } = useActivePlan();
   const { data: packages } = usePackages();
   const cancelSubscription = useCancelSubscription();
-  
+
   if (isLoadingSubscription) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -57,7 +57,9 @@ export default function ManageSubscriptionPage() {
           <div className="h-3 w-3 bg-primary rounded-full"></div>
           <div className="h-3 w-3 bg-primary rounded-full"></div>
           <div className="h-3 w-3 bg-primary rounded-full"></div>
-          <span className="text-muted-foreground text-sm ml-2">Loading subscription data...</span>
+          <span className="text-muted-foreground text-sm ml-2">
+            Loading subscription data...
+          </span>
         </div>
       </div>
     );
@@ -77,12 +79,14 @@ export default function ManageSubscriptionPage() {
             <div className="flex items-center justify-center py-8">
               <div className="text-center">
                 <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No subscription found</h3>
+                <h3 className="text-lg font-semibold mb-2">
+                  No subscription found
+                </h3>
                 <p className="text-muted-foreground mb-6">
                   You currently don't have any active subscription or trial.
                 </p>
-                <Button 
-                  onClick={() => router.push('/dashboard/billing')}
+                <Button
+                  onClick={() => router.push("/dashboard/billing")}
                   className="mt-2"
                 >
                   View Available Plans
@@ -97,25 +101,33 @@ export default function ManageSubscriptionPage() {
 
   // Format dates for display
   const formatDate = (timestamp: number) => {
-    return format(new Date(timestamp * 1000), 'dd MMM yyyy');
+    return format(new Date(timestamp * 1000), "dd MMM yyyy");
   };
 
-  const isTrialing = subscription.subscription_status === 'trialing';
+  const isTrialing = subscription.subscription_status === "trialing";
   const isCanceled = subscription.cancel_at_period_end;
-  
+
   // Calculate trial progress if applicable
   let trialProgress = 0;
   let daysRemaining = 0;
-  
+
   if (isTrialing && subscription.trial_end) {
     const trialStartDate = new Date(subscription.trial_start! * 1000);
     const trialEndDate = new Date(subscription.trial_end * 1000);
     const today = new Date();
-    
-    const totalDays = Math.round((trialEndDate.getTime() - trialStartDate.getTime()) / (1000 * 60 * 60 * 24));
-    daysRemaining = Math.max(0, Math.round((trialEndDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)));
+
+    const totalDays = Math.round(
+      (trialEndDate.getTime() - trialStartDate.getTime()) /
+        (1000 * 60 * 60 * 24)
+    );
+    daysRemaining = Math.max(
+      0,
+      Math.round(
+        (trialEndDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+      )
+    );
     const daysUsed = totalDays - daysRemaining;
-    
+
     trialProgress = Math.round((daysUsed / totalDays) * 100);
   }
 
@@ -128,16 +140,17 @@ export default function ManageSubscriptionPage() {
     try {
       setIsCancelling(true);
       await cancelSubscription.mutateAsync();
-      
-      toast.success('Subscription cancelled', {
-        description: 'Your subscription will end at the current billing period.'
+
+      toast.success("Subscription cancelled", {
+        description:
+          "Your subscription will end at the current billing period.",
       });
-      
+
       setCancelDialogOpen(false);
       router.refresh();
     } catch (error) {
-      toast.error('Failed to cancel subscription', {
-        description: 'Please try again or contact support.'
+      toast.error("Failed to cancel subscription", {
+        description: "Please try again or contact support.",
       });
     } finally {
       setIsCancelling(false);
@@ -159,7 +172,9 @@ export default function ManageSubscriptionPage() {
             <div className="flex justify-between items-center mb-3">
               <div className="flex items-center">
                 <CreditCard className="h-5 w-5 text-primary mr-3" />
-                <h3 className="font-semibold">{currentPackage?.name || activePlan || 'Current Plan'}</h3>
+                <h3 className="font-semibold">
+                  {currentPackage?.name || activePlan || "Current Plan"}
+                </h3>
               </div>
               <div>
                 {isTrialing ? (
@@ -177,30 +192,37 @@ export default function ManageSubscriptionPage() {
                 )}
               </div>
             </div>
-            
+
             {currentPackage && (
               <div className="text-sm text-muted-foreground mb-4">
                 Up to {currentPackage.product_limit} products
               </div>
             )}
-            
+
             {/* Trial info if applicable */}
             {isTrialing && (
               <>
                 <div className="mb-2">
                   <div className="flex justify-between text-sm mb-1">
                     <span>Trial Progress</span>
-                    <span className={daysRemaining <= 2 ? "text-destructive font-medium" : ""}>
+                    <span
+                      className={
+                        daysRemaining <= 2 ? "text-destructive font-medium" : ""
+                      }
+                    >
                       {daysRemaining} days remaining
                     </span>
                   </div>
                   <Progress value={trialProgress} className="h-2" />
                 </div>
-                
+
                 {daysRemaining <= 2 && (
                   <div className="flex items-start mt-3 p-2 bg-destructive/10 rounded text-sm">
                     <AlertTriangle className="h-4 w-4 text-destructive mr-2 mt-0.5 shrink-0" />
-                    <p>Your trial is ending soon. Add your payment details to continue your subscription.</p>
+                    <p>
+                      Your trial is ending soon. Add your payment details to
+                      continue your subscription.
+                    </p>
                   </div>
                 )}
               </>
@@ -217,7 +239,7 @@ export default function ManageSubscriptionPage() {
                 </div>
                 <div className="ml-3">
                   <p className="font-medium capitalize">
-                    {subscription.payment_method_brand || 'Card'}
+                    {subscription.payment_method_brand || "Card"}
                   </p>
                   <p className="text-sm text-muted-foreground">
                     Ending in {subscription.payment_method_last4}
@@ -240,10 +262,11 @@ export default function ManageSubscriptionPage() {
                 </div>
                 <div>
                   <p className="font-medium">
-                    {isTrialing ? 'Trial Period' : 'Billing Period'}
+                    {isTrialing ? "Trial Period" : "Billing Period"}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {formatDate(subscription.current_period_start)} - {formatDate(subscription.current_period_end)}
+                    {formatDate(subscription.current_period_start)} -{" "}
+                    {formatDate(subscription.current_period_end)}
                   </p>
                 </div>
               </div>
@@ -255,11 +278,11 @@ export default function ManageSubscriptionPage() {
                 <div>
                   <p className="font-medium">Status</p>
                   <p className="text-sm text-muted-foreground">
-                    {isCanceled 
-                      ? 'Cancelled (access until end of current period)' 
+                    {isCanceled
+                      ? "Cancelled (access until end of current period)"
                       : isTrialing
-                        ? 'On trial (automatic renewal unless cancelled)'
-                        : 'Active (automatic renewal)'}
+                      ? "On trial (automatic renewal unless cancelled)"
+                      : "Active (automatic renewal)"}
                   </p>
                 </div>
               </div>
@@ -273,7 +296,9 @@ export default function ManageSubscriptionPage() {
                 <div className="flex items-start">
                   <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 mr-3" />
                   <div>
-                    <h4 className="font-semibold text-amber-800 dark:text-amber-300">Want to cancel?</h4>
+                    <h4 className="font-semibold text-amber-800 dark:text-amber-300">
+                      Want to cancel?
+                    </h4>
                     <p className="text-amber-700 dark:text-amber-400 text-sm mt-1">
                       {isTrialing
                         ? "You can cancel your trial at any time. You'll continue to have access until the trial ends."
@@ -286,46 +311,46 @@ export default function ManageSubscriptionPage() {
           )}
         </CardContent>
         <CardFooter className="flex-col sm:flex-row gap-3 border-t p-6">
-          <Button 
-            variant="outline" 
-            onClick={() => router.push('/dashboard/billing')}
+          <Button
+            variant="outline"
+            onClick={() => router.push("/dashboard/billing")}
           >
             Change Plan
           </Button>
-          
+
           {!isCanceled && (
-            <Button 
-              variant="destructive" 
+            <Button
+              variant="destructive"
               onClick={() => setCancelDialogOpen(true)}
             >
-              {isTrialing ? 'Cancel Trial' : 'Cancel Subscription'}
+              {isTrialing ? "Cancel Trial" : "Cancel Subscription"}
             </Button>
           )}
-          
-          {isCanceled && (
-            <Button>
-              Reactivate Subscription
-            </Button>
-          )}
+
+          {isCanceled && <Button>Reactivate Subscription</Button>}
         </CardFooter>
       </Card>
-      
+
       {/* Cancellation Dialog */}
       <AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {isTrialing ? 'Cancel Your Trial?' : 'Cancel Your Subscription?'}
+              {isTrialing ? "Cancel Your Trial?" : "Cancel Your Subscription?"}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {isTrialing
-                ? "If you cancel, you'll still have access until your trial ends on " + formatDate(subscription.current_period_end) + ". You won't be charged."
-                : "If you cancel, you'll still have access until the end of your current billing period on " + formatDate(subscription.current_period_end) + ". After that, your subscription will end."}
+                ? "If you cancel, you'll still have access until your trial ends on " +
+                  formatDate(subscription.current_period_end) +
+                  ". You won't be charged."
+                : "If you cancel, you'll still have access until the end of your current billing period on " +
+                  formatDate(subscription.current_period_end) +
+                  ". After that, your subscription will end."}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Keep Subscription</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogAction
               onClick={handleCancelSubscription}
               className="bg-destructive text-destructive-foreground"
               disabled={isCancelling}
