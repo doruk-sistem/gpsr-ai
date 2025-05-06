@@ -24,10 +24,10 @@ export default function DashboardNavbar() {
   const { data: subscription } = useSubscription();
   const { data: user } = useCurrentUser();
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
-  
+
   // Check if user is in trial period
-  const isTrialing = subscription?.subscription_status === 'trialing';
-  
+  const isTrialing = subscription?.subscription_status === "trialing";
+
   // Calculate days remaining in trial if applicable
   let daysRemaining = 0;
   if (isTrialing && subscription?.trial_end) {
@@ -42,21 +42,25 @@ export default function DashboardNavbar() {
         {/* Trial indicator */}
         {isTrialing && (
           <div className="mr-auto flex items-center">
-            <div 
+            <div
               className={`flex items-center py-1 px-3 text-sm rounded-full border 
-                ${daysRemaining <= 2 
-                  ? "bg-destructive/10 text-destructive border-destructive/30" 
-                  : "bg-primary/10 text-primary border-primary/30"}`}
+                ${
+                  daysRemaining <= 2
+                    ? "bg-destructive/10 text-destructive border-destructive/30"
+                    : "bg-primary/10 text-primary border-primary/30"
+                }`}
             >
               <Clock className="h-3.5 w-3.5 mr-1.5" />
               <span>
-                {daysRemaining === 0 
-                  ? "Trial ends today" 
-                  : `${daysRemaining} day${daysRemaining !== 1 ? 's' : ''} left in trial`}
+                {daysRemaining === 0
+                  ? "Trial ends today"
+                  : `${daysRemaining} day${
+                      daysRemaining !== 1 ? "s" : ""
+                    } left in trial`}
               </span>
-              <Button 
-                variant="link" 
-                onClick={() => router.push('/dashboard/billing/manage')}
+              <Button
+                variant="link"
+                onClick={() => router.push("/dashboard/billing/manage")}
                 className="ml-1 p-0 h-auto text-xs underline"
               >
                 Manage
@@ -64,30 +68,41 @@ export default function DashboardNavbar() {
             </div>
           </div>
         )}
-        
-        <div className="ml-auto flex items-center space-x-4">
+
+        <div className="ml-auto flex items-center">
           <ThemeToggle />
-          
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <User className="h-5 w-5" />
+              <Button variant="ghost">
+                <User className="h-5 w-5 mr-2" />
+                {`${user?.user_metadata?.first_name} ${
+                  user?.user_metadata?.last_name || ""
+                }`}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel>
                 {user?.user_metadata?.first_name
-                  ? `${user.user_metadata.first_name} ${user.user_metadata.last_name || ""}`
+                  ? `${user.user_metadata.first_name} ${
+                      user.user_metadata.last_name || ""
+                    }`
                   : user?.email || "My Account"}
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => router.push('/dashboard/profile')}>
+              <DropdownMenuItem
+                onClick={() => router.push("/dashboard/profile")}
+              >
                 Profile
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => router.push('/dashboard/billing')}>
+              <DropdownMenuItem
+                onClick={() => router.push("/dashboard/billing")}
+              >
                 Billing
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => router.push('/dashboard/settings')}>
+              <DropdownMenuItem
+                onClick={() => router.push("/dashboard/settings")}
+              >
                 Settings
               </DropdownMenuItem>
               <DropdownMenuSeparator />
@@ -101,9 +116,9 @@ export default function DashboardNavbar() {
       </div>
 
       {/* Shared Logout Confirmation Component */}
-      <LogoutConfirmation 
-        isOpen={isLogoutDialogOpen} 
-        setIsOpen={setIsLogoutDialogOpen} 
+      <LogoutConfirmation
+        isOpen={isLogoutDialogOpen}
+        setIsOpen={setIsLogoutDialogOpen}
       />
     </div>
   );

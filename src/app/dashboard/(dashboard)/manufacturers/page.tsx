@@ -51,68 +51,74 @@ export default function ManufacturersPage() {
         </Button>
       </CardHeader>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Logo</TableHead>
-              <TableHead>Company Name</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Phone</TableHead>
-              <TableHead>Country</TableHead>
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {manufacturers?.map((manufacturer) => (
-              <TableRow key={manufacturer.id}>
-                <TableCell>
-                  {manufacturer.logo_image_url ? (
-                    <div className="relative w-10 h-10">
-                      <Image
-                        src={manufacturer.logo_image_url}
-                        alt={manufacturer.name}
-                        fill
-                        className="object-contain rounded"
-                      />
-                    </div>
-                  ) : (
-                    <div className="w-10 h-10 bg-gray-100 rounded flex items-center justify-center">
-                      <span className="text-gray-400 text-xs">No logo</span>
-                    </div>
-                  )}
-                </TableCell>
-                <TableCell className="font-medium">
-                  {manufacturer.name}
-                </TableCell>
-                <TableCell>{manufacturer.email}</TableCell>
-                <TableCell>{manufacturer.phone}</TableCell>
-                <TableCell>{manufacturer.country}</TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() =>
-                        router.push(
-                          `/dashboard/manufacturers/${manufacturer.id}`
-                        )
-                      }
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleDelete(manufacturer.id)}
-                    >
-                      <Trash2 className="h-4 w-4 text-red-500" />
-                    </Button>
-                  </div>
-                </TableCell>
+        {manufacturers?.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full">
+            <p className="text-base">No manufacturers found.</p>
+          </div>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Logo</TableHead>
+                <TableHead>Company Name</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Phone</TableHead>
+                <TableHead>Country</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {manufacturers?.map((manufacturer) => (
+                <TableRow key={manufacturer.id}>
+                  <TableCell>
+                    {manufacturer.logo_image_url ? (
+                      <div className="relative w-10 h-10">
+                        <Image
+                          src={manufacturer.logo_image_url}
+                          alt={manufacturer.name}
+                          fill
+                          className="object-contain rounded"
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-10 h-10 bg-gray-100 rounded flex items-center justify-center">
+                        <span className="text-gray-400 text-xs">No logo</span>
+                      </div>
+                    )}
+                  </TableCell>
+                  <TableCell className="font-medium">
+                    {manufacturer.name}
+                  </TableCell>
+                  <TableCell>{manufacturer.email}</TableCell>
+                  <TableCell>{manufacturer.phone}</TableCell>
+                  <TableCell>{manufacturer.country}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() =>
+                          router.push(
+                            `/dashboard/manufacturers/${manufacturer.id}`
+                          )
+                        }
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDelete(manufacturer.id)}
+                      >
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
       </CardContent>
     </Card>
   );

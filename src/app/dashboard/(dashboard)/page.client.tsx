@@ -23,16 +23,10 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { useCurrentUser } from "@/hooks/use-auth";
 import { TrialStatus } from "@/components/dashboard/trial-status";
 
 export default function DashboardPageClient() {
   const router = useRouter();
-  const user = useCurrentUser();
-
-  console.log("testuser: ");
-
-  console.log("user: ", user);
 
   useEffect(() => {
     // Welcome toast when dashboard first loads

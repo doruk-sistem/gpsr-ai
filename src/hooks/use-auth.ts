@@ -41,7 +41,7 @@ export const useCurrentUser = () => {
         console.log("Fetching initial session...");
         // Get the current session
         const { data: sessionData } = await supabase.auth.getSession();
-        
+
         if (sessionData?.session) {
           console.log("Session found during initial check");
           setUser(sessionData.session.user as User);
@@ -63,8 +63,7 @@ export const useCurrentUser = () => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log(`Auth state changed: ${event}, session:`, !!session);
-      setUser(session?.user as User || null);
+      setUser((session?.user as User) || null);
       setIsLoading(false);
     });
 
