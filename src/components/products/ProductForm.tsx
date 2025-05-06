@@ -231,8 +231,8 @@ export default function ProductForm({
   };
 
   return (
-    <div className="min-h-screen bg-muted/30">
-      <form onSubmit={handleSubmit} className="max-w-6xl mx-auto p-8">
+    <div>
+      <form onSubmit={handleSubmit}>
         <Card className="border shadow-sm">
           <CardContent className="p-8">
             <div className="space-y-8">

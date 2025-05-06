@@ -70,10 +70,6 @@ export default function RequestPage() {
               </p>
             </div>
           </div>
-          <Button type="submit" size="lg" className="flex items-center gap-2">
-            <Save className="h-4 w-4" />
-            Submit Request
-          </Button>
         </div>
 
         {/* Company Details Section */}
@@ -687,6 +683,12 @@ export default function RequestPage() {
             </div>
           </CardContent>
         </Card>
+
+        <div className="flex justify-end">
+          <Button type="submit" size="lg" className="flex items-center gap-2">
+            Submit Request
+          </Button>
+        </div>
       </form>
     </div>
   );

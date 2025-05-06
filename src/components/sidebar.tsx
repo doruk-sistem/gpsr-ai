@@ -67,10 +67,10 @@ export function Sidebar() {
             </div>
           </div>
         </Link>
-        
+
         {/* Trial Notification Component */}
         <TrialNotification />
-        
+
         <div className="space-y-1">
           {routes.map((route) => (
             <Link
@@ -101,7 +101,7 @@ export function Sidebar() {
       <hr className="my-4" />
       <div className="mt-auto px-3 py-2">
         <Link
-          href="/account"
+          href="/dashboard/profile"
           className="text-sm group flex p-3 w-full justify-start font-medium cursor-pointer rounded-lg transition text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
         >
           <div className="flex items-center flex-1">
@@ -120,11 +120,11 @@ export function Sidebar() {
           </div>
         </button>
       </div>
-      
+
       {/* Shared Logout Confirmation Component */}
-      <LogoutConfirmation 
-        isOpen={isLogoutDialogOpen} 
-        setIsOpen={setIsLogoutDialogOpen} 
+      <LogoutConfirmation
+        isOpen={isLogoutDialogOpen}
+        setIsOpen={setIsLogoutDialogOpen}
       />
     </div>
   );
