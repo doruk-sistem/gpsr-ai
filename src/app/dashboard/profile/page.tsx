@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -26,13 +26,11 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useCurrentUser, useUpdateCurrentUser } from "@/hooks/use-auth";
-import { useUploadAvatar } from "@/hooks/use-upload-avatar";
 import { useUpdatePassword } from "@/hooks/use-update-password";
 import { useDeleteAccount } from "@/hooks/use-delete-account";
 import { toast } from "sonner";
-import { Loader2, Upload } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { CountryDropdown } from "@/components/ui/country-dropdown";
-import Image from "next/image";
 
 const profileSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
@@ -62,12 +60,10 @@ type PasswordFormData = z.infer<typeof passwordSchema>;
 export default function ProfilePage() {
   const { data: user } = useCurrentUser();
   const updateCurrentUser = useUpdateCurrentUser();
-  const { uploadAvatar, isUploading } = useUploadAvatar();
   const { updatePassword, isUpdating } = useUpdatePassword();
   const { deleteAccount, isDeleting } = useDeleteAccount();
   const [isLoading, setIsLoading] = useState(false);
   const [isPasswordLoading, setIsPasswordLoading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const profileForm = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
@@ -135,28 +131,6 @@ export default function ProfilePage() {
     }
   };
 
-  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) {
-      console.log("No file selected");
-      return;
-    }
-
-    console.log("Starting avatar upload process");
-    try {
-      const publicUrl = await uploadAvatar(file);
-      console.log("Avatar upload completed successfully:", publicUrl);
-      toast.success("Profile photo updated successfully");
-    } catch (error) {
-      console.error("Avatar upload failed:", error);
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : "Failed to upload profile photo"
-      );
-    }
-  };
-
   return (
     <div className="container mx-auto py-10 space-y-8">
       {/* Profile Information */}
@@ -173,61 +147,6 @@ export default function ProfilePage() {
             className="space-y-6"
           >
             <div className="space-y-4">
-              <div>
-                <Label>Profile Photo</Label>
-                <div className="mt-2 flex items-center gap-4">
-                  <div className="relative h-20 w-20 rounded-full overflow-hidden border">
-                    {user?.user_metadata?.avatar_url ? (
-                      <Image
-                        src={user.user_metadata.avatar_url}
-                        alt="Profile"
-                        fill
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="h-full w-full bg-muted flex items-center justify-center">
-                        <span className="text-2xl">
-                          {user?.user_metadata?.first_name?.[0] ||
-                            user?.email?.[0] ||
-                            "?"}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <input
-                      type="file"
-                      ref={fileInputRef}
-                      onChange={handleAvatarUpload}
-                      accept="image/jpeg,image/png,image/jpg,image/gif,image/svg+xml"
-                      className="hidden"
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => fileInputRef.current?.click()}
-                      disabled={isUploading}
-                    >
-                      {isUploading ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Uploading...
-                        </>
-                      ) : (
-                        <>
-                          <Upload className="mr-2 h-4 w-4" />
-                          Upload Photo
-                        </>
-                      )}
-                    </Button>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Allowed file types: jpeg, png, jpg, gif, svg. Max size:
-                      2MB.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="firstName">First Name</Label>
