@@ -31,6 +31,8 @@ import { useDeleteAccount } from "@/hooks/use-delete-account";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { CountryDropdown } from "@/components/ui/country-dropdown";
+import { useRouter } from "next/navigation";
+import { ChevronLeft } from "lucide-react";
 
 const profileSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
@@ -58,6 +60,7 @@ type ProfileFormData = z.infer<typeof profileSchema>;
 type PasswordFormData = z.infer<typeof passwordSchema>;
 
 export default function ProfilePage() {
+  const router = useRouter();
   const { data: user } = useCurrentUser();
   const updateCurrentUser = useUpdateCurrentUser();
   const { updatePassword, isUpdating } = useUpdatePassword();
@@ -132,40 +135,61 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="container mx-auto py-10 space-y-8">
+    <div className="container max-w-4xl mx-auto py-10 space-y-8">
+      <div className="flex items-center gap-4">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => router.push("/dashboard")}
+          className="gap-2 text-muted-foreground hover:text-foreground"
+        >
+          <ChevronLeft className="h-4 w-4" />
+          Back to Dashboard
+        </Button>
+      </div>
+
       {/* Profile Information */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Profile Information</CardTitle>
-          <CardDescription>
-            Update your account's profile information.
+      <Card className="border-none shadow-lg">
+        <CardHeader className="bg-muted/50 rounded-t-lg border-b">
+          <CardTitle className="text-2xl">Profile Information</CardTitle>
+          <CardDescription className="text-base">
+            Update your account's profile information and email address.
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <form
             onSubmit={profileForm.handleSubmit(onProfileSubmit)}
-            className="space-y-6"
+            className="space-y-8"
           >
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="firstName">First Name</Label>
+                  <Label htmlFor="firstName" className="text-sm font-medium">
+                    First Name
+                  </Label>
                   <Input
                     id="firstName"
                     {...profileForm.register("firstName")}
+                    className="h-11"
                   />
                   {profileForm.formState.errors.firstName && (
-                    <p className="text-sm text-destructive">
+                    <p className="text-sm text-destructive mt-1">
                       {profileForm.formState.errors.firstName.message}
                     </p>
                   )}
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="lastName">Last Name</Label>
-                  <Input id="lastName" {...profileForm.register("lastName")} />
+                  <Label htmlFor="lastName" className="text-sm font-medium">
+                    Last Name
+                  </Label>
+                  <Input
+                    id="lastName"
+                    {...profileForm.register("lastName")}
+                    className="h-11"
+                  />
                   {profileForm.formState.errors.lastName && (
-                    <p className="text-sm text-destructive">
+                    <p className="text-sm text-destructive mt-1">
                       {profileForm.formState.errors.lastName.message}
                     </p>
                   )}
@@ -173,126 +197,182 @@ export default function ProfilePage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" value={user?.email} disabled />
+                <Label htmlFor="email" className="text-sm font-medium">
+                  Email
+                </Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={user?.email}
+                  disabled
+                  className="h-11 bg-muted/50"
+                />
                 {!user?.email_confirmed_at && (
-                  <p className="text-sm text-muted-foreground">
-                    Your email address is unverified.{" "}
-                    <Button variant="link" className="p-0 h-auto">
-                      Click here to re-send the verification email.
+                  <div className="flex items-center gap-2 mt-2">
+                    <p className="text-sm text-muted-foreground">
+                      Your email address is unverified.
+                    </p>
+                    <Button variant="link" className="p-0 h-auto text-sm">
+                      Resend verification email
                     </Button>
-                  </p>
+                  </div>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="phone">Phone</Label>
-                <div className="flex gap-2">
+                <Label htmlFor="phone" className="text-sm font-medium">
+                  Phone
+                </Label>
+                <div className="flex gap-3">
                   <CountryDropdown
                     defaultValue={profileForm.watch("country")}
                     onChange={(country) =>
                       profileForm.setValue("country", country.alpha2)
                     }
-                    className="w-[200px]"
+                    className="w-[200px] h-11"
                   />
                   <Input
                     id="phone"
                     {...profileForm.register("phone")}
-                    className="flex-1"
+                    className="flex-1 h-11"
+                    placeholder="Enter your phone number"
                   />
                 </div>
               </div>
             </div>
 
-            <Button type="submit" disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save
-            </Button>
+            <div className="flex justify-end">
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="min-w-[120px]"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save Changes"
+                )}
+              </Button>
+            </div>
           </form>
         </CardContent>
       </Card>
 
       {/* Update Password */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Update Password</CardTitle>
-          <CardDescription>
+      <Card className="border-none shadow-lg">
+        <CardHeader className="bg-muted/50 rounded-t-lg border-b">
+          <CardTitle className="text-2xl">Update Password</CardTitle>
+          <CardDescription className="text-base">
             Ensure your account is using a long, random password to stay secure.
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <form
             onSubmit={passwordForm.handleSubmit(onPasswordSubmit)}
-            className="space-y-6"
+            className="space-y-8"
           >
-            <div className="space-y-4">
+            <div className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="currentPassword">Current Password</Label>
+                <Label
+                  htmlFor="currentPassword"
+                  className="text-sm font-medium"
+                >
+                  Current Password
+                </Label>
                 <Input
                   id="currentPassword"
                   type="password"
                   {...passwordForm.register("currentPassword")}
+                  className="h-11"
                 />
                 {passwordForm.formState.errors.currentPassword && (
-                  <p className="text-sm text-destructive">
+                  <p className="text-sm text-destructive mt-1">
                     {passwordForm.formState.errors.currentPassword.message}
                   </p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="newPassword">New Password</Label>
+                <Label htmlFor="newPassword" className="text-sm font-medium">
+                  New Password
+                </Label>
                 <Input
                   id="newPassword"
                   type="password"
                   {...passwordForm.register("newPassword")}
+                  className="h-11"
                 />
                 {passwordForm.formState.errors.newPassword && (
-                  <p className="text-sm text-destructive">
+                  <p className="text-sm text-destructive mt-1">
                     {passwordForm.formState.errors.newPassword.message}
                   </p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <Label
+                  htmlFor="confirmPassword"
+                  className="text-sm font-medium"
+                >
+                  Confirm Password
+                </Label>
                 <Input
                   id="confirmPassword"
                   type="password"
                   {...passwordForm.register("confirmPassword")}
+                  className="h-11"
                 />
                 {passwordForm.formState.errors.confirmPassword && (
-                  <p className="text-sm text-destructive">
+                  <p className="text-sm text-destructive mt-1">
                     {passwordForm.formState.errors.confirmPassword.message}
                   </p>
                 )}
               </div>
             </div>
 
-            <Button type="submit" disabled={isPasswordLoading}>
-              {isPasswordLoading && (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              )}
-              Save
-            </Button>
+            <div className="flex justify-end">
+              <Button
+                type="submit"
+                disabled={isPasswordLoading}
+                className="min-w-[120px]"
+              >
+                {isPasswordLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Updating...
+                  </>
+                ) : (
+                  "Update Password"
+                )}
+              </Button>
+            </div>
           </form>
         </CardContent>
       </Card>
 
       {/* Delete Account */}
-      <Card className="border-destructive">
-        <CardHeader>
-          <CardTitle className="text-destructive">Delete Account</CardTitle>
-          <CardDescription>
+      <Card className="border-destructive/50 shadow-lg">
+        <CardHeader className="bg-destructive/5 rounded-t-lg border-b border-destructive/50">
+          <CardTitle className="text-2xl text-destructive">
+            Delete Account
+          </CardTitle>
+          <CardDescription className="text-base">
             Once your account is deleted, all of its resources and data will be
             permanently deleted. Before deleting your account, please download
             any data or information that you wish to retain.
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="destructive" disabled={isDeleting}>
+              <Button
+                variant="destructive"
+                disabled={isDeleting}
+                className="min-w-[120px]"
+              >
                 {isDeleting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -313,7 +393,10 @@ export default function ProfilePage() {
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDeleteAccount}>
+                <AlertDialogAction
+                  onClick={handleDeleteAccount}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
                   Delete Account
                 </AlertDialogAction>
               </AlertDialogFooter>
