@@ -1,18 +1,26 @@
 // src/app/dashboard/(dashboard)/billing/payment/page.client.tsx
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { Sparkles, Clock, CreditCard } from "lucide-react";
+import { Sparkles, Clock, CreditCard, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 import { useSearchParams } from "next/navigation";
 import { useUpdateCurrentUser } from "@/hooks/use-auth";
 import { usePackages } from "@/hooks/use-packages";
+import { useCreateCheckoutSession } from "@/hooks/use-stripe";
 
 export default function PaymentPageClient() {
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  
   const { mutate: updateCurrentUser } = useUpdateCurrentUser();
   const { data: packages } = usePackages();
+  const createCheckoutSession = useCreateCheckoutSession();
 
   const selectedPlanId = searchParams.get("plan");
   const billingType = searchParams.get("billing") || "annual";
@@ -24,12 +32,6 @@ export default function PaymentPageClient() {
       ? selectedPlan?.annually_price
       : selectedPlan?.monthly_price;
 
-  const handlePayment = () => {
-    if (selectedPlanId) {
-      updateCurrentUser({ package_id: selectedPlanId });
-    }
-  };
-
   // Calculate trial end date (14 days from now)
   const trialEndDate = new Date();
   trialEndDate.setDate(trialEndDate.getDate() + 14);
@@ -38,6 +40,46 @@ export default function PaymentPageClient() {
     month: 'short',
     year: 'numeric'
   });
+
+  const handlePayment = async () => {
+    if (!selectedPlan) {
+      toast.error("No plan selected", {
+        description: "Please select a plan to continue"
+      });
+      return;
+    }
+    
+    setIsLoading(true);
+    
+    try {
+      // First, update the user's package_id in user metadata
+      await updateCurrentUser({ package_id: selectedPlanId });
+      
+      // Get stripe price ID based on billing interval
+      const priceId = billingType === "annual" 
+        ? `price_annual_${selectedPlan.id}`  // This would be the actual Stripe price ID in production
+        : `price_monthly_${selectedPlan.id}`; // This would be the actual Stripe price ID in production
+        
+      // Create a Stripe checkout session
+      const sessionUrl = await createCheckoutSession.mutateAsync({
+        priceId,
+        mode: "subscription"
+      });
+      
+      if (sessionUrl) {
+        // Redirect to Stripe Checkout
+        window.location.href = sessionUrl;
+      } else {
+        throw new Error("Failed to create checkout session");
+      }
+    } catch (error: any) {
+      console.error("Payment error:", error);
+      toast.error("Payment setup failed", {
+        description: error.message || "Please try again later"
+      });
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -139,8 +181,16 @@ export default function PaymentPageClient() {
           <Button
             className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-6 text-lg font-semibold"
             onClick={handlePayment}
+            disabled={isLoading}
           >
-            Add Payment Details
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                Processing...
+              </>
+            ) : (
+              "Add Payment Details"
+            )}
           </Button>
         </div>
       </div>

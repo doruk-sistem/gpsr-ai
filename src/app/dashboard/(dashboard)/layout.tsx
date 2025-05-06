@@ -16,8 +16,6 @@ export default function DashboardLayout({
   const router = useRouter();
   const pathname = usePathname();
 
-  console.log('layout')
-
   const isRootPath = pathname === "/dashboard";
 
   return (
@@ -56,7 +54,7 @@ export default function DashboardLayout({
             <div>{children}</div>
           </div>
         </main>
-        
+
         {/* Trial Expiration Modal */}
         <TrialExpirationModal />
       </div>

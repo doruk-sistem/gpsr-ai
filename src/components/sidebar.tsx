@@ -1,8 +1,7 @@
-// src/components/sidebar.tsx
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils/cn";
 import {
   LayoutDashboard,
@@ -16,6 +15,8 @@ import {
   Shield,
 } from "lucide-react";
 import { TrialNotification } from "@/components/dashboard/trial-notification";
+import { useState } from "react";
+import { LogoutConfirmation } from "./logout-confirmation/logout-confirmation";
 
 const routes = [
   {
@@ -52,6 +53,8 @@ const routes = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
 
   return (
     <div className="space-y-4 py-4 flex flex-col h-full bg-white dark:bg-gray-950 border-r border-border dark:border-gray-800">
@@ -107,16 +110,22 @@ export function Sidebar() {
           </div>
         </Link>
 
-        <Link
-          href="/logout"
+        <button
+          onClick={() => setIsLogoutDialogOpen(true)}
           className="text-sm group flex p-3 w-full justify-start font-medium cursor-pointer rounded-lg transition text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
         >
           <div className="flex items-center flex-1">
             <LogOut className="h-5 w-5 mr-3 text-gray-500 dark:text-gray-400" />
             Log out
           </div>
-        </Link>
+        </button>
       </div>
+      
+      {/* Shared Logout Confirmation Component */}
+      <LogoutConfirmation 
+        isOpen={isLogoutDialogOpen} 
+        setIsOpen={setIsLogoutDialogOpen} 
+      />
     </div>
   );
 }
