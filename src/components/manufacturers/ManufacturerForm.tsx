@@ -15,6 +15,8 @@ import {
   Briefcase,
   Image as ImageIcon,
   PenTool,
+  Save,
+  Factory,
 } from "lucide-react";
 
 import { Country, CountryDropdown } from "../ui/country-dropdown";
@@ -83,16 +85,33 @@ export default function ManufacturerForm({
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <form onSubmit={handleSubmit} className="max-w-6xl mx-auto">
-        <Card className="border-none shadow-lg">
+    <div>
+      <form onSubmit={handleSubmit}>
+        <Card className="border shadow-sm">
           <CardContent className="p-8">
             <div className="space-y-8">
               <div className="flex items-center justify-between border-b border-gray-200 pb-6">
-                <h1 className="text-3xl font-bold text-gray-900">
-                  {initialData ? "Edit Manufacturer" : "Add Manufacturer"}
-                </h1>
-                <Button type="submit">{initialData ? "Update" : "Save"}</Button>
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Factory className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <h1 className="text-2xl font-bold">
+                      {initialData ? "Edit Manufacturer" : "Add Manufacturer"}
+                    </h1>
+                    <p className="text-muted-foreground">
+                      Register your manufacturer details for GPSR compliance
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  type="submit"
+                  size="lg"
+                  className="flex items-center gap-2"
+                >
+                  <Save className="h-4 w-4" />
+                  {initialData ? "Update" : "Save"}
+                </Button>
               </div>
 
               <div className="space-y-8">
@@ -100,7 +119,7 @@ export default function ManufacturerForm({
                   <label className="block text-sm font-medium text-gray-700">
                     Company Logo
                   </label>
-                  <div className="flex flex-col items-center justify-center h-[260px] px-6 py-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-gray-400 transition-colors">
+                  <div className="flex flex-col items-center justify-center h-[260px] px-6 py-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-gray-400 transition-colors bg-white">
                     {logoPreview ? (
                       <div className="relative w-full h-full group">
                         <Image
@@ -296,7 +315,7 @@ export default function ManufacturerForm({
                           (Will appear on Declaration of Conformity)
                         </span>
                       </label>
-                      <div className="flex flex-col items-center justify-center h-[260px] px-6 py-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-gray-400 transition-colors">
+                      <div className="flex flex-col items-center justify-center h-[260px] px-6 py-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-gray-400 transition-colors bg-white">
                         {signaturePreview ? (
                           <div className="relative w-full h-full group">
                             <Image

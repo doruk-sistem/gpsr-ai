@@ -33,6 +33,9 @@ export default function EditProductPage() {
         }
       }
 
+      // Get standards from the form
+      const standards = formData.getAll("standards") as string[];
+
       const data = {
         name: formData.get("name") as string,
         category: formData.get("category") as string,
@@ -47,11 +50,7 @@ export default function EditProductPage() {
           .filter(Boolean),
         directives: formData.getAll("directives") as string[],
         regulations: formData.getAll("regulations") as string[],
-        standards: {
-          en: formData.getAll("standards_en") as string[],
-          bs: formData.getAll("standards_bs") as string[],
-          ts: formData.getAll("standards_ts") as string[],
-        },
+        standards,
         manufacturer_id: formData.get("manufacturer_id") as string,
         authorised_representative_in_eu: formData.get(
           "authorised_representative_in_eu"

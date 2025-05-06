@@ -32,9 +32,8 @@ export default function DashboardLayout({
               <Button
                 onClick={() => router.back()}
                 variant="ghost"
-                size="icon"
-                className="rounded-full"
-                title="Go Back"
+                className="rounded-full text-muted-foreground"
+                title="Back"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -46,9 +45,11 @@ export default function DashboardLayout({
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
+                  className="mr-2"
                 >
                   <path d="M19 12H5M12 19l-7-7 7-7" />
                 </svg>
+                Back
               </Button>
             )}
             <div>{children}</div>
