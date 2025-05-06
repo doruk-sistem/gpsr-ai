@@ -8,26 +8,26 @@ import { Loader2 } from "lucide-react";
 
 export default function LogoutPage() {
   const router = useRouter();
-  const logout = useLogout();
+  const { mutateAsync: logout } = useLogout();
 
   useEffect(() => {
     const performLogout = async () => {
       try {
         // Show loading toast
         toast.loading("Logging out...");
-        
+
         // Call the logout mutation
-        await logout.mutateAsync();
-        
+        await logout();
+
         // Clear any additional storage if needed
         localStorage.removeItem("supabaseSession");
         sessionStorage.clear();
-        
+
         // Show success message
         toast.success("Logged out successfully", {
-          description: "You have been safely logged out of your account"
+          description: "You have been safely logged out of your account",
         });
-        
+
         // Redirect to home page
         setTimeout(() => {
           router.push("/");
@@ -36,9 +36,10 @@ export default function LogoutPage() {
       } catch (error) {
         console.error("Logout error:", error);
         toast.error("Logout failed", {
-          description: "Please try again or contact support if the issue persists"
+          description:
+            "Please try again or contact support if the issue persists",
         });
-        
+
         // Even if there's an error, try to redirect to the home page
         setTimeout(() => {
           router.push("/");

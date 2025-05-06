@@ -17,7 +17,10 @@ interface LogoutConfirmationProps {
   setIsOpen: (open: boolean) => void;
 }
 
-export function LogoutConfirmation({ isOpen, setIsOpen }: LogoutConfirmationProps) {
+export function LogoutConfirmation({
+  isOpen,
+  setIsOpen,
+}: LogoutConfirmationProps) {
   const router = useRouter();
 
   const handleLogout = () => {
@@ -30,12 +33,13 @@ export function LogoutConfirmation({ isOpen, setIsOpen }: LogoutConfirmationProp
         <AlertDialogHeader>
           <AlertDialogTitle>Are you sure you want to logout?</AlertDialogTitle>
           <AlertDialogDescription>
-            You will be securely logged out from your account. Any unsaved changes might be lost.
+            You will be securely logged out from your account. Any unsaved
+            changes might be lost.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction 
+          <AlertDialogAction
             onClick={handleLogout}
             className="bg-primary hover:bg-primary/90"
           >

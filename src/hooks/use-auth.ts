@@ -1,9 +1,10 @@
 "use client";
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
 import { User } from "@/lib/api/endpoints";
 import authService from "@/lib/services/auth-service";
-import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase/client";
 
 // ------------------------- //

@@ -41,30 +41,42 @@ export async function updateSession(request: NextRequest) {
   // Get the URL and pathname for debugging
   const url = request.nextUrl.clone();
   const pathname = url.pathname;
-  
-  console.log(`[Middleware] Path: ${pathname} | Auth: ${user ? 'Authenticated as ' + user.id : 'Not authenticated'}`);
-  
+
+  console.log(
+    `[Middleware] Path: ${pathname} | Auth: ${
+      user ? "Authenticated as " + user.id : "Not authenticated"
+    }`
+  );
+
   // Check for URL params that might indicate we should skip auth checks (for debugging)
-  const skipAuth = url.searchParams.get('skipAuth') === 'true';
+  const skipAuth = url.searchParams.get("skipAuth") === "true";
   if (skipAuth) {
-    console.log('[Middleware] Skipping auth checks due to skipAuth parameter');
+    console.log("[Middleware] Skipping auth checks due to skipAuth parameter");
     return supabaseResponse;
   }
 
   // Get the auth cookie for debugging
-  const authCookie = request.cookies.get('sb-access-token');
+  const authCookie = request.cookies.get("sb-access-token");
   console.log(`[Middleware] Auth cookie present: ${!!authCookie}`);
-  
+
   // If user tried to access dashboard without authentication, redirect to login
   if (!user && pathname.startsWith("/dashboard")) {
-    console.log("[Middleware] Unauthenticated user trying to access dashboard, redirecting to login");
+    console.log(
+      "[Middleware] Unauthenticated user trying to access dashboard, redirecting to login"
+    );
     url.pathname = "/auth/login";
     return NextResponse.redirect(url);
   }
 
   // If authenticated user tried to access auth pages, redirect to dashboard
-  if (user && pathname.startsWith("/auth")) {
-    console.log("[Middleware] Authenticated user trying to access auth pages, redirecting to dashboard");
+  if (
+    user &&
+    pathname.startsWith("/auth") &&
+    !pathname.startsWith("/auth/logout")
+  ) {
+    console.log(
+      "[Middleware] Authenticated user trying to access auth pages, redirecting to dashboard"
+    );
     url.pathname = "/dashboard";
     return NextResponse.redirect(url);
   }
@@ -73,14 +85,16 @@ export async function updateSession(request: NextRequest) {
   if (user && pathname.startsWith("/dashboard")) {
     // Missing profile info and not on complete-profile page
     console.log(`[Middleware] User metadata:`, user.user_metadata);
-    
+
     if (
       (!user?.user_metadata?.first_name ||
         !user?.user_metadata?.last_name ||
         !user?.user_metadata?.company) &&
       pathname !== "/dashboard/complete-profile"
     ) {
-      console.log("[Middleware] User missing profile info, redirecting to complete profile page");
+      console.log(
+        "[Middleware] User missing profile info, redirecting to complete profile page"
+      );
       url.pathname = "/dashboard/complete-profile";
       return NextResponse.redirect(url);
     }
@@ -92,7 +106,9 @@ export async function updateSession(request: NextRequest) {
       user?.user_metadata?.company &&
       pathname === "/dashboard/complete-profile"
     ) {
-      console.log("[Middleware] User profile already complete, redirecting to dashboard");
+      console.log(
+        "[Middleware] User profile already complete, redirecting to dashboard"
+      );
       url.pathname = "/dashboard";
       return NextResponse.redirect(url);
     }
@@ -109,11 +125,10 @@ export async function updateSession(request: NextRequest) {
         "/dashboard/representative",
       ];
 
-      if (
-        !user?.user_metadata?.package_id &&
-        privatePaths.includes(pathname)
-      ) {
-        console.log("[Middleware] User without package_id trying to access restricted area, redirecting to billing");
+      if (!user?.user_metadata?.package_id && privatePaths.includes(pathname)) {
+        console.log(
+          "[Middleware] User without package_id trying to access restricted area, redirecting to billing"
+        );
         url.pathname = "/dashboard/billing";
         return NextResponse.redirect(url);
       }
