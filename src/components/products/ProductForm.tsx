@@ -20,6 +20,7 @@ import {
   ChevronsUpDown,
   Search,
   Plus,
+  Shield,
 } from "lucide-react";
 import {
   Command,
@@ -230,16 +231,28 @@ export default function ProductForm({
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <form onSubmit={handleSubmit} className="max-w-6xl mx-auto">
-        <Card className="border-none shadow-lg">
+    <div className="min-h-screen bg-muted/30">
+      <form onSubmit={handleSubmit} className="max-w-6xl mx-auto p-8">
+        <Card className="border shadow-sm">
           <CardContent className="p-8">
             <div className="space-y-8">
               <div className="flex items-center justify-between border-b border-gray-200 pb-6">
-                <h1 className="text-3xl font-bold text-gray-900">
-                  {initialData ? "Edit Product" : "Add New Product"}
-                </h1>
-                <Button type="submit">{initialData ? "Update" : "Save"}</Button>
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Package className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <h1 className="text-2xl font-bold">
+                      {initialData ? "Edit Product" : "Add New Product"}
+                    </h1>
+                    <p className="text-muted-foreground">
+                      Register your product for GPSR compliance
+                    </p>
+                  </div>
+                </div>
+                <Button type="submit" size="lg">
+                  {initialData ? "Update Product" : "Save Product"}
+                </Button>
               </div>
 
               <div className="space-y-8">
@@ -260,12 +273,15 @@ export default function ProductForm({
                           aria-expanded={openCategoryPopover}
                           className="w-full justify-between h-12 text-lg bg-white"
                         >
-                          {selectedCategory
-                            ? PRODUCT_CATEGORY_OPTIONS.find(
-                                (category) =>
-                                  category.value === selectedCategory
-                              )?.label || "Select a category"
-                            : "Select a category"}
+                          <div className="flex items-center gap-2">
+                            <Tag className="h-4 w-4 text-gray-400" />
+                            {selectedCategory
+                              ? PRODUCT_CATEGORY_OPTIONS.find(
+                                  (category) =>
+                                    category.value === selectedCategory
+                                )?.label || "Select a category"
+                              : "Select a category"}
+                          </div>
                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                       </PopoverTrigger>
@@ -324,12 +340,15 @@ export default function ProductForm({
                           className="w-full justify-between h-12 text-lg bg-white"
                           disabled={!selectedCategory}
                         >
-                          {selectedSubcategory
-                            ? getSubcategories().find(
-                                (subcategory) =>
-                                  subcategory.value === selectedSubcategory
-                              )?.label || "Select a subcategory"
-                            : "Select a subcategory"}
+                          <div className="flex items-center gap-2">
+                            <Layers className="h-4 w-4 text-gray-400" />
+                            {selectedSubcategory
+                              ? getSubcategories().find(
+                                  (subcategory) =>
+                                    subcategory.value === selectedSubcategory
+                                )?.label || "Select a subcategory"
+                              : "Select a subcategory"}
+                          </div>
                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                       </PopoverTrigger>
@@ -534,9 +553,24 @@ export default function ProductForm({
 
                 {/* Directives */}
                 <div className="space-y-4">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                    Directives
-                  </h2>
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-xl font-semibold text-gray-900">
+                      Directives
+                    </h2>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="flex items-center text-primary text-sm"
+                      onClick={() =>
+                        document
+                          .getElementById("add-directive-section")
+                          ?.classList.toggle("hidden")
+                      }
+                    >
+                      <Plus className="w-4 h-4 mr-1" />
+                      Add Additional Directive
+                    </Button>
+                  </div>
                   <div className="space-y-3">
                     {directives.map((directive, index) => (
                       <div key={index} className="flex items-center space-x-3">
@@ -560,20 +594,6 @@ export default function ProductForm({
                     ))}
                   </div>
 
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    className="flex items-center text-primary text-sm mt-2"
-                    onClick={() =>
-                      document
-                        .getElementById("add-directive-section")
-                        ?.classList.toggle("hidden")
-                    }
-                  >
-                    <Plus className="w-4 h-4 mr-1" />
-                    Add Additional Directive
-                  </Button>
-
                   <div
                     id="add-directive-section"
                     className="hidden space-y-4 border rounded-md p-4 mt-2 bg-gray-50"
@@ -593,7 +613,10 @@ export default function ProductForm({
                             aria-expanded={openDirectivePopover}
                             className="w-full justify-between h-10 text-sm bg-white"
                           >
-                            {selectedDirective || "Select a directive"}
+                            <div className="flex items-center gap-2">
+                              <FileCheck className="h-4 w-4 text-gray-400" />
+                              {selectedDirective || "Select a directive"}
+                            </div>
                             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                           </Button>
                         </PopoverTrigger>
@@ -676,9 +699,24 @@ export default function ProductForm({
 
                 {/* Regulations */}
                 <div className="space-y-4">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                    Regulations
-                  </h2>
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-xl font-semibold text-gray-900">
+                      Regulations
+                    </h2>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="flex items-center text-primary text-sm"
+                      onClick={() =>
+                        document
+                          .getElementById("add-regulation-section")
+                          ?.classList.toggle("hidden")
+                      }
+                    >
+                      <Plus className="w-4 h-4 mr-1" />
+                      Add Additional Regulation
+                    </Button>
+                  </div>
                   <div className="space-y-3">
                     {regulations.map((regulation, index) => (
                       <div key={index} className="flex items-center space-x-3">
@@ -702,20 +740,6 @@ export default function ProductForm({
                     ))}
                   </div>
 
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    className="flex items-center text-primary text-sm mt-2"
-                    onClick={() =>
-                      document
-                        .getElementById("add-regulation-section")
-                        ?.classList.toggle("hidden")
-                    }
-                  >
-                    <Plus className="w-4 h-4 mr-1" />
-                    Add Additional Regulation
-                  </Button>
-
                   <div
                     id="add-regulation-section"
                     className="hidden space-y-4 border rounded-md p-4 mt-2 bg-gray-50"
@@ -735,7 +759,10 @@ export default function ProductForm({
                             aria-expanded={openRegulationPopover}
                             className="w-full justify-between h-10 text-sm bg-white"
                           >
-                            {selectedRegulation || "Select a regulation"}
+                            <div className="flex items-center gap-2">
+                              <ShieldCheck className="h-4 w-4 text-gray-400" />
+                              {selectedRegulation || "Select a regulation"}
+                            </div>
                             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                           </Button>
                         </PopoverTrigger>
@@ -820,9 +847,24 @@ export default function ProductForm({
 
                 {/* Standards */}
                 <div className="space-y-4">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                    Standards
-                  </h2>
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-xl font-semibold text-gray-900">
+                      Standards
+                    </h2>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="flex items-center text-primary text-sm"
+                      onClick={() =>
+                        document
+                          .getElementById("add-standard-section")
+                          ?.classList.toggle("hidden")
+                      }
+                    >
+                      <Plus className="w-4 h-4 mr-1" />
+                      Add Additional Standard
+                    </Button>
+                  </div>
                   <div className="space-y-3">
                     {standards.map((standard, index) => (
                       <div key={index} className="flex items-center space-x-3">
@@ -845,20 +887,6 @@ export default function ProductForm({
                       </div>
                     ))}
                   </div>
-
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    className="flex items-center text-primary text-sm mt-2"
-                    onClick={() =>
-                      document
-                        .getElementById("add-standard-section")
-                        ?.classList.toggle("hidden")
-                    }
-                  >
-                    <Plus className="w-4 h-4 mr-1" />
-                    Add Additional Standard
-                  </Button>
 
                   <div
                     id="add-standard-section"
@@ -952,12 +980,15 @@ export default function ProductForm({
                             aria-expanded={openManufacturerPopover}
                             className="w-full justify-between h-10 text-sm bg-white"
                           >
-                            {selectedManufacturer
-                              ? manufacturers.find(
-                                  (manufacturer) =>
-                                    manufacturer.id === selectedManufacturer
-                                )?.name || "Select Manufacturer"
-                              : "Select Manufacturer"}
+                            <div className="flex items-center gap-2">
+                              <Building className="h-4 w-4 text-gray-400" />
+                              {selectedManufacturer
+                                ? manufacturers.find(
+                                    (manufacturer) =>
+                                      manufacturer.id === selectedManufacturer
+                                  )?.name || "Select Manufacturer"
+                                : "Select Manufacturer"}
+                            </div>
                             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                           </Button>
                         </PopoverTrigger>
@@ -1029,7 +1060,10 @@ export default function ProductForm({
                             aria-expanded={openEUTempPopover}
                             className="w-full justify-between h-10 text-sm bg-white"
                           >
-                            {selectedEUTemp || "Not for EU sale"}
+                            <div className="flex items-center gap-2">
+                              <Shield className="h-4 w-4 text-gray-400" />
+                              {selectedEUTemp || "Not for EU sale"}
+                            </div>
                             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                           </Button>
                         </PopoverTrigger>
@@ -1127,7 +1161,10 @@ export default function ProductForm({
                             aria-expanded={openUKTempPopover}
                             className="w-full justify-between h-10 text-sm bg-white"
                           >
-                            {selectedUKTemp || "Not for UK sale"}
+                            <div className="flex items-center gap-2">
+                              <Shield className="h-4 w-4 text-gray-400" />
+                              {selectedUKTemp || "Not for UK sale"}
+                            </div>
                             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                           </Button>
                         </PopoverTrigger>
