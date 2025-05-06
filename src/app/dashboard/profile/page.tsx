@@ -71,21 +71,21 @@ export default function ProfilePage() {
   const profileForm = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      firstName: "",
-      lastName: "",
-      phone: "",
-      country: "",
+      firstName: user?.user_metadata?.first_name || "",
+      lastName: user?.user_metadata?.last_name || "",
+      phone: user?.user_metadata?.phone || "",
+      country: user?.user_metadata?.country || "",
     },
   });
 
   // Update form values when user data is loaded
   useEffect(() => {
-    if (user) {
+    if (user?.user_metadata) {
       profileForm.reset({
-        firstName: user.user_metadata?.first_name || "",
-        lastName: user.user_metadata?.last_name || "",
-        phone: user.user_metadata?.phone || "",
-        country: user.user_metadata?.country || "",
+        firstName: user.user_metadata.first_name || "",
+        lastName: user.user_metadata.last_name || "",
+        phone: user.user_metadata.phone || "",
+        country: user.user_metadata.country || "",
       });
     }
   }, [user, profileForm]);
@@ -157,107 +157,113 @@ export default function ProfilePage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-6">
-          <form
-            onSubmit={profileForm.handleSubmit(onProfileSubmit)}
-            className="space-y-8"
-          >
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="firstName" className="text-sm font-medium">
-                    First Name
-                  </Label>
-                  <Input
-                    id="firstName"
-                    {...profileForm.register("firstName")}
-                    className="h-11"
-                  />
-                  {profileForm.formState.errors.firstName && (
-                    <p className="text-sm text-destructive mt-1">
-                      {profileForm.formState.errors.firstName.message}
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="lastName" className="text-sm font-medium">
-                    Last Name
-                  </Label>
-                  <Input
-                    id="lastName"
-                    {...profileForm.register("lastName")}
-                    className="h-11"
-                  />
-                  {profileForm.formState.errors.lastName && (
-                    <p className="text-sm text-destructive mt-1">
-                      {profileForm.formState.errors.lastName.message}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm font-medium">
-                  Email
-                </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={user?.email}
-                  disabled
-                  className="h-11 bg-muted/50"
-                />
-                {!user?.email_confirmed_at && (
-                  <div className="flex items-center gap-2 mt-2">
-                    <p className="text-sm text-muted-foreground">
-                      Your email address is unverified.
-                    </p>
-                    <Button variant="link" className="p-0 h-auto text-sm">
-                      Resend verification email
-                    </Button>
+          {!user ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+          ) : (
+            <form
+              onSubmit={profileForm.handleSubmit(onProfileSubmit)}
+              className="space-y-8"
+            >
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="firstName" className="text-sm font-medium">
+                      First Name
+                    </Label>
+                    <Input
+                      id="firstName"
+                      {...profileForm.register("firstName")}
+                      className="h-11"
+                    />
+                    {profileForm.formState.errors.firstName && (
+                      <p className="text-sm text-destructive mt-1">
+                        {profileForm.formState.errors.firstName.message}
+                      </p>
+                    )}
                   </div>
-                )}
-              </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="phone" className="text-sm font-medium">
-                  Phone
-                </Label>
-                <div className="flex gap-3">
-                  <CountryDropdown
-                    defaultValue={profileForm.watch("country")}
-                    onChange={(country) =>
-                      profileForm.setValue("country", country.alpha2)
-                    }
-                    className="w-[200px] h-11"
-                  />
+                  <div className="space-y-2">
+                    <Label htmlFor="lastName" className="text-sm font-medium">
+                      Last Name
+                    </Label>
+                    <Input
+                      id="lastName"
+                      {...profileForm.register("lastName")}
+                      className="h-11"
+                    />
+                    {profileForm.formState.errors.lastName && (
+                      <p className="text-sm text-destructive mt-1">
+                        {profileForm.formState.errors.lastName.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-sm font-medium">
+                    Email
+                  </Label>
                   <Input
-                    id="phone"
-                    {...profileForm.register("phone")}
-                    className="flex-1 h-11"
-                    placeholder="Enter your phone number"
+                    id="email"
+                    type="email"
+                    value={user?.email}
+                    disabled
+                    className="h-11 bg-muted/50"
                   />
+                  {!user?.email_confirmed_at && (
+                    <div className="flex items-center gap-2 mt-2">
+                      <p className="text-sm text-muted-foreground">
+                        Your email address is unverified.
+                      </p>
+                      <Button variant="link" className="p-0 h-auto text-sm">
+                        Resend verification email
+                      </Button>
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="phone" className="text-sm font-medium">
+                    Phone
+                  </Label>
+                  <div className="flex gap-3">
+                    <CountryDropdown
+                      defaultValue={profileForm.watch("country")}
+                      onChange={(country) =>
+                        profileForm.setValue("country", country.alpha2)
+                      }
+                      className="w-[200px] h-11"
+                    />
+                    <Input
+                      id="phone"
+                      {...profileForm.register("phone")}
+                      className="flex-1 h-11"
+                      placeholder="Enter your phone number"
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="flex justify-end">
-              <Button
-                type="submit"
-                disabled={isLoading}
-                className="min-w-[120px]"
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  "Save Changes"
-                )}
-              </Button>
-            </div>
-          </form>
+              <div className="flex justify-end">
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  className="min-w-[120px]"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    "Save Changes"
+                  )}
+                </Button>
+              </div>
+            </form>
+          )}
         </CardContent>
       </Card>
 
