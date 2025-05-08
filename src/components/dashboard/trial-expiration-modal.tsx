@@ -26,27 +26,33 @@ export default function TrialExpirationModal() {
   const [open, setOpen] = useState(false);
   const router = useRouter();
   const { data: trialStatus } = useTrialStatus();
-  
+
   useEffect(() => {
     // Show the modal if trial is ending soon (2 days or less)
-    if (trialStatus && trialStatus.isTrialing && trialStatus.daysRemaining <= 2) {
+    if (
+      trialStatus &&
+      trialStatus.isTrialing &&
+      trialStatus.daysRemaining <= 2
+    ) {
       // Only show once per session
-      const hasShownWarning = sessionStorage.getItem('trial_expiration_warning_shown');
+      const hasShownWarning = sessionStorage.getItem(
+        "trial_expiration_warning_shown"
+      );
       if (!hasShownWarning) {
         setOpen(true);
-        sessionStorage.setItem('trial_expiration_warning_shown', 'true');
+        sessionStorage.setItem("trial_expiration_warning_shown", "true");
       }
     }
   }, [trialStatus]);
-  
+
   if (!trialStatus || !trialStatus.isTrialing) {
     return null;
   }
-  
-  const trialEndDate = trialStatus.trialEndDate.toLocaleDateString('en-GB', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric'
+
+  const trialEndDate = trialStatus.trialEndDate.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
   });
 
   return (
@@ -58,14 +64,18 @@ export default function TrialExpirationModal() {
               <AlertTriangle className="h-6 w-6 text-amber-600 dark:text-amber-300" />
             </div>
           </div>
-          <DialogTitle className="text-xl text-center">Your Free Trial Is Ending Soon</DialogTitle>
+          <DialogTitle className="text-xl text-center">
+            Your Free Trial Is Ending Soon
+          </DialogTitle>
           <DialogDescription className="text-center">
-            {trialStatus.daysRemaining === 0 
-              ? "Your trial ends today." 
-              : `You have ${trialStatus.daysRemaining} day${trialStatus.daysRemaining > 1 ? 's' : ''} left in your trial.`}
+            {trialStatus.daysRemaining === 0
+              ? "Your trial ends today."
+              : `You have ${trialStatus.daysRemaining} day${
+                  trialStatus.daysRemaining > 1 ? "s" : ""
+                } left in your trial.`}
           </DialogDescription>
         </DialogHeader>
-        
+
         <div className="space-y-4 my-2">
           <div className="flex items-start space-x-3 p-3 bg-muted rounded-lg">
             <CalendarClock className="h-5 w-5 text-muted-foreground mt-0.5" />
@@ -74,42 +84,43 @@ export default function TrialExpirationModal() {
               <p className="text-sm text-muted-foreground">{trialEndDate}</p>
             </div>
           </div>
-          
+
           <div className="flex items-start space-x-3 p-3 bg-muted rounded-lg">
             <CreditCard className="h-5 w-5 text-muted-foreground mt-0.5" />
             <div>
               <p className="text-sm font-medium">After Your Trial</p>
               <p className="text-sm text-muted-foreground">
-                You'll be automatically upgraded to your selected plan. You won't be charged until your trial ends.
+                You&apos;ll be automatically upgraded to your selected plan. You
+                won&apos;t be charged until your trial ends.
               </p>
             </div>
           </div>
         </div>
-        
+
         <DialogFooter className="flex-col space-y-2 sm:space-y-0">
-          <Button 
+          <Button
             onClick={() => {
               setOpen(false);
-              router.push('/dashboard/billing');
+              router.push("/dashboard/billing");
             }}
             className="w-full"
           >
             Upgrade Now
           </Button>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => setOpen(false)}
             className="w-full"
           >
             Remind Me Later
           </Button>
           <div className="flex justify-center pt-2">
-            <Button 
-              variant="link" 
+            <Button
+              variant="link"
               size="sm"
               onClick={() => {
                 setOpen(false);
-                router.push('/faq#trial');
+                router.push("/faq#trial");
               }}
               className="flex items-center text-xs"
             >

@@ -13,7 +13,7 @@ export function TrialNotification() {
   const { data: subscription } = useSubscription();
 
   // If no subscription exists or it's not in trial mode, return null
-  if (!subscription || subscription.status !== "trialing") {
+  if (!subscription || subscription.subscription_status !== "trialing") {
     return null;
   }
 
@@ -35,11 +35,11 @@ export function TrialNotification() {
             : `${daysRemaining} days left in your trial`}
         </p>
         {daysRemaining <= 7 && (
-          <Button 
-            variant="default" 
-            size="sm" 
+          <Button
+            variant="default"
+            size="sm"
             className="w-full"
-            onClick={() => router.push('/dashboard/billing')}
+            onClick={() => router.push("/dashboard/billing")}
           >
             Upgrade Now
           </Button>
