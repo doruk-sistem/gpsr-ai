@@ -3,6 +3,7 @@
 
 import { useQuery, useMutation } from "@tanstack/react-query";
 import stripeService from "@/lib/services/stripe-service";
+import { StripeCheckoutSessionRequest } from "@/lib/services/stripe-service/types";
 
 export const useSubscription = () => {
   return useQuery({
@@ -30,10 +31,13 @@ export const useCreateCheckoutSession = () => {
     mutationFn: ({
       priceId,
       mode,
-    }: {
-      priceId: string;
-      mode: "payment" | "subscription";
-    }) => stripeService.createCheckoutSession(priceId, mode),
+      promotion_code,
+      trial_period_days,
+    }: StripeCheckoutSessionRequest) =>
+      stripeService.createCheckoutSession(priceId, mode, {
+        promotion_code,
+        trial_period_days,
+      }),
   });
 };
 
@@ -41,11 +45,30 @@ export const useTrialStatus = () => {
   return useQuery({
     queryKey: ["trial-status"],
     queryFn: () => stripeService.getTrialStatus(),
+    refetchInterval: 1000 * 60 * 5, // Refetch every 5 minutes
   });
 };
 
 export const useCancelSubscription = () => {
   return useMutation({
-    mutationFn: () => stripeService.cancelSubscription(),
+    mutationFn: ({
+      cancel_immediately = false,
+    }: {
+      cancel_immediately?: boolean;
+    } = {}) => stripeService.cancelSubscription({ cancel_immediately }),
+  });
+};
+
+export const useProducts = () => {
+  return useQuery({
+    queryKey: ["products"],
+    queryFn: () => stripeService.getProducts(),
+  });
+};
+
+export const useHasPaymentMethod = () => {
+  return useQuery({
+    queryKey: ["has-payment-method"],
+    queryFn: () => stripeService.hasPaymentMethod(),
   });
 };

@@ -2,80 +2,87 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { Sparkles, Clock, CreditCard, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
-import { useSearchParams } from "next/navigation";
+import { notFound, useSearchParams } from "next/navigation";
 import { useUpdateCurrentUser } from "@/hooks/use-auth";
-import { usePackages } from "@/hooks/use-packages";
-import { useCreateCheckoutSession } from "@/hooks/use-stripe";
+import {
+  useActivePlan,
+  useCreateCheckoutSession,
+  useProducts,
+} from "@/hooks/use-stripe";
 
 export default function PaymentPageClient() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  
-  const { mutate: updateCurrentUser } = useUpdateCurrentUser();
-  const { data: packages } = usePackages();
-  const createCheckoutSession = useCreateCheckoutSession();
 
-  const selectedPlanId = searchParams.get("plan");
+  const { mutateAsync: updateCurrentUser } = useUpdateCurrentUser();
+  const createCheckoutSession = useCreateCheckoutSession();
+  const { data: products } = useProducts();
+  const { data: activePlan } = useActivePlan();
+
+  const selectedPlanId = searchParams.get("productId");
   const billingType = searchParams.get("billing") || "annual";
 
+  if (activePlan) {
+    notFound();
+  }
+
   const selectedPlan =
-    packages?.find((p) => p.id === selectedPlanId) || packages?.[0];
+    products?.find((p) => p.id === selectedPlanId) || products?.[0];
   const price =
     billingType === "annual"
-      ? selectedPlan?.annually_price
-      : selectedPlan?.monthly_price;
+      ? selectedPlan?.prices.annual
+      : selectedPlan?.prices.monthly;
 
   // Calculate trial end date (14 days from now)
   const trialEndDate = new Date();
   trialEndDate.setDate(trialEndDate.getDate() + 14);
-  const formattedTrialEndDate = trialEndDate.toLocaleDateString('en-GB', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric'
+  const formattedTrialEndDate = trialEndDate.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
   });
 
   const handlePayment = async () => {
     if (!selectedPlan) {
       toast.error("No plan selected", {
-        description: "Please select a plan to continue"
+        description: "Please select a plan to continue",
       });
       return;
     }
-    
+
     setIsLoading(true);
-    
+
     try {
       // First, update the user's package_id in user metadata
       await updateCurrentUser({ package_id: selectedPlanId });
-      
+
       // Get stripe price ID based on billing interval
-      const priceId = billingType === "annual" 
-        ? `price_annual_${selectedPlan.id}`  // This would be the actual Stripe price ID in production
-        : `price_monthly_${selectedPlan.id}`; // This would be the actual Stripe price ID in production
-        
+      const priceId =
+        billingType === "annual"
+          ? selectedPlan.priceIds.annual
+          : selectedPlan.priceIds.monthly;
+
       // Create a Stripe checkout session
-      const sessionUrl = await createCheckoutSession.mutateAsync({
-        priceId,
-        mode: "subscription"
+      const response = await createCheckoutSession.mutateAsync({
+        priceId: priceId || "",
+        mode: "subscription",
       });
-      
-      if (sessionUrl) {
+
+      if (response?.url) {
         // Redirect to Stripe Checkout
-        window.location.href = sessionUrl;
+        window.location.href = response.url;
       } else {
         throw new Error("Failed to create checkout session");
       }
     } catch (error: any) {
       console.error("Payment error:", error);
       toast.error("Payment setup failed", {
-        description: error.message || "Please try again later"
+        description: error.message || "Please try again later",
       });
       setIsLoading(false);
     }
@@ -136,9 +143,7 @@ export default function PaymentPageClient() {
         <div className="flex justify-between items-center mb-6">
           <div>
             <h2 className="text-xl font-semibold">{selectedPlan?.name} Plan</h2>
-            <p className="text-muted-foreground">
-              Up to {selectedPlan?.product_limit} Products
-            </p>
+            <p className="text-muted-foreground">{selectedPlan?.description}</p>
             <p className="text-sm text-muted-foreground">
               14 days free trial. Cancel anytime.
             </p>
@@ -152,7 +157,8 @@ export default function PaymentPageClient() {
         </div>
 
         <p className="text-muted-foreground mb-6">
-          Your first payment is due after the free trial ends on {formattedTrialEndDate}.
+          Your first payment is due after the free trial ends on{" "}
+          {formattedTrialEndDate}.
         </p>
 
         <div className="flex justify-between items-center mb-6">
