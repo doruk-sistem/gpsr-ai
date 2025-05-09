@@ -10,9 +10,9 @@ import { toast } from "sonner";
 import { notFound, useSearchParams } from "next/navigation";
 import { useUpdateCurrentUser } from "@/hooks/use-auth";
 import {
-  useActivePlan,
   useCreateCheckoutSession,
   useProducts,
+  useSubscription,
 } from "@/hooks/use-stripe";
 
 export default function PaymentPageClient() {
@@ -22,12 +22,12 @@ export default function PaymentPageClient() {
   const { mutateAsync: updateCurrentUser } = useUpdateCurrentUser();
   const createCheckoutSession = useCreateCheckoutSession();
   const { data: products } = useProducts();
-  const { data: activePlan } = useActivePlan();
+  const { data: subscription } = useSubscription();
 
   const selectedPlanId = searchParams.get("productId");
   const billingType = searchParams.get("billing") || "annual";
 
-  if (activePlan) {
+  if (subscription?.is_subscription_active) {
     notFound();
   }
 

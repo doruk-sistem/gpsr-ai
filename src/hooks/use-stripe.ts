@@ -51,11 +51,7 @@ export const useTrialStatus = () => {
 
 export const useCancelSubscription = () => {
   return useMutation({
-    mutationFn: ({
-      cancel_immediately = false,
-    }: {
-      cancel_immediately?: boolean;
-    } = {}) => stripeService.cancelSubscription({ cancel_immediately }),
+    mutationFn: stripeService.cancelSubscription,
   });
 };
 
