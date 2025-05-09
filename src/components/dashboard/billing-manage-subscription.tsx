@@ -119,7 +119,7 @@ export default function BillingManageSubscription() {
       });
 
       setCancelDialogOpen(false);
-      router.refresh();
+      window.location.reload();
     } catch (error) {
       toast.error("Failed to cancel subscription", {
         description: "Please try again or contact support.",

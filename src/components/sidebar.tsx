@@ -14,7 +14,6 @@ import {
   User,
   Shield,
 } from "lucide-react";
-import { TrialNotification } from "@/components/dashboard/trial-notification";
 import { useState } from "react";
 import { LogoutConfirmation } from "./logout-confirmation/logout-confirmation";
 
@@ -53,7 +52,6 @@ const routes = [
 
 export function Sidebar() {
   const pathname = usePathname();
-  const router = useRouter();
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
 
   return (
@@ -67,9 +65,6 @@ export function Sidebar() {
             </div>
           </div>
         </Link>
-
-        {/* Trial Notification Component */}
-        <TrialNotification />
 
         <div className="space-y-1">
           {routes.map((route) => (
