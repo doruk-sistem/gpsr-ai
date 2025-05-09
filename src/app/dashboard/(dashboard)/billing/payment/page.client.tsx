@@ -11,7 +11,7 @@ import { notFound, useSearchParams } from "next/navigation";
 import { useUpdateCurrentUser } from "@/hooks/use-auth";
 import {
   useCreateCheckoutSession,
-  useProducts,
+  useStripeProducts,
   useSubscription,
 } from "@/hooks/use-stripe";
 
@@ -21,7 +21,7 @@ export default function PaymentPageClient() {
 
   const { mutateAsync: updateCurrentUser } = useUpdateCurrentUser();
   const createCheckoutSession = useCreateCheckoutSession();
-  const { data: products } = useProducts();
+  const { data: products } = useStripeProducts();
   const { data: subscription } = useSubscription();
 
   const selectedPlanId = searchParams.get("productId");

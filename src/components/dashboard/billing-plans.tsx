@@ -13,7 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { useProducts } from "@/hooks/use-stripe";
+import { useStripeProducts } from "@/hooks/use-stripe";
 import { StripeProduct } from "@/lib/services/stripe-service/types";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -22,7 +22,7 @@ export default function BillingPlans() {
   const [isAnnual, setIsAnnual] = useState(true);
   const [selectedPlan, setSelectedPlan] = useState<StripeProduct | null>(null);
 
-  const { data: productsRaw, isLoading } = useProducts();
+  const { data: productsRaw, isLoading } = useStripeProducts();
   const router = useRouter();
 
   // Sort products by monthly price and remove any with missing prices

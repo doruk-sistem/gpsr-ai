@@ -55,7 +55,7 @@ export const useCancelSubscription = () => {
   });
 };
 
-export const useProducts = () => {
+export const useStripeProducts = () => {
   return useQuery({
     queryKey: ["products"],
     queryFn: () => stripeService.getProducts(),
