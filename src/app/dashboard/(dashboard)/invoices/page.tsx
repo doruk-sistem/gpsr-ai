@@ -28,13 +28,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  FileText,
-  Download,
-  RefreshCw,
-  AlertTriangle,
-  Receipt,
-} from "lucide-react";
+import { FileText, RefreshCw, AlertTriangle, Receipt } from "lucide-react";
 import { toast } from "sonner";
 
 export default function InvoicesPage() {
@@ -46,7 +40,7 @@ export default function InvoicesPage() {
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [currentPage, setCurrentPage] = useState(1);
-  const [sortBy, setSortBy] = useState("created_at");
+  const [sortBy, setSortBy] = useState("order_date");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
 
   // State for selected invoice (for details modal)
@@ -185,8 +179,8 @@ export default function InvoicesPage() {
                 </div>
                 <h3 className="text-lg font-medium">No Invoices Yet</h3>
                 <p className="text-muted-foreground mt-1 max-w-md mx-auto">
-                  You don't have any invoices yet. Once you make a purchase or
-                  subscribe to a plan, your invoices will appear here.
+                  You don&apos;t have any invoices yet. Once you make a purchase
+                  or subscribe to a plan, your invoices will appear here.
                 </p>
                 <Button
                   variant="outline"
@@ -311,8 +305,8 @@ export default function InvoicesPage() {
                 </div>
                 <h3 className="text-lg font-medium">No invoices found</h3>
                 <p className="text-muted-foreground mt-1 max-w-md mx-auto">
-                  You don't have any invoices that match your current filters.
-                  Try adjusting your search or filters.
+                  You don&apos;t have any invoices that match your current
+                  filters. Try adjusting your search or filters.
                 </p>
                 {(searchQuery ||
                   selectedStatus !== "all" ||

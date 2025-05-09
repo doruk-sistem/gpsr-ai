@@ -10,16 +10,26 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, Search, X, Download, FileText } from "lucide-react";
+import {
+  Calendar as CalendarIcon,
+  Search,
+  X,
+  Download,
+  FileText,
+} from "lucide-react";
 
 interface InvoiceFiltersProps {
   onSearch: (search: string) => void;
   onStatusChange: (status: string) => void;
   onDateRangeChange: (startDate?: Date, endDate?: Date) => void;
-  onExport: (format: 'csv' | 'pdf') => void;
+  onExport: (format: "csv" | "pdf") => void;
   isExporting?: boolean;
 }
 
@@ -43,7 +53,10 @@ export function InvoiceFilters({
     onSearch("");
   };
 
-  const handleDateRangeChange = (date: Date | undefined, type: "start" | "end") => {
+  const handleDateRangeChange = (
+    date: Date | undefined,
+    type: "start" | "end"
+  ) => {
     if (type === "start") {
       setStartDate(date);
       onDateRangeChange(date, endDate);
@@ -91,16 +104,19 @@ export function InvoiceFilters({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value="paid">Paid</SelectItem>
+              <SelectItem value="completed">Completed</SelectItem>
               <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="failed">Failed</SelectItem>
+              <SelectItem value="canceled">Canceled</SelectItem>
             </SelectContent>
           </Select>
 
           <div className="flex items-center">
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" className="w-full justify-start text-left font-normal">
+                <Button
+                  variant="outline"
+                  className="w-full justify-start text-left font-normal"
+                >
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {startDate ? format(startDate, "MMM dd, yyyy") : "Start Date"}
                 </Button>
@@ -120,7 +136,10 @@ export function InvoiceFilters({
           <div className="flex items-center">
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" className="w-full justify-start text-left font-normal">
+                <Button
+                  variant="outline"
+                  className="w-full justify-start text-left font-normal"
+                >
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {endDate ? format(endDate, "MMM dd, yyyy") : "End Date"}
                 </Button>
