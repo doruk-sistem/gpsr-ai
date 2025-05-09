@@ -14,11 +14,10 @@ import {
   User,
   Shield,
 } from "lucide-react";
-import { TrialNotification } from "@/components/dashboard/trial-notification";
 import { useState } from "react";
 import { LogoutConfirmation } from "./logout-confirmation/logout-confirmation";
 
-const routes = [
+const baseRoutes = [
   {
     label: "Dashboard",
     icon: LayoutDashboard,
@@ -39,6 +38,9 @@ const routes = [
     icon: UserCheck,
     href: "/dashboard/representative",
   },
+];
+
+const billingRoutes = [
   {
     label: "Billing Plan",
     icon: CreditCard,
@@ -53,7 +55,6 @@ const routes = [
 
 export function Sidebar() {
   const pathname = usePathname();
-  const router = useRouter();
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
 
   return (
@@ -68,11 +69,8 @@ export function Sidebar() {
           </div>
         </Link>
 
-        {/* Trial Notification Component */}
-        <TrialNotification />
-
         <div className="space-y-1">
-          {routes.map((route) => (
+          {baseRoutes.map((route) => (
             <Link
               key={route.href}
               href={route.href}
@@ -96,6 +94,38 @@ export function Sidebar() {
               </div>
             </Link>
           ))}
+        </div>
+
+        <div className="mt-6">
+          <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+            Subscription
+          </h3>
+          <div className="mt-2 space-y-1">
+            {billingRoutes.map((route) => (
+              <Link
+                key={route.href}
+                href={route.href}
+                className={cn(
+                  "text-sm group flex p-3 w-full justify-start font-medium cursor-pointer rounded-lg transition",
+                  pathname === route.href
+                    ? "bg-primary/10 text-primary dark:bg-primary/20"
+                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                )}
+              >
+                <div className="flex items-center flex-1">
+                  <route.icon
+                    className={cn(
+                      "h-5 w-5 mr-3",
+                      pathname === route.href
+                        ? "text-primary"
+                        : "text-gray-500 dark:text-gray-400"
+                    )}
+                  />
+                  {route.label}
+                </div>
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
       <hr className="my-4" />

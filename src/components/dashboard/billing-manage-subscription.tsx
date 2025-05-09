@@ -49,7 +49,6 @@ export default function BillingManageSubscription() {
   const { data: trialStatus } = useTrialStatus();
   const cancelSubscription = useCancelSubscription();
 
-  subscription?.subscription_status;
   if (isLoadingSubscription) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -111,7 +110,7 @@ export default function BillingManageSubscription() {
     try {
       setIsCancelling(true);
       await cancelSubscription.mutateAsync({
-        cancel_immediately: true,
+        cancel_immediately: false,
       });
 
       toast.success("Subscription cancelled", {
@@ -120,7 +119,7 @@ export default function BillingManageSubscription() {
       });
 
       setCancelDialogOpen(false);
-      router.refresh();
+      window.location.reload();
     } catch (error) {
       toast.error("Failed to cancel subscription", {
         description: "Please try again or contact support.",
@@ -288,25 +287,16 @@ export default function BillingManageSubscription() {
             </div>
           )}
         </CardContent>
-        <CardFooter className="flex-col sm:flex-row gap-3 border-t p-6">
-          <Button
-            variant="outline"
-            onClick={() => router.push("/dashboard/billing")}
-          >
-            Change Plan
-          </Button>
-
-          {!isCanceled && (
+        {!isCanceled && (
+          <CardFooter className="flex-col sm:flex-row gap-3 border-t p-6">
             <Button
               variant="destructive"
               onClick={() => setCancelDialogOpen(true)}
             >
               {trialStatus?.isTrialing ? "Cancel Trial" : "Cancel Subscription"}
             </Button>
-          )}
-
-          {isCanceled && <Button>Reactivate Subscription</Button>}
-        </CardFooter>
+          </CardFooter>
+        )}
       </Card>
 
       {/* Cancellation Dialog */}

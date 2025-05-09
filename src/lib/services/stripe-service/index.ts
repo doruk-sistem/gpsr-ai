@@ -88,7 +88,8 @@ class StripeService {
     const subscription = await this.getSubscription();
     const products = await this.getProducts();
 
-    if (!subscription?.price_id) return null;
+    if (!subscription?.price_id || !subscription.is_subscription_active)
+      return null;
 
     // Check both monthly and annual price IDs
     const plan = products.find(
