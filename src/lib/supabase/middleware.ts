@@ -112,7 +112,7 @@ export async function updateSession(request: NextRequest) {
     if (isProfileComplete) {
       const privatePaths = [
         "/dashboard/products",
-        "/dashboard/manufacturer",
+        "/dashboard/manufacturers",
         "/dashboard/representative",
       ];
 
