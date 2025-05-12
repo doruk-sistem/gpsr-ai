@@ -109,9 +109,9 @@ Deno.serve(async (req) => {
     let cancelledSubscription;
     const isInTrialPeriod = subscriptionData.status === "trialing";
 
-    // Handle cancellation based on whether it's a trial or not
-    if (cancel_immediately || isInTrialPeriod) {
-      // If in trial period or requested immediate cancellation, cancel immediately
+    // Handle cancellation
+    if (cancel_immediately) {
+      // If immediate cancellation is requested, cancel right away
       cancelledSubscription = await stripe.subscriptions.cancel(
         subscriptionData.subscription_id
       );
@@ -120,7 +120,7 @@ Deno.serve(async (req) => {
         `Subscription ${subscriptionData.subscription_id} cancelled immediately for customer ${customer.customer_id}`
       );
     } else {
-      // Otherwise, cancel at period end
+      // For trial periods or regular subscriptions, schedule cancellation at period end
       cancelledSubscription = await stripe.subscriptions.update(
         subscriptionData.subscription_id,
         { cancel_at_period_end: true }
@@ -132,10 +132,9 @@ Deno.serve(async (req) => {
     }
 
     // Update the subscription in the database
-    const updateData =
-      isInTrialPeriod || cancel_immediately
-        ? { status: "canceled" }
-        : { cancel_at_period_end: true };
+    const updateData = cancel_immediately
+      ? { status: "canceled" }
+      : { cancel_at_period_end: true };
 
     await supabase
       .from("stripe_subscriptions")
@@ -163,7 +162,7 @@ Deno.serve(async (req) => {
           email_type: emailType,
           metadata: {
             subscription_id: subscriptionData.subscription_id,
-            immediate_cancellation: cancel_immediately || isInTrialPeriod,
+            immediate_cancellation: cancel_immediately,
           },
         });
       }
@@ -172,15 +171,14 @@ Deno.serve(async (req) => {
       // Continue processing even if email fails
     }
 
-    const responseMessage =
-      isInTrialPeriod || cancel_immediately
-        ? "Your subscription has been cancelled"
-        : "Your subscription has been scheduled for cancellation at the end of the billing period";
+    const responseMessage = cancel_immediately
+      ? "Your subscription has been cancelled"
+      : "Your subscription has been scheduled for cancellation at the end of the billing period";
 
     return corsResponse({
       success: true,
       message: responseMessage,
-      is_immediate: isInTrialPeriod || cancel_immediately,
+      is_immediate: cancel_immediately,
     });
   } catch (error: any) {
     console.error(`Cancel subscription error: ${error.message}`);
