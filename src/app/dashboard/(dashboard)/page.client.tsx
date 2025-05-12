@@ -34,6 +34,7 @@ import { useManufacturers } from "@/hooks/use-manufacturers";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import Spinner from "@/components/ui/spinner";
 
 export default function DashboardPageClient() {
   const router = useRouter();
@@ -45,7 +46,7 @@ export default function DashboardPageClient() {
   const { data: activePlan } = useActivePlan();
 
   // Check user subscription
-  const hasActiveSubscription = subscription?.is_subscription_active;
+  const hasActiveSubscription = subscription?.hasActiveSubscription;
   const productsCount = products?.length || 0;
   const manufacturersCount = manufacturers?.length || 0;
 
@@ -60,8 +61,16 @@ export default function DashboardPageClient() {
     router.push("/dashboard/products/new");
   };
 
-  // Abonelik yok ise abone ol ekranını göster
-  if (!isLoadingSubscription && !hasActiveSubscription) {
+  if (isLoadingSubscription) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
+
+  // if user has no active subscription, show the trial card
+  if (!hasActiveSubscription) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">

@@ -19,6 +19,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Pencil, Trash2, Factory, PlusCircle, AlertCircle } from "lucide-react";
 import Image from "next/image";
+import Spinner from "@/components/ui/spinner";
 
 export default function ManufacturersPage() {
   const router = useRouter();
@@ -38,7 +39,7 @@ export default function ManufacturersPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <Spinner size="lg" />
       </div>
     );
   }

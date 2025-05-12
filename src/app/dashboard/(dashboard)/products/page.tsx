@@ -11,16 +11,19 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Pencil, Trash2, Package, PlusCircle, AlertCircle } from "lucide-react";
 import Image from "next/image";
+import Spinner from "@/components/ui/spinner";
 
 export default function ProductsPage() {
   const router = useRouter();
-  const { data: products, isLoading } = useProducts();
+  const { data: productsData, isLoading } = useProducts();
   const deleteProduct = useDeleteProduct();
+
+  const products = productsData || [];
 
   const handleDelete = async (id: string) => {
     try {
@@ -35,7 +38,7 @@ export default function ProductsPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <Spinner size="lg" />
       </div>
     );
   }

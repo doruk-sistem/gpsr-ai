@@ -25,7 +25,7 @@ export default function BillingPage() {
     );
   }
 
-  return subscription?.is_subscription_active ? (
+  return subscription?.hasActiveSubscription ? (
     <BillingManageSubscription />
   ) : (
     <BillingPlans />
