@@ -242,7 +242,7 @@ Deno.serve(async (req) => {
             .insert({
               customer_id: customerId,
               status: "not_started",
-              is_trial_used: false, // Başlangıçta false olarak ayarla, gerçek abonelik webhook'da güncellenecek
+              is_trial_used: false,
             });
 
           if (createSubscriptionError) {

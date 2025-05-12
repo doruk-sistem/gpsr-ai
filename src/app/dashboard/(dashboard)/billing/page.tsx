@@ -5,6 +5,7 @@ import { useSubscription } from "@/hooks/use-stripe";
 
 import BillingManageSubscription from "@/components/dashboard/billing-manage-subscription";
 import BillingPlans from "@/components/dashboard/billing-plans";
+import Spinner from "@/components/ui/spinner";
 
 export default function BillingPage() {
   const { data: subscription, isLoading: isLoadingSubscription } =
@@ -13,19 +14,12 @@ export default function BillingPage() {
   if (isLoadingSubscription) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-pulse flex space-x-2 items-center">
-          <div className="h-3 w-3 bg-primary rounded-full"></div>
-          <div className="h-3 w-3 bg-primary rounded-full"></div>
-          <div className="h-3 w-3 bg-primary rounded-full"></div>
-          <span className="text-muted-foreground text-sm ml-2">
-            Loading data...
-          </span>
-        </div>
+        <Spinner size="lg" />
       </div>
     );
   }
 
-  return subscription?.is_subscription_active ? (
+  return subscription?.has_active_subscription ? (
     <BillingManageSubscription />
   ) : (
     <BillingPlans />

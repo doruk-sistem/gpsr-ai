@@ -17,6 +17,7 @@ import { useStripeProducts } from "@/hooks/use-stripe";
 import { StripeProduct } from "@/lib/services/stripe-service/types";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import Spinner from "../ui/spinner";
 
 export default function BillingPlans() {
   const [isAnnual, setIsAnnual] = useState(true);
@@ -32,12 +33,16 @@ export default function BillingPlans() {
     return [...productsRaw]
       .filter(
         (product) =>
-          (isAnnual && product.prices.annual !== null) ||
-          (!isAnnual && product.prices.monthly !== null)
+          (isAnnual && product?.prices?.annual !== null) ||
+          (!isAnnual && product?.prices?.monthly !== null)
       )
       .sort((a, b) => {
-        const priceA = isAnnual ? a.prices.annual || 0 : a.prices.monthly || 0;
-        const priceB = isAnnual ? b.prices.annual || 0 : b.prices.monthly || 0;
+        const priceA = isAnnual
+          ? a?.prices?.annual || 0
+          : a?.prices?.monthly || 0;
+        const priceB = isAnnual
+          ? b?.prices?.annual || 0
+          : b?.prices?.monthly || 0;
         return priceA - priceB;
       });
   }, [productsRaw, isAnnual]);
@@ -66,10 +71,10 @@ export default function BillingPlans() {
 
   // Calculate monthly savings when paying annually
   const calculateSavings = (product: StripeProduct) => {
-    if (!product.prices.annual || !product.prices.monthly) return null;
+    if (!product?.prices?.annual || !product?.prices?.monthly) return null;
 
-    const annualMonthly = product.prices.annual / 12;
-    const monthlyCost = product.prices.monthly;
+    const annualMonthly = product?.prices?.annual / 12;
+    const monthlyCost = product?.prices?.monthly;
 
     return Math.round((1 - annualMonthly / monthlyCost) * 100);
   };
@@ -81,12 +86,8 @@ export default function BillingPlans() {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-pulse flex space-x-2 items-center">
-          <div className="h-3 w-3 bg-primary rounded-full"></div>
-          <div className="h-3 w-3 bg-primary rounded-full"></div>
-          <div className="h-3 w-3 bg-primary rounded-full"></div>
-          <span className="text-muted-foreground text-sm ml-2">Loading...</span>
-        </div>
+        <Spinner />
+        <span className="text-muted-foreground text-sm ml-2">Loading...</span>
       </div>
     );
   }
