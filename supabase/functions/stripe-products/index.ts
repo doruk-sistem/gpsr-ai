@@ -132,12 +132,18 @@ Deno.serve(async (req) => {
           features.push(...additionalFeatures);
         }
 
+        // Get product limit from metadata
+        const productLimit = product.metadata?.product_limit
+          ? parseInt(product.metadata.product_limit, 10)
+          : 0;
+
         return {
           id: product.id,
           name: product.name,
           description: product.description || "",
           features: features,
           metadata: product.metadata || {},
+          product_limit: productLimit,
           prices: {
             monthly: monthlyPrice?.unit_amount
               ? monthlyPrice.unit_amount / 100

@@ -58,15 +58,8 @@ class StripeService {
         throw error;
       }
 
-      const hasActiveSubscription =
-        data?.subscription_status === "active" ||
-        data?.subscription_status === "trialing";
-
       console.log("Subscription data:", data ? "Found" : "Not found");
-      return {
-        ...data,
-        hasActiveSubscription,
-      };
+      return data;
     } catch (error) {
       console.error("Subscription fetch exception:", error);
       throw error;
@@ -88,7 +81,7 @@ class StripeService {
     const subscription = await this.getSubscription();
     const products = await this.getProducts();
 
-    if (!subscription?.price_id || !subscription.hasActiveSubscription)
+    if (!subscription?.price_id || !subscription.has_active_subscription)
       return null;
 
     // Check both monthly and annual price IDs

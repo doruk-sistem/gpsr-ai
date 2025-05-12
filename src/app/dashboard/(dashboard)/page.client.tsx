@@ -46,7 +46,7 @@ export default function DashboardPageClient() {
   const { data: activePlan } = useActivePlan();
 
   // Check user subscription
-  const hasActiveSubscription = subscription?.hasActiveSubscription;
+  const hasActiveSubscription = subscription?.has_active_subscription;
   const productsCount = products?.length || 0;
   const manufacturersCount = manufacturers?.length || 0;
 

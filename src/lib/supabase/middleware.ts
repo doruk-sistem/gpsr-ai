@@ -86,12 +86,12 @@ export async function updateSession(request: NextRequest) {
     // Missing profile info and not on complete-profile page
     console.log(`[Middleware] User metadata:`, user.user_metadata);
 
-    if (
-      (!user?.user_metadata?.first_name ||
-        !user?.user_metadata?.last_name ||
-        !user?.user_metadata?.company) &&
-      pathname !== "/dashboard/complete-profile"
-    ) {
+    const isProfileComplete =
+      user?.user_metadata?.first_name &&
+      user?.user_metadata?.last_name &&
+      user?.user_metadata?.company;
+
+    if (!isProfileComplete && pathname !== "/dashboard/complete-profile") {
       console.log(
         "[Middleware] User missing profile info, redirecting to complete profile page"
       );
@@ -100,12 +100,7 @@ export async function updateSession(request: NextRequest) {
     }
 
     // Profile complete but on complete-profile page
-    if (
-      user?.user_metadata?.first_name &&
-      user?.user_metadata?.last_name &&
-      user?.user_metadata?.company &&
-      pathname === "/dashboard/complete-profile"
-    ) {
+    if (isProfileComplete && pathname === "/dashboard/complete-profile") {
       console.log(
         "[Middleware] User profile already complete, redirecting to dashboard"
       );
@@ -114,20 +109,30 @@ export async function updateSession(request: NextRequest) {
     }
 
     // Check for paid plan requirement on certain paths - but only after profile is complete
-    if (
-      user?.user_metadata?.first_name &&
-      user?.user_metadata?.last_name &&
-      user?.user_metadata?.company
-    ) {
+    if (isProfileComplete) {
       const privatePaths = [
         "/dashboard/products",
         "/dashboard/manufacturer",
         "/dashboard/representative",
       ];
 
-      if (!user?.user_metadata?.package_id && privatePaths.includes(pathname)) {
+      const { data: subscription, error } = await supabase
+        .from("stripe_user_subscriptions")
+        .select("*")
+        .maybeSingle();
+
+      console.log("[Middleware] Subscription:", subscription);
+
+      if (error) {
+        console.error("[Middleware] Error fetching subscription:", error);
+        throw error;
+      }
+
+      const hasActiveSubscription = subscription?.has_active_subscription;
+
+      if (!hasActiveSubscription && privatePaths.includes(pathname)) {
         console.log(
-          "[Middleware] User without package_id trying to access restricted area, redirecting to billing"
+          "[Middleware] User without active subscription trying to access restricted area, redirecting to billing"
         );
         url.pathname = "/dashboard/billing";
         return NextResponse.redirect(url);

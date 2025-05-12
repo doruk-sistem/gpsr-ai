@@ -76,5 +76,6 @@ export interface Subscription {
   trial_end: number;
   is_trial_used: boolean;
   is_in_trial: boolean;
-  hasActiveSubscription: boolean;
+  has_active_subscription: boolean;
+  product_limit: number;
 }

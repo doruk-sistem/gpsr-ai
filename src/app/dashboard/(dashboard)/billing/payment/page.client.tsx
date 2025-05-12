@@ -27,7 +27,7 @@ export default function PaymentPageClient() {
   const selectedPlanId = searchParams.get("productId");
   const billingType = searchParams.get("billing") || "annual";
 
-  if (subscription?.hasActiveSubscription) {
+  if (subscription?.has_active_subscription) {
     notFound();
   }
 

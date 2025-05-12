@@ -412,7 +412,7 @@ async function syncCustomerFromStripe(customerId: string) {
       customer: customerId,
       limit: 1,
       status: "all",
-      expand: ["data.default_payment_method"],
+      expand: ["data.default_payment_method", "data.items.data.price.product"],
     });
 
     if (subscriptions.data.length === 0) {
@@ -423,6 +423,7 @@ async function syncCustomerFromStripe(customerId: string) {
           {
             customer_id: customerId,
             status: "not_started",
+            product_limit: 0, // Set default limit to 0 for no subscription
           },
           {
             onConflict: "customer_id",
@@ -439,6 +440,13 @@ async function syncCustomerFromStripe(customerId: string) {
 
     // assumes that a customer can only have a single subscription
     const subscription = subscriptions.data[0];
+    const price = subscription.items.data[0].price;
+    const product = price.product as Stripe.Product;
+
+    // Get product limit from metadata
+    const productLimit = product.metadata?.product_limit
+      ? parseInt(product.metadata.product_limit, 10)
+      : 0;
 
     // store subscription state
     const { error: subError } = await supabase
@@ -447,12 +455,13 @@ async function syncCustomerFromStripe(customerId: string) {
         {
           customer_id: customerId,
           subscription_id: subscription.id,
-          price_id: subscription.items.data[0].price.id,
+          price_id: price.id,
           current_period_start: subscription.current_period_start,
           current_period_end: subscription.current_period_end,
           cancel_at_period_end: subscription.cancel_at_period_end,
           trial_start: subscription.trial_start,
           trial_end: subscription.trial_end,
+          product_limit: productLimit,
           ...(subscription.default_payment_method &&
           typeof subscription.default_payment_method !== "string"
             ? {
@@ -474,7 +483,7 @@ async function syncCustomerFromStripe(customerId: string) {
       throw new Error("Failed to sync subscription in database");
     }
     console.info(
-      `Successfully synced subscription for customer: ${customerId}`
+      `Successfully synced subscription for customer: ${customerId} with product limit: ${productLimit}`
     );
   } catch (error) {
     console.error(
