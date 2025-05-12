@@ -32,12 +32,16 @@ export default function BillingPlans() {
     return [...productsRaw]
       .filter(
         (product) =>
-          (isAnnual && product.prices.annual !== null) ||
-          (!isAnnual && product.prices.monthly !== null)
+          (isAnnual && product?.prices?.annual !== null) ||
+          (!isAnnual && product?.prices?.monthly !== null)
       )
       .sort((a, b) => {
-        const priceA = isAnnual ? a.prices.annual || 0 : a.prices.monthly || 0;
-        const priceB = isAnnual ? b.prices.annual || 0 : b.prices.monthly || 0;
+        const priceA = isAnnual
+          ? a?.prices?.annual || 0
+          : a?.prices?.monthly || 0;
+        const priceB = isAnnual
+          ? b?.prices?.annual || 0
+          : b?.prices?.monthly || 0;
         return priceA - priceB;
       });
   }, [productsRaw, isAnnual]);
@@ -66,10 +70,10 @@ export default function BillingPlans() {
 
   // Calculate monthly savings when paying annually
   const calculateSavings = (product: StripeProduct) => {
-    if (!product.prices.annual || !product.prices.monthly) return null;
+    if (!product?.prices?.annual || !product?.prices?.monthly) return null;
 
-    const annualMonthly = product.prices.annual / 12;
-    const monthlyCost = product.prices.monthly;
+    const annualMonthly = product?.prices?.annual / 12;
+    const monthlyCost = product?.prices?.monthly;
 
     return Math.round((1 - annualMonthly / monthlyCost) * 100);
   };
