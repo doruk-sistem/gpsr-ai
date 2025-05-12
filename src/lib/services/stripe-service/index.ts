@@ -79,7 +79,7 @@ class StripeService {
 
   public async getActivePlan() {
     const subscription = await this.getSubscription();
-    const products = await this.getProducts();
+    const products = await this.getStripeProducts();
 
     if (!subscription?.price_id || !subscription.has_active_subscription)
       return null;
@@ -173,7 +173,7 @@ class StripeService {
     }
   }
 
-  public async getProducts(): Promise<StripeProductsResponse> {
+  public async getStripeProducts(): Promise<StripeProductsResponse> {
     try {
       console.log("Fetching Stripe products");
       const { data, error } = await supabase.functions.invoke(

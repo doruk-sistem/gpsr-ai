@@ -14,16 +14,40 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Pencil, Trash2, Package, PlusCircle, AlertCircle } from "lucide-react";
+import {
+  Pencil,
+  Trash2,
+  Package,
+  PlusCircle,
+  AlertCircle,
+  Lock,
+} from "lucide-react";
 import Image from "next/image";
 import Spinner from "@/components/ui/spinner";
+import { useActivePlan } from "@/hooks/use-stripe";
+import { Progress } from "@/components/ui/progress";
 
 export default function ProductsPage() {
   const router = useRouter();
   const { data: productsData, isLoading } = useProducts();
   const deleteProduct = useDeleteProduct();
+  const { data: activePlan } = useActivePlan();
 
   const products = productsData || [];
+  const productLimit = activePlan?.product_limit || 0;
+  const currentProductCount = products.length;
+  const isLimitReached = currentProductCount >= productLimit;
+
+  const handleAddProduct = () => {
+    if (isLimitReached) {
+      toast.error(
+        "You have reached your product limit. Please upgrade your plan to add more products."
+      );
+      router.push("/dashboard/billing");
+      return;
+    }
+    router.push("/dashboard/products/add");
+  };
 
   const handleDelete = async (id: string) => {
     try {
@@ -58,13 +82,49 @@ export default function ProductsPage() {
           </div>
         </div>
         <Button
-          onClick={() => router.push("/dashboard/products/add")}
+          onClick={handleAddProduct}
           className="flex items-center gap-2"
+          disabled={isLimitReached}
         >
-          <PlusCircle className="h-4 w-4" />
-          Add New Product
+          {isLimitReached ? (
+            <>
+              <Lock className="h-4 w-4" />
+              Upgrade Plan
+            </>
+          ) : (
+            <>
+              <PlusCircle className="h-4 w-4" />
+              Add New Product
+            </>
+          )}
         </Button>
       </div>
+
+      {/* Product Limit Progress Bar */}
+      <Card>
+        <CardContent className="p-6">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">
+                Product Limit: {currentProductCount} / {productLimit}
+              </span>
+              {isLimitReached && (
+                <Button
+                  variant="link"
+                  className="text-primary p-0 h-auto"
+                  onClick={() => router.push("/dashboard/billing")}
+                >
+                  Upgrade Plan
+                </Button>
+              )}
+            </div>
+            <Progress
+              value={(currentProductCount / productLimit) * 100}
+              className={isLimitReached ? "bg-red-100" : ""}
+            />
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardContent className="p-6">
@@ -80,12 +140,22 @@ export default function ProductsPage() {
                 Get started by adding your first product
               </p>
               <Button
-                onClick={() => router.push("/dashboard/products/add")}
+                onClick={handleAddProduct}
                 variant="outline"
                 className="flex items-center gap-2"
+                disabled={isLimitReached}
               >
-                <PlusCircle className="h-4 w-4" />
-                Add Your First Product
+                {isLimitReached ? (
+                  <>
+                    <Lock className="h-4 w-4" />
+                    Upgrade Plan
+                  </>
+                ) : (
+                  <>
+                    <PlusCircle className="h-4 w-4" />
+                    Add Your First Product
+                  </>
+                )}
               </Button>
             </div>
           ) : (

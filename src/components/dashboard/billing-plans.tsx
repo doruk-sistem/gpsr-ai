@@ -17,6 +17,7 @@ import { useStripeProducts } from "@/hooks/use-stripe";
 import { StripeProduct } from "@/lib/services/stripe-service/types";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import Spinner from "../ui/spinner";
 
 export default function BillingPlans() {
   const [isAnnual, setIsAnnual] = useState(true);
@@ -85,12 +86,8 @@ export default function BillingPlans() {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-pulse flex space-x-2 items-center">
-          <div className="h-3 w-3 bg-primary rounded-full"></div>
-          <div className="h-3 w-3 bg-primary rounded-full"></div>
-          <div className="h-3 w-3 bg-primary rounded-full"></div>
-          <span className="text-muted-foreground text-sm ml-2">Loading...</span>
-        </div>
+        <Spinner />
+        <span className="text-muted-foreground text-sm ml-2">Loading...</span>
       </div>
     );
   }

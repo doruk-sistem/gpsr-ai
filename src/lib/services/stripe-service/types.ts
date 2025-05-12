@@ -3,15 +3,18 @@ export interface StripeProduct {
   name: string;
   description: string;
   features: string[];
-  metadata: Record<string, string>;
+  metadata: {
+    product_limit: string;
+  };
+  product_limit: number;
   prices: {
-    monthly: number | null;
-    annual: number | null;
-    monthlyWithAnnualDiscount: number | null; // Calculated monthly equivalent of annual price
+    monthly: number;
+    annual: number;
+    monthlyWithAnnualDiscount: number; // Calculated monthly equivalent of annual price
   };
   priceIds: {
-    monthly: string | null;
-    annual: string | null;
+    monthly: string;
+    annual: string;
   };
   images: string[];
   created: number;
@@ -77,5 +80,4 @@ export interface Subscription {
   is_trial_used: boolean;
   is_in_trial: boolean;
   has_active_subscription: boolean;
-  product_limit: number;
 }

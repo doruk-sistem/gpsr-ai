@@ -37,6 +37,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import Spinner from "../ui/spinner";
 
 export default function BillingManageSubscription() {
   const router = useRouter();
@@ -52,14 +53,10 @@ export default function BillingManageSubscription() {
   if (isLoadingSubscription) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-pulse flex space-x-2 items-center">
-          <div className="h-3 w-3 bg-primary rounded-full"></div>
-          <div className="h-3 w-3 bg-primary rounded-full"></div>
-          <div className="h-3 w-3 bg-primary rounded-full"></div>
-          <span className="text-muted-foreground text-sm ml-2">
-            Loading subscription data...
-          </span>
-        </div>
+        <Spinner />
+        <span className="text-muted-foreground text-sm ml-4">
+          Loading subscription data...
+        </span>
       </div>
     );
   }
