@@ -32,6 +32,15 @@ class ProductsService {
     return data as Product[];
   }
 
+  public async getProductsCount() {
+    const { count, error } = await supabase
+      .from("products")
+      .select("*", { count: "exact", head: true });
+
+    if (error) throw error;
+    return count;
+  }
+
   public async getProductById(id: string) {
     const { data, error } = await supabase
       .from("products")

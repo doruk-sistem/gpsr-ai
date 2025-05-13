@@ -10,6 +10,13 @@ export const useProducts = () => {
   });
 };
 
+export const useProductsCount = () => {
+  return useQuery({
+    queryKey: ["products-count"],
+    queryFn: () => productsService.getProductsCount(),
+  });
+};
+
 export const useProduct = (id: string) => {
   return useQuery({
     queryKey: ["product", id],
@@ -24,15 +31,18 @@ export const useCreateProduct = () => {
   return useMutation({
     mutationFn: (data: Omit<Product, "id" | "created_at" | "updated_at">) =>
       productsService.createProduct(data),
-    onSuccess: () => {
+    onSuccess: (newProduct) => {
       queryClient.invalidateQueries({
         queryKey: ["products"],
         refetchType: "all",
       });
-      queryClient.refetchQueries({
-        queryKey: ["products"],
-        type: "active",
-      });
+
+      if (newProduct && newProduct.id) {
+        queryClient.invalidateQueries({
+          queryKey: ["product", newProduct.id],
+          refetchType: "all",
+        });
+      }
     },
   });
 };
@@ -43,14 +53,14 @@ export const useUpdateProduct = () => {
   return useMutation({
     mutationFn: ({ id, product }: { id: string; product: Partial<Product> }) =>
       productsService.updateProduct(id, product),
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
         queryKey: ["products"],
         refetchType: "all",
       });
-      queryClient.refetchQueries({
-        queryKey: ["products"],
-        type: "active",
+      queryClient.invalidateQueries({
+        queryKey: ["product", variables.id],
+        refetchType: "all",
       });
     },
   });
@@ -60,8 +70,13 @@ export const useDeleteProduct = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => productsService.deleteProduct(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["products"] });
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({
+        queryKey: ["products"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["product", id],
+      });
     },
   });
 };
