@@ -70,7 +70,7 @@ export default function EditManufacturerPage() {
     }
   };
 
-  if (!isLoading) {
+  if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
         <Spinner size="lg" />

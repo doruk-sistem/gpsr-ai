@@ -27,15 +27,18 @@ export const useCreateManufacturer = () => {
     mutationFn: (
       data: Omit<Manufacturer, "id" | "created_at" | "updated_at">
     ) => manufacturersService.createManufacturer(data),
-    onSuccess: () => {
+    onSuccess: (newManufacturer) => {
       queryClient.invalidateQueries({
         queryKey: ["manufacturers"],
         refetchType: "all",
       });
-      queryClient.refetchQueries({
-        queryKey: ["manufacturers"],
-        type: "active",
-      });
+
+      if (newManufacturer && newManufacturer.id) {
+        queryClient.invalidateQueries({
+          queryKey: ["manufacturer", newManufacturer.id],
+          refetchType: "all",
+        });
+      }
     },
   });
 };
@@ -51,14 +54,14 @@ export const useUpdateManufacturer = () => {
       id: string;
       manufacturer: Partial<Manufacturer>;
     }) => manufacturersService.updateManufacturer(id, manufacturer),
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
         queryKey: ["manufacturers"],
         refetchType: "all",
       });
-      queryClient.refetchQueries({
-        queryKey: ["manufacturers"],
-        type: "active",
+      queryClient.invalidateQueries({
+        queryKey: ["manufacturer", variables.id],
+        refetchType: "all",
       });
     },
   });
@@ -68,8 +71,15 @@ export const useDeleteManufacturer = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => manufacturersService.deleteManufacturer(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["manufacturers"] });
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({
+        queryKey: ["manufacturers"],
+        refetchType: "all",
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["manufacturer", id],
+        refetchType: "all",
+      });
     },
   });
 };
