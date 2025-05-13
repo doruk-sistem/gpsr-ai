@@ -58,15 +58,8 @@ class StripeService {
         throw error;
       }
 
-      const isSubscriptionActive =
-        data?.subscription_status === "active" ||
-        data?.subscription_status === "trialing";
-
       console.log("Subscription data:", data ? "Found" : "Not found");
-      return {
-        ...data,
-        is_subscription_active: isSubscriptionActive,
-      };
+      return data;
     } catch (error) {
       console.error("Subscription fetch exception:", error);
       throw error;
@@ -86,9 +79,9 @@ class StripeService {
 
   public async getActivePlan() {
     const subscription = await this.getSubscription();
-    const products = await this.getProducts();
+    const products = await this.getStripeProducts();
 
-    if (!subscription?.price_id || !subscription.is_subscription_active)
+    if (!subscription?.price_id || !subscription.has_active_subscription)
       return null;
 
     // Check both monthly and annual price IDs
@@ -180,7 +173,7 @@ class StripeService {
     }
   }
 
-  public async getProducts(): Promise<StripeProductsResponse> {
+  public async getStripeProducts(): Promise<StripeProductsResponse> {
     try {
       console.log("Fetching Stripe products");
       const { data, error } = await supabase.functions.invoke(

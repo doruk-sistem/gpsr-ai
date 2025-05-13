@@ -23,19 +23,9 @@ import { useCurrentUser, useUpdateCurrentUser } from "@/hooks/use-auth";
 import { useUpdatePassword } from "@/hooks/use-update-password";
 import { useDeleteAccount } from "@/hooks/use-delete-account";
 import { toast } from "sonner";
-import {
-  Loader2,
-  User,
-  Mail,
-  Phone,
-  Lock,
-  AlertTriangle,
-  ChevronLeft,
-  Save,
-  Shield,
-} from "lucide-react";
+import { Loader2, User, Mail, Phone, Lock, AlertTriangle } from "lucide-react";
 import { CountryDropdown } from "@/components/ui/country-dropdown";
-import { useRouter } from "next/navigation";
+import Spinner from "@/components/ui/spinner";
 
 const profileSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
@@ -63,10 +53,9 @@ type ProfileFormData = z.infer<typeof profileSchema>;
 type PasswordFormData = z.infer<typeof passwordSchema>;
 
 export default function ProfilePage() {
-  const router = useRouter();
-  const { data: user } = useCurrentUser();
+  const { data: user, isLoading: isUserLoading } = useCurrentUser();
   const updateCurrentUser = useUpdateCurrentUser();
-  const { updatePassword, isUpdating } = useUpdatePassword();
+  const { updatePassword } = useUpdatePassword();
   const { deleteAccount, isDeleting } = useDeleteAccount();
   const [isLoading, setIsLoading] = useState(false);
   const [isPasswordLoading, setIsPasswordLoading] = useState(false);
@@ -96,6 +85,14 @@ export default function ProfilePage() {
   const passwordForm = useForm<PasswordFormData>({
     resolver: zodResolver(passwordSchema),
   });
+
+  if (isUserLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
 
   const onProfileSubmit = async (data: ProfileFormData) => {
     setIsLoading(true);
