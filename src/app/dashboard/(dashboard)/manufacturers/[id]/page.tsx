@@ -10,6 +10,7 @@ import {
 import { toast } from "sonner";
 import storageService from "@/lib/services/storage-service";
 import { useCurrentUser } from "@/hooks/use-auth";
+import Spinner from "@/components/ui/spinner";
 
 export default function EditManufacturerPage() {
   const router = useRouter();
@@ -69,8 +70,12 @@ export default function EditManufacturerPage() {
     }
   };
 
-  if (isLoading) {
-    return <div>Loading...</div>;
+  if (!isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Spinner size="lg" />
+      </div>
+    );
   }
 
   if (!manufacturer) {

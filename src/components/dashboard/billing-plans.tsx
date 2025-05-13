@@ -86,8 +86,7 @@ export default function BillingPlans() {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <Spinner />
-        <span className="text-muted-foreground text-sm ml-2">Loading...</span>
+        <Spinner size="lg" />
       </div>
     );
   }
