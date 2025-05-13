@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
+import { ImageUploadField } from "@/components/ui/image-upload-field";
 import {
   Building2,
   Mail,
@@ -13,13 +13,12 @@ import {
   MapPin,
   User,
   Briefcase,
-  Image as ImageIcon,
-  PenTool,
   Save,
   Factory,
 } from "lucide-react";
 
 import { Country, CountryDropdown } from "../ui/country-dropdown";
+import { base64ToFile } from "@/lib/utils/base64ToFile";
 
 interface ManufacturerFormProps {
   initialData?: {
@@ -41,34 +40,22 @@ export default function ManufacturerForm({
   initialData,
   onSubmit,
 }: ManufacturerFormProps) {
-  const [logoPreview, setLogoPreview] = useState<string>(
-    initialData?.logo_image_url || ""
-  );
-  const [signaturePreview, setSignaturePreview] = useState<string>(
-    initialData?.signature_image_url || ""
-  );
+  const [logoPreview, setLogoPreview] = useState<string>("");
+  const [signaturePreview, setSignaturePreview] = useState<string>("");
   const [country, setCountry] = useState<string>(initialData?.country || "");
 
-  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setLogoPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
+  const handleLogoChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    imageDataUrl: string
+  ) => {
+    setLogoPreview(imageDataUrl);
   };
 
-  const handleSignatureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setSignaturePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
+  const handleSignatureChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    imageDataUrl: string
+  ) => {
+    setSignaturePreview(imageDataUrl);
   };
 
   const handleCountryChange = (country: Country) => {
@@ -78,6 +65,17 @@ export default function ManufacturerForm({
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
+
+    if (logoPreview) {
+      formData.set("logo", base64ToFile(logoPreview, "logo.png", "image/png"));
+    }
+
+    if (signaturePreview) {
+      formData.set(
+        "signature",
+        base64ToFile(signaturePreview, "signature.png", "image/png")
+      );
+    }
 
     formData.append("country", country);
 
@@ -119,50 +117,11 @@ export default function ManufacturerForm({
                   <label className="block text-sm font-medium text-gray-700">
                     Company Logo
                   </label>
-                  <div className="flex flex-col items-center justify-center h-[260px] px-6 py-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-gray-400 transition-colors bg-white">
-                    {logoPreview ? (
-                      <div className="relative w-full h-full group">
-                        <Image
-                          src={logoPreview}
-                          alt="Logo preview"
-                          fill
-                          className="object-contain rounded-lg"
-                        />
-                        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                          <label className="cursor-pointer rounded-md px-4 py-2 font-medium text-white">
-                            <span>Change Logo</span>
-                            <Input
-                              type="file"
-                              name="logo"
-                              className="sr-only"
-                              accept="image/jpeg,image/png,image/jpg"
-                              onChange={handleLogoChange}
-                            />
-                          </label>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="space-y-2 text-center">
-                        <ImageIcon className="mx-auto h-16 w-16 text-gray-400" />
-                        <div className="flex text-sm text-gray-600">
-                          <label className="relative cursor-pointer bg-white rounded-md font-medium text-primary hover:text-primary/90">
-                            <span>Upload a file</span>
-                            <Input
-                              type="file"
-                              name="logo"
-                              className="sr-only"
-                              accept="image/jpeg,image/png,image/jpg"
-                              onChange={handleLogoChange}
-                            />
-                          </label>
-                          <p className="pl-1">or drag and drop</p>
-                        </div>
-                        <p className="text-xs text-gray-500">
-                          PNG, JPG - up to 2MB
-                        </p>
-                      </div>
-                    )}
-                  </div>
+                  <ImageUploadField
+                    imagePreview={logoPreview || initialData?.logo_image_url}
+                    onImageChange={handleLogoChange}
+                    altText="Company logo"
+                  />
                 </div>
 
                 <div>
@@ -315,50 +274,13 @@ export default function ManufacturerForm({
                           (Will appear on Declaration of Conformity)
                         </span>
                       </label>
-                      <div className="flex flex-col items-center justify-center h-[260px] px-6 py-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-gray-400 transition-colors bg-white">
-                        {signaturePreview ? (
-                          <div className="relative w-full h-full group">
-                            <Image
-                              src={signaturePreview}
-                              alt="Signature preview"
-                              fill
-                              className="object-contain rounded-lg"
-                            />
-                            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                              <label className="cursor-pointer rounded-md px-4 py-2 font-medium text-white">
-                                <span>Change Signature</span>
-                                <Input
-                                  type="file"
-                                  name="signature"
-                                  className="sr-only"
-                                  accept="image/jpeg,image/png,image/jpg"
-                                  onChange={handleSignatureChange}
-                                />
-                              </label>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="space-y-2 text-center">
-                            <PenTool className="mx-auto h-16 w-16 text-gray-400" />
-                            <div className="flex text-sm text-gray-600">
-                              <label className="relative cursor-pointer bg-white rounded-md font-medium text-primary hover:text-primary/90">
-                                <span>Upload a file</span>
-                                <Input
-                                  type="file"
-                                  name="signature"
-                                  className="sr-only"
-                                  accept="image/jpeg,image/png,image/jpg"
-                                  onChange={handleSignatureChange}
-                                />
-                              </label>
-                              <p className="pl-1">or drag and drop</p>
-                            </div>
-                            <p className="text-xs text-gray-500">
-                              PNG, JPG - up to 2MB
-                            </p>
-                          </div>
-                        )}
-                      </div>
+                      <ImageUploadField
+                        imagePreview={
+                          signaturePreview || initialData?.signature_image_url
+                        }
+                        onImageChange={handleSignatureChange}
+                        altText="Signature image"
+                      />
                     </div>
                   </div>
                 </div>

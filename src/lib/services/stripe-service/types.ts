@@ -1,3 +1,5 @@
+import { type FormatSelectQuerySelectObject } from "@/lib/utils/from-select-query";
+
 export interface StripeProduct {
   id: string;
   name: string;
@@ -80,4 +82,8 @@ export interface Subscription {
   is_trial_used: boolean;
   is_in_trial: boolean;
   has_active_subscription: boolean;
+}
+
+export interface SubscriptionRequest {
+  select?: FormatSelectQuerySelectObject<keyof Subscription>;
 }

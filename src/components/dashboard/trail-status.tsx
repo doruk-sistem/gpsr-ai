@@ -12,7 +12,12 @@ import { useSubscription } from "@/hooks/use-stripe";
 
 export function TrialStatus() {
   const router = useRouter();
-  const { data: subscription } = useSubscription();
+  const { data: subscription } = useSubscription({
+    select: {
+      subscription_status: true,
+      current_period_end: true,
+    },
+  });
 
   // If no subscription exists or it's not in trial mode, return null
   if (!subscription || subscription.subscription_status !== "trialing") {

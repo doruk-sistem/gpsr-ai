@@ -1,7 +1,11 @@
 "use client";
 
 import React from "react";
-import { useProducts, useDeleteProduct } from "@/hooks/use-products";
+import {
+  useProducts,
+  useDeleteProduct,
+  useProductsCount,
+} from "@/hooks/use-products";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -29,13 +33,15 @@ import { Progress } from "@/components/ui/progress";
 
 export default function ProductsPage() {
   const router = useRouter();
-  const { data: productsData, isLoading } = useProducts();
   const deleteProduct = useDeleteProduct();
-  const { data: activePlan } = useActivePlan();
+  const { data: productsData, isLoading: isProductsLoading } = useProducts();
+  const { data: activePlan, isLoading: isActivePlanLoading } = useActivePlan();
+  const { data: productsCount, isLoading: isProductsCountLoading } =
+    useProductsCount();
 
   const products = productsData || [];
   const productLimit = activePlan?.product_limit || 0;
-  const currentProductCount = products.length;
+  const currentProductCount = productsCount || 0;
   const isLimitReached = currentProductCount >= productLimit;
 
   const handleAddProduct = () => {
@@ -59,7 +65,7 @@ export default function ProductsPage() {
     }
   };
 
-  if (isLoading) {
+  if (isProductsLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <Spinner size="lg" />
@@ -101,30 +107,36 @@ export default function ProductsPage() {
       </div>
 
       {/* Product Limit Progress Bar */}
-      <Card>
-        <CardContent className="p-6">
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">
-                Product Limit: {currentProductCount} / {productLimit}
-              </span>
-              {isLimitReached && (
-                <Button
-                  variant="link"
-                  className="text-primary p-0 h-auto"
-                  onClick={() => router.push("/dashboard/billing")}
-                >
-                  Upgrade Plan
-                </Button>
-              )}
+      {isProductsCountLoading || isActivePlanLoading ? (
+        <div className="flex items-center justify-center h-24">
+          <Spinner />
+        </div>
+      ) : (
+        <Card>
+          <CardContent className="p-6">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">
+                  Product Limit: {currentProductCount} / {productLimit}
+                </span>
+                {isLimitReached && (
+                  <Button
+                    variant="link"
+                    className="text-primary p-0 h-auto"
+                    onClick={() => router.push("/dashboard/billing")}
+                  >
+                    Upgrade Plan
+                  </Button>
+                )}
+              </div>
+              <Progress
+                value={(currentProductCount / productLimit) * 100}
+                className={isLimitReached ? "bg-red-100" : ""}
+              />
             </div>
-            <Progress
-              value={(currentProductCount / productLimit) * 100}
-              className={isLimitReached ? "bg-red-100" : ""}
-            />
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardContent className="p-6">

@@ -7,7 +7,9 @@ import {
   SubscriptionCancelResponse,
   Subscription,
   TrialStatus,
+  SubscriptionRequest,
 } from "./types";
+import { formatSelectQuery } from "@/lib/utils/from-select-query";
 
 class StripeService {
   public async createCheckoutSession(
@@ -45,12 +47,16 @@ class StripeService {
     }
   }
 
-  public async getSubscription(): Promise<Subscription | null> {
+  public async getSubscription({
+    select,
+  }: SubscriptionRequest = {}): Promise<Subscription | null> {
     try {
       console.log("Fetching subscription data");
+      const selectQuery = formatSelectQuery<keyof Subscription>(select);
+
       const { data, error } = await supabase
         .from("stripe_user_subscriptions")
-        .select("*")
+        .select(selectQuery)
         .maybeSingle();
 
       if (error) {
@@ -59,7 +65,7 @@ class StripeService {
       }
 
       console.log("Subscription data:", data ? "Found" : "Not found");
-      return data;
+      return data as Subscription | null;
     } catch (error) {
       console.error("Subscription fetch exception:", error);
       throw error;
@@ -78,7 +84,12 @@ class StripeService {
   }
 
   public async getActivePlan() {
-    const subscription = await this.getSubscription();
+    const subscription = await this.getSubscription({
+      select: {
+        price_id: true,
+        has_active_subscription: true,
+      },
+    });
     const products = await this.getStripeProducts();
 
     if (!subscription?.price_id || !subscription.has_active_subscription)
@@ -97,7 +108,14 @@ class StripeService {
   // Get trial status details with enhanced information
   public async getTrialStatus(): Promise<TrialStatus | null> {
     try {
-      const subscription = await this.getSubscription();
+      const subscription = await this.getSubscription({
+        select: {
+          subscription_status: true,
+          trial_start: true,
+          trial_end: true,
+          payment_method_last4: true,
+        },
+      });
 
       if (!subscription) {
         return null;
@@ -175,7 +193,6 @@ class StripeService {
 
   public async getStripeProducts(): Promise<StripeProductsResponse> {
     try {
-      console.log("Fetching Stripe products");
       const { data, error } = await supabase.functions.invoke(
         "stripe-products",
         {
@@ -193,12 +210,6 @@ class StripeService {
       console.error("Products fetch exception:", error);
       throw error;
     }
-  }
-
-  // Check if a user has a payment method attached
-  public async hasPaymentMethod(): Promise<boolean> {
-    const subscription = await this.getSubscription();
-    return !!subscription?.payment_method_last4;
   }
 }
 

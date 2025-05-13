@@ -1,15 +1,16 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Image from "next/image";
+import Link from "next/link";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
+import { ImageUploadField } from "@/components/ui/image-upload-field";
 import {
   Package,
   Tag,
-  ImageIcon,
   FileText,
   Layers,
   FileBadge,
@@ -18,7 +19,6 @@ import {
   Building,
   Check,
   ChevronsUpDown,
-  Search,
   Plus,
   Shield,
 } from "lucide-react";
@@ -40,8 +40,10 @@ import { Label } from "@/components/ui/label";
 import { Manufacturer } from "@/lib/services/manufacturers-service";
 import { PRODUCT_CATEGORY_OPTIONS } from "@/lib/data/product-category-options";
 import { cn } from "@/lib/utils/cn";
-import Link from "next/link";
+
 import { Checkbox } from "../ui/checkbox";
+import { toast } from "sonner";
+import { base64ToFile } from "@/lib/utils/base64ToFile";
 
 interface ProductFormProps {
   initialData?: {
@@ -70,9 +72,7 @@ export default function ProductForm({
   manufacturers,
   onSubmit,
 }: ProductFormProps) {
-  const [imagePreview, setImagePreview] = useState<string[]>(
-    initialData?.image_urls || []
-  );
+  const [imagePreview, setImagePreview] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>(
     initialData?.category || ""
   );
@@ -94,7 +94,6 @@ export default function ProductForm({
   const [openEUTempPopover, setOpenEUTempPopover] = useState(false);
   const [openUKTempPopover, setOpenUKTempPopover] = useState(false);
 
-  // Yeni state'ler ekliyorum
   const [directives, setDirectives] = useState<string[]>(
     initialData?.directives || []
   );
@@ -123,35 +122,51 @@ export default function ProductForm({
     setSelectedSubcategory("");
   }, [selectedCategory]);
 
-  const handleImageChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    index: number
-  ) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const newPreviews = [...imagePreview];
-        newPreviews[index] = reader.result as string;
-        setImagePreview(newPreviews);
-      };
-      reader.readAsDataURL(file);
-    }
+  const handleImageChange = (imageDataUrl: string, index: number) => {
+    const newPreviews = [...imagePreview];
+    newPreviews[index] = imageDataUrl;
+    setImagePreview(newPreviews);
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
 
+    if (imagePreview.length > 0) {
+      imagePreview.forEach((image) => {
+        formData.set("images", base64ToFile(image, "image.png", "image/png"));
+      });
+    }
+
     // Add the selected values from comboboxes
     if (selectedCategory) formData.set("category", selectedCategory);
+    else {
+      toast.error("Please select a category");
+      return;
+    }
+
     if (selectedSubcategory) formData.set("sub_category", selectedSubcategory);
+    else {
+      toast.error("Please select a subcategory");
+      return;
+    }
+
     if (selectedManufacturer)
       formData.set("manufacturer_id", selectedManufacturer);
+
     if (selectedEUTemp)
       formData.set("authorised_representative_in_eu", selectedEUTemp);
+    else {
+      toast.error("Please select a authorised representative in EU");
+      return;
+    }
+
     if (selectedUKTemp)
       formData.set("authorised_representative_in_uk", selectedUKTemp);
+    else {
+      toast.error("Please select a authorised representative in UK");
+      return;
+    }
 
     onSubmit(formData);
   };
@@ -479,53 +494,18 @@ export default function ProductForm({
                   </label>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {[0, 1].map((index) => (
-                      <div
+                      <ImageUploadField
                         key={index}
-                        className="flex flex-col items-center justify-center h-[260px] px-6 py-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-gray-400 transition-colors"
-                      >
-                        {imagePreview[index] ? (
-                          <div className="relative w-full h-full group">
-                            <Image
-                              src={imagePreview[index]}
-                              alt={`Product image ${index + 1}`}
-                              fill
-                              className="object-contain rounded-lg"
-                            />
-                            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                              <label className="cursor-pointer rounded-md px-4 py-2 font-medium text-white">
-                                <span>Change Image</span>
-                                <Input
-                                  type="file"
-                                  name="images"
-                                  className="sr-only"
-                                  accept="image/jpeg,image/png,image/jpg"
-                                  onChange={(e) => handleImageChange(e, index)}
-                                />
-                              </label>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="space-y-2 text-center">
-                            <ImageIcon className="mx-auto h-16 w-16 text-gray-400" />
-                            <div className="flex text-sm text-gray-600">
-                              <label className="relative cursor-pointer bg-white rounded-md font-medium text-primary hover:text-primary/90">
-                                <span>Upload a file</span>
-                                <Input
-                                  type="file"
-                                  name="images"
-                                  className="sr-only"
-                                  accept="image/jpeg,image/png,image/jpg"
-                                  onChange={(e) => handleImageChange(e, index)}
-                                />
-                              </label>
-                              <p className="pl-1">or drag and drop</p>
-                            </div>
-                            <p className="text-xs text-gray-500">
-                              PNG, JPG - max 2MB
-                            </p>
-                          </div>
-                        )}
-                      </div>
+                        imagePreview={
+                          imagePreview[index] ||
+                          (initialData?.image_urls || ["", ""])[index]
+                        }
+                        onImageChange={(e, imageDataUrl) =>
+                          handleImageChange(imageDataUrl, index)
+                        }
+                        altText={`Product image ${index + 1}`}
+                        name="image"
+                      />
                     ))}
                   </div>
                 </div>

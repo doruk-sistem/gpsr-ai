@@ -22,7 +22,11 @@ export default function PaymentPageClient() {
   const { mutateAsync: updateCurrentUser } = useUpdateCurrentUser();
   const createCheckoutSession = useCreateCheckoutSession();
   const { data: products } = useStripeProducts();
-  const { data: subscription } = useSubscription();
+  const { data: subscription } = useSubscription({
+    select: {
+      has_active_subscription: true,
+    },
+  });
 
   const selectedPlanId = searchParams.get("productId");
   const billingType = searchParams.get("billing") || "annual";

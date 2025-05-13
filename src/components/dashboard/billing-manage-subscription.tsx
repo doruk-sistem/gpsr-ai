@@ -45,7 +45,14 @@ export default function BillingManageSubscription() {
   const [isCancelling, setIsCancelling] = useState(false);
 
   const { data: subscription, isLoading: isLoadingSubscription } =
-    useSubscription();
+    useSubscription({
+      select: {
+        current_period_start: true,
+        current_period_end: true,
+        payment_method_last4: true,
+        payment_method_brand: true,
+      },
+    });
   const { data: activePlan } = useActivePlan();
   const { data: trialStatus } = useTrialStatus();
   const cancelSubscription = useCancelSubscription();
@@ -53,10 +60,7 @@ export default function BillingManageSubscription() {
   if (isLoadingSubscription) {
     return (
       <div className="flex justify-center items-center h-64">
-        <Spinner />
-        <span className="text-muted-foreground text-sm ml-4">
-          Loading subscription data...
-        </span>
+        <Spinner size="lg" />
       </div>
     );
   }
