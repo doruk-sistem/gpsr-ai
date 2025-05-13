@@ -23,6 +23,7 @@ export default function EditProductPage() {
       let imageUrls = product?.image_urls || [];
 
       const imageFiles = formData.getAll("images") as File[];
+
       for (let i = 0; i < imageFiles.length; i++) {
         const file = imageFiles[i];
         if (file && file.name !== "") {
