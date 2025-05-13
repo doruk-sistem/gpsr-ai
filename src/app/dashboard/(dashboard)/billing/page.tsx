@@ -9,7 +9,11 @@ import Spinner from "@/components/ui/spinner";
 
 export default function BillingPage() {
   const { data: subscription, isLoading: isLoadingSubscription } =
-    useSubscription();
+    useSubscription({
+      select: {
+        has_active_subscription: true,
+      },
+    });
 
   if (isLoadingSubscription) {
     return (

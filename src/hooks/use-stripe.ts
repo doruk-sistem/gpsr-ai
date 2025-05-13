@@ -3,12 +3,15 @@
 
 import { useQuery, useMutation } from "@tanstack/react-query";
 import stripeService from "@/lib/services/stripe-service";
-import { StripeCheckoutSessionRequest } from "@/lib/services/stripe-service/types";
+import {
+  StripeCheckoutSessionRequest,
+  SubscriptionRequest,
+} from "@/lib/services/stripe-service/types";
 
-export const useSubscription = () => {
+export const useSubscription = (params?: SubscriptionRequest) => {
   return useQuery({
-    queryKey: ["subscription"],
-    queryFn: () => stripeService.getSubscription(),
+    queryKey: ["subscription", params],
+    queryFn: () => stripeService.getSubscription(params),
   });
 };
 
@@ -59,12 +62,5 @@ export const useStripeProducts = () => {
   return useQuery({
     queryKey: ["stripe-products"],
     queryFn: () => stripeService.getStripeProducts(),
-  });
-};
-
-export const useHasPaymentMethod = () => {
-  return useQuery({
-    queryKey: ["has-payment-method"],
-    queryFn: () => stripeService.hasPaymentMethod(),
   });
 };

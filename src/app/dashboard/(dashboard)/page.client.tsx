@@ -18,7 +18,6 @@ import {
   Package,
   Settings,
   PlusCircle,
-  Bell,
   ChevronRight,
   Factory,
   CreditCard,
@@ -39,26 +38,25 @@ import Spinner from "@/components/ui/spinner";
 export default function DashboardPageClient() {
   const router = useRouter();
   const { data: subscription, isLoading: isLoadingSubscription } =
-    useSubscription();
+    useSubscription({
+      select: {
+        has_active_subscription: true,
+        is_in_trial: true,
+        current_period_end: true,
+      },
+    });
   const { data: products, isLoading: isLoadingProducts } = useProducts();
   const { data: manufacturers, isLoading: isLoadingManufacturers } =
     useManufacturers();
-  const { data: activePlan } = useActivePlan();
+  const { data: activePlan, isLoading: isLoadingActivePlan } = useActivePlan();
 
   // Check user subscription
   const hasActiveSubscription = subscription?.has_active_subscription;
   const productsCount = products?.length || 0;
   const manufacturersCount = manufacturers?.length || 0;
 
-  useEffect(() => {
-    // Welcome toast when dashboard first loads
-    toast.success("Welcome to DorukWell", {
-      description: "Your account has been created successfully",
-    });
-  }, []);
-
   const handleAddProduct = () => {
-    router.push("/dashboard/products/new");
+    router.push("/dashboard/products/add");
   };
 
   if (isLoadingSubscription) {
@@ -251,10 +249,6 @@ export default function DashboardPageClient() {
           <p className="text-muted-foreground mt-1">Your GPSR compliance hub</p>
         </div>
         <div className="mt-4 md:mt-0 flex gap-3">
-          <Button variant="outline" className="flex items-center gap-2">
-            <Bell className="h-4 w-4" />
-            <span>Notifications</span>
-          </Button>
           <Button
             className="flex items-center gap-2"
             onClick={handleAddProduct}
@@ -343,7 +337,13 @@ export default function DashboardPageClient() {
             ) : (
               <>
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-lg font-bold">{activePlan?.name}</span>
+                  {isLoadingActivePlan ? (
+                    <Spinner size="sm" />
+                  ) : (
+                    <span className="text-lg font-bold">
+                      {activePlan?.name}
+                    </span>
+                  )}
                   <Badge
                     variant={subscription?.is_in_trial ? "outline" : "default"}
                     className={
