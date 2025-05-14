@@ -14,6 +14,7 @@ export interface Manufacturer {
   signature_image_url: string;
   created_at: string;
   updated_at: string;
+  user_id: string;
 }
 
 class ManufacturersService {
@@ -65,6 +66,7 @@ class ManufacturersService {
         ...manufacturer,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
+        user_id: (await supabase.auth.getUser()).data.user?.id,
       })
       .select()
       .single();
