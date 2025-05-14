@@ -10,6 +10,7 @@ import {
   Clock,
   AlertTriangle,
   AlertCircle,
+  ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,6 +26,7 @@ import {
   useActivePlan,
   useCancelSubscription,
   useTrialStatus,
+  useCreateCustomerPortalSession,
 } from "@/hooks/use-stripe";
 import {
   AlertDialog,
@@ -43,6 +45,7 @@ export default function BillingManageSubscription() {
   const router = useRouter();
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   const { data: subscription, isLoading: isLoadingSubscription } =
     useSubscription({
@@ -53,9 +56,11 @@ export default function BillingManageSubscription() {
         payment_method_brand: true,
       },
     });
-  const { data: activePlan } = useActivePlan();
-  const { data: trialStatus } = useTrialStatus();
+  const { data: activePlan, isLoading: isLoadingActivePlan } = useActivePlan();
+  const { data: trialStatus, isLoading: isLoadingTrialStatus } =
+    useTrialStatus();
   const cancelSubscription = useCancelSubscription();
+  const createCustomerPortalSession = useCreateCustomerPortalSession();
 
   if (isLoadingSubscription) {
     return (
@@ -130,6 +135,24 @@ export default function BillingManageSubscription() {
     }
   };
 
+  const handleGoToCustomerPortal = async () => {
+    try {
+      setIsRedirecting(true);
+      const response = await createCustomerPortalSession.mutateAsync({});
+
+      if (response?.url) {
+        window.location.href = response.url;
+      } else {
+        throw new Error("Failed to create customer portal session");
+      }
+    } catch (error: any) {
+      toast.error("Failed to redirect to billing portal", {
+        description: error.message || "Please try again later",
+      });
+      setIsRedirecting(false);
+    }
+  };
+
   return (
     <div>
       <Card>
@@ -141,69 +164,75 @@ export default function BillingManageSubscription() {
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Plan Information */}
-          <div className="bg-muted p-4 rounded-lg">
-            <div className="flex justify-between items-center mb-3">
-              <div className="flex items-center">
-                <CreditCard className="h-5 w-5 text-primary mr-3" />
-                <h3 className="font-semibold">
-                  {activePlan?.name || "Current Plan"}
-                </h3>
-              </div>
-              <div>
-                {trialStatus?.isTrialing ? (
-                  <span className="px-2 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100 text-xs rounded-full font-medium">
-                    Trial
-                  </span>
-                ) : isCanceled ? (
-                  <span className="px-2 py-1 bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-100 text-xs rounded-full font-medium">
-                    Cancelled
-                  </span>
-                ) : (
-                  <span className="px-2 py-1 bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-100 text-xs rounded-full font-medium">
-                    Active
-                  </span>
-                )}
-              </div>
+          {isLoadingActivePlan || isLoadingTrialStatus ? (
+            <div className="flex justify-center items-center h-16">
+              <Spinner size="lg" />
             </div>
-
-            {activePlan && (
-              <div className="text-sm text-muted-foreground mb-4">
-                {activePlan.description}
-              </div>
-            )}
-
-            {/* Trial info if applicable */}
-            {trialStatus?.isTrialing && (
-              <>
-                <div className="mb-2">
-                  <div className="flex justify-between text-sm mb-1">
-                    <span>Trial Progress</span>
-                    <span
-                      className={
-                        trialStatus?.daysRemaining &&
-                        trialStatus.daysRemaining <= 2
-                          ? "text-destructive font-medium"
-                          : ""
-                      }
-                    >
-                      {trialStatus?.daysRemaining} days remaining
-                    </span>
-                  </div>
+          ) : (
+            <div className="bg-muted p-4 rounded-lg">
+              <div className="flex justify-between items-center mb-3">
+                <div className="flex items-center">
+                  <CreditCard className="h-5 w-5 text-primary mr-3" />
+                  <h3 className="font-semibold">
+                    {activePlan?.name || "Current Plan"}
+                  </h3>
                 </div>
-
-                {trialStatus?.daysRemaining &&
-                  trialStatus.daysRemaining <= 2 && (
-                    <div className="flex items-start mt-3 p-2 bg-destructive/10 rounded text-sm">
-                      <AlertTriangle className="h-4 w-4 text-destructive mr-2 mt-0.5 shrink-0" />
-                      <p>
-                        Your trial is ending soon. Add your payment details to
-                        continue your subscription.
-                      </p>
-                    </div>
+                <div>
+                  {trialStatus?.isTrialing ? (
+                    <span className="px-2 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100 text-xs rounded-full font-medium">
+                      Trial
+                    </span>
+                  ) : isCanceled ? (
+                    <span className="px-2 py-1 bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-100 text-xs rounded-full font-medium">
+                      Cancelled
+                    </span>
+                  ) : (
+                    <span className="px-2 py-1 bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-100 text-xs rounded-full font-medium">
+                      Active
+                    </span>
                   )}
-              </>
-            )}
-          </div>
+                </div>
+              </div>
+
+              {activePlan && (
+                <div className="text-sm text-muted-foreground mb-4">
+                  {activePlan.description}
+                </div>
+              )}
+
+              {/* Trial info if applicable */}
+              {trialStatus?.isTrialing && (
+                <>
+                  <div className="mb-2">
+                    <div className="flex justify-between text-sm mb-1">
+                      <span>Trial Progress</span>
+                      <span
+                        className={
+                          trialStatus?.daysRemaining &&
+                          trialStatus.daysRemaining <= 2
+                            ? "text-destructive font-medium"
+                            : ""
+                        }
+                      >
+                        {trialStatus?.daysRemaining} days remaining
+                      </span>
+                    </div>
+                  </div>
+
+                  {trialStatus?.daysRemaining &&
+                    trialStatus.daysRemaining <= 2 && (
+                      <div className="flex items-start mt-3 p-2 bg-destructive/10 rounded text-sm">
+                        <AlertTriangle className="h-4 w-4 text-destructive mr-2 mt-0.5 shrink-0" />
+                        <p>
+                          Your trial is ending soon. Add your payment details to
+                          continue your subscription.
+                        </p>
+                      </div>
+                    )}
+                </>
+              )}
+            </div>
+          )}
 
           {/* Payment details */}
           {subscription.payment_method_last4 && (
@@ -221,8 +250,14 @@ export default function BillingManageSubscription() {
                     Ending in {subscription.payment_method_last4}
                   </p>
                 </div>
-                <Button className="ml-auto" variant="outline" size="sm">
-                  Update
+                <Button
+                  className="ml-auto"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleGoToCustomerPortal}
+                  disabled={isRedirecting}
+                >
+                  {isRedirecting ? "Redirecting..." : "Update"}
                 </Button>
               </div>
             </div>
@@ -295,6 +330,15 @@ export default function BillingManageSubscription() {
               onClick={() => setCancelDialogOpen(true)}
             >
               {trialStatus?.isTrialing ? "Cancel Trial" : "Cancel Subscription"}
+            </Button>
+            <Button
+              variant="outline"
+              className="sm:ml-auto"
+              onClick={handleGoToCustomerPortal}
+              disabled={isRedirecting}
+            >
+              <ExternalLink className="h-4 w-4 mr-2" />
+              {isRedirecting ? "Redirecting..." : "Manage Billing"}
             </Button>
           </CardFooter>
         )}

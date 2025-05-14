@@ -8,6 +8,7 @@ import {
   Subscription,
   TrialStatus,
   SubscriptionRequest,
+  CustomerPortalResponse,
 } from "./types";
 import { formatSelectQuery } from "@/lib/utils/from-select-query";
 
@@ -208,6 +209,36 @@ class StripeService {
       return data || [];
     } catch (error) {
       console.error("Products fetch exception:", error);
+      throw error;
+    }
+  }
+
+  // Create a customer portal session for managing billing and subscriptions
+  public async createCustomerPortalSession(
+    options: {
+      return_url?: string;
+    } = {}
+  ): Promise<CustomerPortalResponse> {
+    try {
+      const { data, error } = await supabase.functions.invoke(
+        "stripe-customer-portal",
+        {
+          body: {
+            return_url:
+              options.return_url ||
+              `${window.location.origin}/dashboard/billing`,
+          },
+        }
+      );
+
+      if (error) {
+        console.error("Customer portal session creation error:", error);
+        throw error;
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Customer portal session exception:", error);
       throw error;
     }
   }
