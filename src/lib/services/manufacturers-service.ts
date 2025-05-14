@@ -58,7 +58,10 @@ class ManufacturersService {
   }
 
   public async createManufacturer(
-    manufacturer: Omit<Manufacturer, "id" | "created_at" | "updated_at">
+    manufacturer: Omit<
+      Manufacturer,
+      "id" | "created_at" | "updated_at" | "user_id"
+    >
   ) {
     const { data, error } = await supabase
       .from("manufacturers")
