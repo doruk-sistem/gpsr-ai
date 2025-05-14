@@ -69,7 +69,7 @@ class ProductsService {
   }
 
   public async createProduct(
-    product: Omit<Product, "id" | "created_at" | "updated_at">
+    product: Omit<Product, "id" | "created_at" | "updated_at" | "user_id">
   ) {
     const { data, error } = await supabase
       .from("products")
