@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { euCountries } from "@/lib/data/eu-countries";
+import { useSearchParams, useRouter } from "next/navigation";
 import {
   Building2,
   Mail,
@@ -18,11 +19,37 @@ import {
   FileCheck,
   ShieldCheck,
   FileText,
-  Save,
-  AlertCircle,
+  Loader2,
 } from "lucide-react";
+import { toast } from "sonner";
+import {
+  useCreateRepresentativeRequest,
+  useRepresentativeRequests,
+} from "@/hooks/use-representative-requests";
+import { RepresentativeRegion } from "@/lib/services/representative-address-service";
+import { useCurrentUser } from "@/hooks/use-auth";
+import storageService from "@/lib/services/storage-service";
+import Spinner from "@/components/ui/spinner";
 
 export default function RequestPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { data: user } = useCurrentUser();
+  const createRequest = useCreateRepresentativeRequest();
+  const {
+    data: representativeRequests = [],
+    isLoading: isLoadingRepresentativeRequests,
+    isError: isErrorRepresentativeRequests,
+  } = useRepresentativeRequests({
+    select: {
+      status: true,
+      region: true,
+    },
+  });
+
+  const regionParam = searchParams.get("region") as RepresentativeRegion | null;
+
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     companyName: "",
     companyNumber: "",
@@ -47,13 +74,191 @@ export default function RequestPage() {
     confirmAccuracy: false,
     confirmResponsibility: false,
     confirmTerms: false,
+    region: regionParam || ("eu" as RepresentativeRegion),
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    // Pre-fill email and name if user is logged in
+    if (user) {
+      setFormData((prev) => ({
+        ...prev,
+        email: user.email || "",
+        fullName: user.user_metadata?.full_name || "",
+      }));
+    }
+  }, [user]);
+
+  const euRepresentativeRequest = representativeRequests.find(
+    (request) => request.region === "eu"
+  );
+  const ukRepresentativeRequest = representativeRequests.find(
+    (request) => request.region === "uk"
+  );
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Form gönderme işlemi burada yapılacak
-    console.log(formData);
+
+    if (
+      !formData.confirmAccuracy ||
+      !formData.confirmResponsibility ||
+      !formData.confirmTerms
+    ) {
+      toast.error("You must agree to all terms", {
+        description: "Please confirm all checkboxes before submitting.",
+      });
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      let testReportsFileUrl = null;
+
+      // Upload test report file if exists
+      if (formData.testReportsFile && user?.id) {
+        const result = await storageService.uploadRepresentativeAddressFile(
+          formData.testReportsFile,
+          user.id,
+          `test-report-${formData.companyName
+            .toLowerCase()
+            .replace(/\s+/g, "-")}-${Date.now()}`
+        );
+        testReportsFileUrl = result.publicUrl;
+      }
+
+      // Create request
+      await createRequest.mutateAsync({
+        region: formData.region,
+        // Company details
+        company_name: formData.companyName,
+        company_number: formData.companyNumber,
+        vat_number: formData.vatNumber || undefined,
+        street_address: formData.streetAddress,
+        city: formData.city,
+        postal_code: formData.postalCode,
+        country: formData.country,
+        // Contact info
+        contact_name: formData.fullName,
+        contact_email: formData.email,
+        contact_phone: formData.phone,
+        contact_position: formData.position,
+        // Additional info
+        website_url: formData.websiteUrl || undefined,
+        business_role: formData.businessRole as any,
+        // Product details
+        product_category: formData.productCategory,
+        product_information: formData.productInformation,
+        // Compliance details
+        ce_ukca_marking: formData.ceMarking,
+        technical_file_ready: formData.technicalFile,
+        required_tests_conducted: formData.requiredTests,
+        test_reports_available: formData.testReports,
+        test_reports_file_url: testReportsFileUrl || undefined,
+        // Confirmations
+        confirm_accuracy: formData.confirmAccuracy,
+        confirm_responsibility: formData.confirmResponsibility,
+        confirm_terms: formData.confirmTerms,
+      });
+
+      toast.success("Request submitted", {
+        description:
+          "Your authorised representative request has been submitted successfully.",
+      });
+
+      // Redirect to dashboard after successful submission
+      router.push("/dashboard/representative/request/success");
+    } catch (error) {
+      console.error("Failed to submit request:", error);
+      toast.error("Submission failed", {
+        description:
+          "There was a problem submitting your request. Please try again.",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
+
+  if (isLoadingRepresentativeRequests) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
+
+  if (isErrorRepresentativeRequests) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <p>Error loading representative requests</p>
+      </div>
+    );
+  }
+
+  if (euRepresentativeRequest?.status === "pending" && regionParam === "eu") {
+    return (
+      <div className="min-h-screen bg-muted/30">
+        <div className="max-w-6xl mx-auto p-8 space-y-8">
+          <h1 className="text-2xl font-bold">Representative Request</h1>
+          <Card>
+            <CardContent className="p-8">
+              <div className="flex flex-col items-center justify-center text-center space-y-4">
+                <div className="h-16 w-16 rounded-full bg-amber-100 flex items-center justify-center">
+                  <Building2 className="h-8 w-8 text-amber-600" />
+                </div>
+                <h2 className="text-xl font-semibold">
+                  Your Request is Being Processed
+                </h2>
+                <p className="text-muted-foreground max-w-md">
+                  Your EU Authorized Representative request is currently under
+                  review. You can check this page for updates on the status of
+                  your request.
+                </p>
+                <Button
+                  variant="outline"
+                  onClick={() => router.push("/dashboard/representative")}
+                >
+                  Return to Representative Page
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  if (ukRepresentativeRequest?.status === "pending" && regionParam === "uk") {
+    return (
+      <div className="min-h-screen bg-muted/30">
+        <div className="max-w-6xl mx-auto p-8 space-y-8">
+          <h1 className="text-2xl font-bold">Representative Request</h1>
+          <Card>
+            <CardContent className="p-8">
+              <div className="flex flex-col items-center justify-center text-center space-y-4">
+                <div className="h-16 w-16 rounded-full bg-amber-100 flex items-center justify-center">
+                  <Building2 className="h-8 w-8 text-amber-600" />
+                </div>
+                <h2 className="text-xl font-semibold">
+                  Your Request is Being Processed
+                </h2>
+                <p className="text-muted-foreground max-w-md">
+                  Your UK Authorized Representative request is currently under
+                  review. You can check this page for updates on the status of
+                  your request.
+                </p>
+                <Button
+                  variant="outline"
+                  onClick={() => router.push("/dashboard/representative")}
+                >
+                  Return to Representative Page
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-muted/30">
@@ -68,6 +273,25 @@ export default function RequestPage() {
               <p className="text-muted-foreground">
                 Submit your request to become an authorised representative
               </p>
+            </div>
+          </div>
+          <div>
+            <div className="text-sm text-muted-foreground">Region</div>
+            <div className="mt-1 flex items-center gap-2">
+              <select
+                className="border rounded-md px-3 py-2"
+                value={formData.region}
+                onChange={(e) => {
+                  setFormData({
+                    ...formData,
+                    region: e.target.value as RepresentativeRegion,
+                  });
+                  router.push(`?region=${e.target.value}`);
+                }}
+              >
+                <option value="eu">European Union (EU)</option>
+                <option value="uk">United Kingdom (UK)</option>
+              </select>
             </div>
           </div>
         </div>
@@ -551,46 +775,47 @@ export default function RequestPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Do you have test reports or notified body certifications?
                   </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <FileCheck className="h-5 w-5 text-gray-400" />
+                  <div className="space-y-2">
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <FileCheck className="h-5 w-5 text-gray-400" />
+                      </div>
+                      <select
+                        className="w-full pl-12 bg-white h-12 text-lg border rounded-md"
+                        value={formData.testReports}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            testReports: e.target.value,
+                          })
+                        }
+                        required
+                      >
+                        <option value="">Select Option</option>
+                        <option value="yes">Yes</option>
+                        <option value="no">No</option>
+                        <option value="not-applicable">Not Applicable</option>
+                      </select>
                     </div>
-                    <select
-                      className="w-full pl-12 bg-white h-12 text-lg border rounded-md"
-                      value={formData.testReports}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          testReports: e.target.value,
-                        })
-                      }
-                      required
-                    >
-                      <option value="">Select Option</option>
-                      <option value="yes">Yes</option>
-                      <option value="no">No</option>
-                      <option value="not-applicable">Not Applicable</option>
-                    </select>
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Upload Document (Optional)
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <FileText className="h-5 w-5 text-gray-400" />
+                    <div className="relative flex items-center text-lg bg-white gap-2">
+                      <div className="flex items-center gap-2">
+                        <div className="flex items-center pointer-events-none">
+                          <FileText className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <p className="text-sm font-medium whitespace-nowrap">
+                          Upload Document (Optional):
+                        </p>
+                      </div>
+                      <Input
+                        type="file"
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            testReportsFile: e.target.files?.[0] || null,
+                          })
+                        }
+                      />
                     </div>
-                    <Input
-                      type="file"
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          testReportsFile: e.target.files?.[0] || null,
-                        })
-                      }
-                      className="pl-12 bg-white h-12 text-lg"
-                    />
                   </div>
                 </div>
               </div>
@@ -685,8 +910,14 @@ export default function RequestPage() {
         </Card>
 
         <div className="flex justify-end">
-          <Button type="submit" size="lg" className="flex items-center gap-2">
-            Submit Request
+          <Button
+            type="submit"
+            size="lg"
+            className="flex items-center gap-2"
+            disabled={loading}
+          >
+            {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+            {loading ? "Submitting..." : "Submit Request"}
           </Button>
         </div>
       </form>

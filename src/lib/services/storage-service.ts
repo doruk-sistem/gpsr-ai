@@ -1,8 +1,10 @@
 import storageHelper from "../utils/storage";
 
 class StorageService {
-  private readonly MANUFACTURERS_IMAGES_BUCKET = "manufacturers";
-  private readonly PRODUCTS_IMAGES_BUCKET = "products";
+  // Storage bucket names
+  readonly PRODUCTS_IMAGES_BUCKET = "products";
+  readonly MANUFACTURERS_IMAGES_BUCKET = "manufacturers";
+  readonly REPRESENTATIVE_IMAGES_BUCKET = "representative";
 
   public async uploadManufacturerFile(
     file: File,
@@ -22,24 +24,9 @@ class StorageService {
     return data;
   }
 
-  public async deleteManufacturerFile(url?: string) {
-    if (!url) return false;
-
-    const urlParts = url.split("/");
-    const publicIndex = urlParts.indexOf("public");
-
-    if (publicIndex === -1 || publicIndex + 2 >= urlParts.length) {
-      console.error("Invalid storage URL format:", url);
-      return false;
-    }
-
-    // The path starts after the bucket name in the URL
-    const fullPath = urlParts.slice(publicIndex + 2).join("/");
-
-    return await storageHelper.deleteFile(
-      fullPath,
-      this.MANUFACTURERS_IMAGES_BUCKET
-    );
+  public async deleteManufacturerFile(fileUrl: string | undefined) {
+    if (!fileUrl) return;
+    return await this.deleteFile(fileUrl, this.MANUFACTURERS_IMAGES_BUCKET);
   }
 
   public async uploadProductFile(
@@ -60,24 +47,47 @@ class StorageService {
     return data;
   }
 
-  public async deleteProductFile(url?: string) {
-    if (!url) return false;
+  public async uploadRepresentativeAddressFile(
+    file: File,
+    userId: string,
+    fileName?: string
+  ) {
+    const filePath = `${userId}/representatives/${
+      fileName || "unnamed"
+    }-${Date.now()}`;
 
-    const urlParts = url.split("/");
+    const data = await storageHelper.uploadFile(
+      file,
+      this.REPRESENTATIVE_IMAGES_BUCKET,
+      filePath
+    );
+
+    return data;
+  }
+
+  public async deleteProductFile(fileUrl: string | undefined) {
+    if (!fileUrl) return;
+    return await this.deleteFile(fileUrl, this.PRODUCTS_IMAGES_BUCKET);
+  }
+
+  public async deleteRepresentativeAddressFile(fileUrl: string | undefined) {
+    if (!fileUrl) return;
+    return await this.deleteFile(fileUrl, this.REPRESENTATIVE_IMAGES_BUCKET);
+  }
+
+  private async deleteFile(fileUrl: string, bucketName: string) {
+    const urlParts = fileUrl.split("/");
     const publicIndex = urlParts.indexOf("public");
 
     if (publicIndex === -1 || publicIndex + 2 >= urlParts.length) {
-      console.error("Invalid storage URL format:", url);
+      console.error("Invalid storage URL format:", fileUrl);
       return false;
     }
 
     // The path starts after the bucket name in the URL
     const fullPath = urlParts.slice(publicIndex + 2).join("/");
 
-    return await storageHelper.deleteFile(
-      fullPath,
-      this.PRODUCTS_IMAGES_BUCKET
-    );
+    return await storageHelper.deleteFile(fullPath, bucketName);
   }
 }
 
