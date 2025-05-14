@@ -64,3 +64,10 @@ export const useStripeProducts = () => {
     queryFn: () => stripeService.getStripeProducts(),
   });
 };
+
+export const useCreateCustomerPortalSession = () => {
+  return useMutation({
+    mutationFn: (options?: { return_url?: string }) =>
+      stripeService.createCustomerPortalSession(options),
+  });
+};

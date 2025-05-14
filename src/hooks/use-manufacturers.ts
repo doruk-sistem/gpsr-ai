@@ -25,7 +25,7 @@ export const useCreateManufacturer = () => {
 
   return useMutation({
     mutationFn: (
-      data: Omit<Manufacturer, "id" | "created_at" | "updated_at">
+      data: Omit<Manufacturer, "id" | "created_at" | "updated_at" | "user_id">
     ) => manufacturersService.createManufacturer(data),
     onSuccess: (newManufacturer) => {
       queryClient.invalidateQueries({

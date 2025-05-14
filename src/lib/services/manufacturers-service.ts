@@ -14,6 +14,7 @@ export interface Manufacturer {
   signature_image_url: string;
   created_at: string;
   updated_at: string;
+  user_id: string;
 }
 
 class ManufacturersService {
@@ -57,7 +58,10 @@ class ManufacturersService {
   }
 
   public async createManufacturer(
-    manufacturer: Omit<Manufacturer, "id" | "created_at" | "updated_at">
+    manufacturer: Omit<
+      Manufacturer,
+      "id" | "created_at" | "updated_at" | "user_id"
+    >
   ) {
     const { data, error } = await supabase
       .from("manufacturers")
@@ -65,6 +69,7 @@ class ManufacturersService {
         ...manufacturer,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
+        user_id: (await supabase.auth.getUser()).data.user?.id,
       })
       .select()
       .single();

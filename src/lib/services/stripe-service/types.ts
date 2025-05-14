@@ -30,6 +30,10 @@ export type StripeCheckoutSessionResponse = {
   url: string;
 };
 
+export type CustomerPortalResponse = {
+  url: string;
+};
+
 export type StripeCheckoutSessionRequest = {
   priceId: string;
   mode: "payment" | "subscription";

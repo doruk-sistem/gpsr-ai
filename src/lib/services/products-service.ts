@@ -19,6 +19,7 @@ export interface Product {
   authorised_representative_in_uk: string;
   created_at?: string;
   updated_at?: string;
+  user_id: string;
 }
 
 class ProductsService {
@@ -68,7 +69,7 @@ class ProductsService {
   }
 
   public async createProduct(
-    product: Omit<Product, "id" | "created_at" | "updated_at">
+    product: Omit<Product, "id" | "created_at" | "updated_at" | "user_id">
   ) {
     const { data, error } = await supabase
       .from("products")
@@ -76,6 +77,7 @@ class ProductsService {
         ...product,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
+        user_id: (await supabase.auth.getUser()).data.user?.id,
       })
       .select()
       .single();
