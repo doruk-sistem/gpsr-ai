@@ -25,7 +25,6 @@ import {
   Calendar,
 } from "lucide-react";
 import Link from "next/link";
-import { toast } from "sonner";
 import { TrialStatus } from "@/components/dashboard/trial-status";
 import { useActivePlan, useSubscription } from "@/hooks/use-stripe";
 import { useProducts } from "@/hooks/use-products";
