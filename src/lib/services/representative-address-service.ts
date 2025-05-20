@@ -17,11 +17,17 @@ export interface RepresentativeAddress {
 }
 
 class RepresentativeAddressService {
-  public async getAddressesByUser() {
-    const { data, error } = await supabase
+  public async getAddressesByUser(region?: RepresentativeRegion) {
+    let query = supabase
       .from("authorised_representative_addresses")
       .select("*")
       .order("created_at", { ascending: false });
+
+    if (region) {
+      query = query.eq("region", region);
+    }
+
+    const { data, error } = await query;
 
     if (error) throw error;
     return data as RepresentativeAddress[];

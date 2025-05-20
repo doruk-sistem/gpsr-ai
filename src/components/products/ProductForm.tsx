@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,6 @@ import {
   Package,
   Tag,
   FileText,
-  Layers,
   FileBadge,
   FileCheck,
   ShieldCheck,
@@ -37,19 +36,22 @@ import {
 } from "@/components/ui/popover";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { Manufacturer } from "@/lib/services/manufacturers-service";
-import { PRODUCT_CATEGORY_OPTIONS } from "@/lib/data/product-category-options";
 import { cn } from "@/lib/utils/cn";
 
 import { Checkbox } from "../ui/checkbox";
 import { toast } from "sonner";
 import { base64ToFile } from "@/lib/utils/base64ToFile";
+import {
+  useCategories,
+  useProductTypesByCategory,
+  useQuestionsByCategoryAndProductType,
+} from "@/hooks/use-product-categories";
+import { useRepresentativeAddresses } from "@/hooks/use-representative-addresses";
+import { useManufacturers } from "@/hooks/use-manufacturers";
 
 interface ProductFormProps {
   initialData?: {
     id?: string;
-    category?: string;
-    sub_category?: string;
     name?: string;
     require_ce_ukca_marking?: boolean;
     batch_number?: string;
@@ -60,25 +62,28 @@ interface ProductFormProps {
     regulations?: string[];
     standards?: string[];
     manufacturer_id?: string;
-    authorised_representative_in_eu?: string;
-    authorised_representative_in_uk?: string;
+    authorised_representative_eu_id?: string;
+    authorised_representative_uk_id?: string;
+    category_id?: number;
+    product_type_id?: number;
+    selectedQuestions?: string[];
   };
-  manufacturers: Manufacturer[];
   onSubmit: (data: FormData) => void;
+  isSubmitting?: boolean;
 }
 
 export default function ProductForm({
   initialData,
-  manufacturers,
   onSubmit,
+  isSubmitting,
 }: ProductFormProps) {
   const [imagePreview, setImagePreview] = useState<string[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string>(
-    initialData?.category || ""
-  );
-  const [selectedSubcategory, setSelectedSubcategory] = useState<string>(
-    initialData?.sub_category || ""
-  );
+  const [selectedCategoryId, setSelectedCategoryId] = useState<
+    number | undefined
+  >(initialData?.category_id);
+  const [selectedProductTypeId, setSelectedProductTypeId] = useState<
+    number | undefined
+  >(initialData?.product_type_id);
   const [openCategoryPopover, setOpenCategoryPopover] = useState(false);
   const [openSubcategoryPopover, setOpenSubcategoryPopover] = useState(false);
   const [openManufacturerPopover, setOpenManufacturerPopover] = useState(false);
@@ -86,10 +91,10 @@ export default function ProductForm({
     initialData?.manufacturer_id || ""
   );
   const [selectedEUTemp, setSelectedEUTemp] = useState<string>(
-    initialData?.authorised_representative_in_eu || ""
+    initialData?.authorised_representative_eu_id || ""
   );
   const [selectedUKTemp, setSelectedUKTemp] = useState<string>(
-    initialData?.authorised_representative_in_uk || ""
+    initialData?.authorised_representative_uk_id || ""
   );
   const [openEUTempPopover, setOpenEUTempPopover] = useState(false);
   const [openUKTempPopover, setOpenUKTempPopover] = useState(false);
@@ -109,23 +114,66 @@ export default function ProductForm({
   const [openDirectivePopover, setOpenDirectivePopover] = useState(false);
   const [openRegulationPopover, setOpenRegulationPopover] = useState(false);
 
-  // Get subcategories for selected category
-  const getSubcategories = () => {
-    const selectedCategoryOption = PRODUCT_CATEGORY_OPTIONS.find(
-      (option) => option.value === selectedCategory
-    );
-    return selectedCategoryOption?.subcategories || [];
-  };
+  const [selectedQuestions, setSelectedQuestions] = useState<string[]>(
+    initialData?.selectedQuestions || []
+  );
 
-  // Update subcategory when category changes
-  useEffect(() => {
-    setSelectedSubcategory("");
-  }, [selectedCategory]);
+  const { data: categories = [] } = useCategories({
+    select: {
+      id: true,
+      name: true,
+    },
+  });
+
+  // Fetch product types based on selected category
+  const { data: productTypes = [] } = useProductTypesByCategory({
+    categoryId: selectedCategoryId || 0,
+    select: {
+      id: true,
+      product: true,
+    },
+  });
+
+  const { data: questions = [] } = useQuestionsByCategoryAndProductType({
+    categoryId: selectedCategoryId || 0,
+    productTypeId: selectedProductTypeId || 0,
+    select: {
+      id: true,
+      question: true,
+      question_description: true,
+    },
+  });
+
+  const { data: manufacturers = [] } = useManufacturers();
+
+  const { data: euRepresentatives = [] } = useRepresentativeAddresses("eu");
+  const { data: ukRepresentatives = [] } = useRepresentativeAddresses("uk");
 
   const handleImageChange = (imageDataUrl: string, index: number) => {
     const newPreviews = [...imagePreview];
     newPreviews[index] = imageDataUrl;
     setImagePreview(newPreviews);
+  };
+
+  const handleCategoryChange = (categoryId: number) => {
+    setSelectedCategoryId(categoryId);
+    setSelectedProductTypeId(undefined);
+
+    setSelectedQuestions([]);
+  };
+
+  const handleProductTypeChange = (productTypeId: number) => {
+    setSelectedProductTypeId(productTypeId);
+
+    setSelectedQuestions([]);
+  };
+
+  const handleQuestionToggle = (questionId: string) => {
+    if (selectedQuestions.includes(questionId)) {
+      setSelectedQuestions(selectedQuestions.filter((id) => id !== questionId));
+    } else {
+      setSelectedQuestions([...selectedQuestions, questionId]);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -138,35 +186,20 @@ export default function ProductForm({
       });
     }
 
-    // Add the selected values from comboboxes
-    if (selectedCategory) formData.set("category", selectedCategory);
-    else {
-      toast.error("Please select a category");
-      return;
-    }
+    if (selectedCategoryId)
+      formData.set("category_id", selectedCategoryId.toString());
+    if (selectedProductTypeId)
+      formData.set("product_type_id", selectedProductTypeId.toString());
 
-    if (selectedSubcategory) formData.set("sub_category", selectedSubcategory);
-    else {
-      toast.error("Please select a subcategory");
-      return;
-    }
+    selectedQuestions.forEach((qId) => {
+      formData.append("question_id", qId);
+    });
 
     if (selectedManufacturer)
       formData.set("manufacturer_id", selectedManufacturer);
 
-    if (selectedEUTemp)
-      formData.set("authorised_representative_in_eu", selectedEUTemp);
-    else {
-      toast.error("Please select a authorised representative in EU");
-      return;
-    }
-
-    if (selectedUKTemp)
-      formData.set("authorised_representative_in_uk", selectedUKTemp);
-    else {
-      toast.error("Please select a authorised representative in UK");
-      return;
-    }
+    formData.set("authorised_representative_eu_id", selectedEUTemp);
+    formData.set("authorised_representative_uk_id", selectedUKTemp);
 
     onSubmit(formData);
   };
@@ -205,7 +238,6 @@ export default function ProductForm({
 
       setStandards([...standards, newStandard]);
 
-      // Form alanlarını temizle
       if (
         document.querySelector('input[name="standard_ref"]') as HTMLInputElement
       ) {
@@ -238,10 +270,9 @@ export default function ProductForm({
         ).value = "";
       }
 
-      // Gizli bölümü kapat
       document.getElementById("add-standard-section")?.classList.add("hidden");
     } else {
-      alert("Lütfen en az bir referans numarası ve başlık girin");
+      toast.error("Please enter at least one reference number and title");
     }
   };
 
@@ -265,18 +296,19 @@ export default function ProductForm({
                     </p>
                   </div>
                 </div>
-                <Button type="submit" size="lg">
-                  {initialData ? "Update Product" : "Save Product"}
+                <Button type="submit" size="lg" disabled={isSubmitting}>
+                  {isSubmitting
+                    ? "Saving..."
+                    : initialData
+                    ? "Update Product"
+                    : "Save Product"}
                 </Button>
               </div>
 
               <div className="space-y-8">
-                {/* Product Category and Subcategory */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Product Category
-                    </label>
+                  <div className="space-y-2">
+                    <Label htmlFor="category">Category</Label>
                     <Popover
                       open={openCategoryPopover}
                       onOpenChange={setOpenCategoryPopover}
@@ -286,50 +318,40 @@ export default function ProductForm({
                           variant="outline"
                           role="combobox"
                           aria-expanded={openCategoryPopover}
-                          className="w-full justify-between h-12 text-lg bg-white"
+                          className="w-full justify-between"
                         >
-                          <div className="flex items-center gap-2">
-                            <Tag className="h-4 w-4 text-gray-400" />
-                            {selectedCategory
-                              ? PRODUCT_CATEGORY_OPTIONS.find(
-                                  (category) =>
-                                    category.value === selectedCategory
-                                )?.label || "Select a category"
-                              : "Select a category"}
-                          </div>
+                          {selectedCategoryId
+                            ? categories.find(
+                                (cat) => cat.id === selectedCategoryId
+                              )?.name || "Select category"
+                            : "Select category"}
                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent
-                        className="w-full p-0"
-                        style={{ width: "var(--radix-popover-trigger-width)" }}
-                      >
+                      <PopoverContent className="w-[300px] p-0">
                         <Command>
-                          <CommandInput
-                            placeholder="Search category..."
-                            className="h-9"
-                          />
+                          <CommandInput placeholder="Search category..." />
+                          <CommandEmpty>No category found.</CommandEmpty>
                           <CommandList>
-                            <CommandEmpty>No category found.</CommandEmpty>
-                            <CommandGroup>
-                              {PRODUCT_CATEGORY_OPTIONS.map((category) => (
+                            <CommandGroup heading="Categories">
+                              {categories.map((category) => (
                                 <CommandItem
-                                  key={category.value}
-                                  value={category.value}
-                                  onSelect={(currentValue) => {
-                                    setSelectedCategory(currentValue);
+                                  key={category.id}
+                                  value={category.name}
+                                  onSelect={() => {
+                                    handleCategoryChange(category.id);
                                     setOpenCategoryPopover(false);
                                   }}
                                 >
                                   <Check
                                     className={cn(
                                       "mr-2 h-4 w-4",
-                                      selectedCategory === category.value
+                                      selectedCategoryId === category.id
                                         ? "opacity-100"
                                         : "opacity-0"
                                     )}
                                   />
-                                  {category.label}
+                                  {category.name}
                                 </CommandItem>
                               ))}
                             </CommandGroup>
@@ -339,10 +361,8 @@ export default function ProductForm({
                     </Popover>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Subcategory
-                    </label>
+                  <div className="space-y-2">
+                    <Label htmlFor="product_type">Product Type</Label>
                     <Popover
                       open={openSubcategoryPopover}
                       onOpenChange={setOpenSubcategoryPopover}
@@ -352,51 +372,41 @@ export default function ProductForm({
                           variant="outline"
                           role="combobox"
                           aria-expanded={openSubcategoryPopover}
-                          className="w-full justify-between h-12 text-lg bg-white"
-                          disabled={!selectedCategory}
+                          className="w-full justify-between"
+                          disabled={!selectedCategoryId}
                         >
-                          <div className="flex items-center gap-2">
-                            <Layers className="h-4 w-4 text-gray-400" />
-                            {selectedSubcategory
-                              ? getSubcategories().find(
-                                  (subcategory) =>
-                                    subcategory.value === selectedSubcategory
-                                )?.label || "Select a subcategory"
-                              : "Select a subcategory"}
-                          </div>
+                          {selectedProductTypeId
+                            ? productTypes.find(
+                                (type) => type.id === selectedProductTypeId
+                              )?.product || "Select product type"
+                            : "Select product type"}
                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent
-                        className="w-full p-0"
-                        style={{ width: "var(--radix-popover-trigger-width)" }}
-                      >
+                      <PopoverContent className="w-[300px] p-0">
                         <Command>
-                          <CommandInput
-                            placeholder="Search subcategory..."
-                            className="h-9"
-                          />
+                          <CommandInput placeholder="Search product type..." />
+                          <CommandEmpty>No product type found.</CommandEmpty>
                           <CommandList>
-                            <CommandEmpty>No subcategory found.</CommandEmpty>
-                            <CommandGroup>
-                              {getSubcategories().map((subcategory) => (
+                            <CommandGroup heading="Product Types">
+                              {productTypes.map((productType) => (
                                 <CommandItem
-                                  key={subcategory.value}
-                                  value={subcategory.value}
-                                  onSelect={(currentValue) => {
-                                    setSelectedSubcategory(currentValue);
+                                  key={productType.id}
+                                  value={productType.product}
+                                  onSelect={() => {
+                                    handleProductTypeChange(productType.id);
                                     setOpenSubcategoryPopover(false);
                                   }}
                                 >
                                   <Check
                                     className={cn(
                                       "mr-2 h-4 w-4",
-                                      selectedSubcategory === subcategory.value
+                                      selectedProductTypeId === productType.id
                                         ? "opacity-100"
                                         : "opacity-0"
                                     )}
                                   />
-                                  {subcategory.label}
+                                  {productType.product}
                                 </CommandItem>
                               ))}
                             </CommandGroup>
@@ -407,7 +417,6 @@ export default function ProductForm({
                   </div>
                 </div>
 
-                {/* CE/UKCA Marking Requirement */}
                 <div className="space-y-2">
                   <label className="block text-sm font-medium text-gray-700">
                     Does your product require CE/UKCA marking?
@@ -430,7 +439,55 @@ export default function ProductForm({
                   </RadioGroup>
                 </div>
 
-                {/* Product Name, Batch Number, and Model Name */}
+                {selectedCategoryId && selectedProductTypeId && (
+                  <div className="mt-6 space-y-4">
+                    <div className="space-y-2">
+                      <p className="text-sm text-muted-foreground">
+                        Select all relevant questions for this product:
+                      </p>
+
+                      <div className="grid grid-cols-1 gap-3 mt-4">
+                        {questions.length === 0 ? (
+                          <p className="text-sm text-muted-foreground">
+                            No questions available for the selected category and
+                            product type.
+                          </p>
+                        ) : (
+                          questions.map((question) => (
+                            <div
+                              key={question.id}
+                              className="flex items-start space-x-3"
+                            >
+                              <Checkbox
+                                id={`question-${question.id}`}
+                                checked={selectedQuestions.includes(
+                                  question.id
+                                )}
+                                onCheckedChange={() =>
+                                  handleQuestionToggle(question.id)
+                                }
+                              />
+                              <div className="space-y-1 flex flex-col">
+                                <label
+                                  htmlFor={`question-${question.id}`}
+                                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                >
+                                  {question.question}
+                                </label>
+                                {question.question_description && (
+                                  <p className="text-sm text-muted-foreground">
+                                    {question.question_description}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="space-y-2">
                     <label className="block text-sm font-medium text-gray-700">
@@ -487,7 +544,6 @@ export default function ProductForm({
                   </div>
                 </div>
 
-                {/* Product Images */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Product Images
@@ -531,7 +587,6 @@ export default function ProductForm({
                   </div>
                 </div>
 
-                {/* Directives */}
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <h2 className="text-xl font-semibold text-gray-900">
@@ -677,7 +732,6 @@ export default function ProductForm({
                   </div>
                 </div>
 
-                {/* Regulations */}
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <h2 className="text-xl font-semibold text-gray-900">
@@ -825,7 +879,6 @@ export default function ProductForm({
                   </div>
                 </div>
 
-                {/* Standards */}
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <h2 className="text-xl font-semibold text-gray-900">
@@ -926,7 +979,6 @@ export default function ProductForm({
                   </div>
                 </div>
 
-                {/* Manufacturer Details */}
                 <div className="space-y-4">
                   <h2 className="text-xl font-semibold text-gray-900 mb-4">
                     Manufacturer Details
@@ -1020,14 +1072,16 @@ export default function ProductForm({
                         <label className="block text-sm font-medium text-gray-700">
                           Authorised Representative in EU
                         </label>
-                        <Button
-                          variant="ghost"
-                          type="button"
-                          className="text-sm text-primary hover:text-primary/80"
-                        >
-                          <Plus className="w-4 h-4 inline-block mr-1" />
-                          Add AR in EU
-                        </Button>
+                        <Link href="/dashboard/representative">
+                          <Button
+                            variant="ghost"
+                            type="button"
+                            className="text-sm text-primary hover:text-primary/80"
+                          >
+                            <Plus className="w-4 h-4 inline-block mr-1" />
+                            Add EU Representative
+                          </Button>
+                        </Link>
                       </div>
                       <Popover
                         open={openEUTempPopover}
@@ -1042,7 +1096,11 @@ export default function ProductForm({
                           >
                             <div className="flex items-center gap-2">
                               <Shield className="h-4 w-4 text-gray-400" />
-                              {selectedEUTemp || "Not for EU sale"}
+                              {selectedEUTemp
+                                ? euRepresentatives.find(
+                                    (rep) => rep.id === selectedEUTemp
+                                  )?.company_name || "Select EU Representative"
+                                : "Select EU Representative"}
                             </div>
                             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                           </Button>
@@ -1055,60 +1113,46 @@ export default function ProductForm({
                             />
                             <CommandList>
                               <CommandEmpty>
-                                No representative found.
+                                No EU representative found.
                               </CommandEmpty>
                               <CommandGroup>
                                 <CommandItem
-                                  value="EU Representative 1"
-                                  onSelect={(value) => {
-                                    setSelectedEUTemp(value);
+                                  value=""
+                                  onSelect={(currentValue) => {
+                                    setSelectedEUTemp(currentValue);
                                     setOpenEUTempPopover(false);
                                   }}
                                 >
                                   <Check
                                     className={cn(
                                       "mr-2 h-4 w-4",
-                                      selectedEUTemp === "EU Representative 1"
-                                        ? "opacity-100"
-                                        : "opacity-0"
-                                    )}
-                                  />
-                                  EU Representative 1
-                                </CommandItem>
-                                <CommandItem
-                                  value="EU Representative 2"
-                                  onSelect={(value) => {
-                                    setSelectedEUTemp(value);
-                                    setOpenEUTempPopover(false);
-                                  }}
-                                >
-                                  <Check
-                                    className={cn(
-                                      "mr-2 h-4 w-4",
-                                      selectedEUTemp === "EU Representative 2"
-                                        ? "opacity-100"
-                                        : "opacity-0"
-                                    )}
-                                  />
-                                  EU Representative 2
-                                </CommandItem>
-                                <CommandItem
-                                  value="Not for EU sale"
-                                  onSelect={(value) => {
-                                    setSelectedEUTemp(value);
-                                    setOpenEUTempPopover(false);
-                                  }}
-                                >
-                                  <Check
-                                    className={cn(
-                                      "mr-2 h-4 w-4",
-                                      selectedEUTemp === "Not for EU sale"
+                                      selectedEUTemp === ""
                                         ? "opacity-100"
                                         : "opacity-0"
                                     )}
                                   />
                                   Not for EU sale
                                 </CommandItem>
+                                {euRepresentatives.map((representative) => (
+                                  <CommandItem
+                                    key={representative.id}
+                                    value={representative.id}
+                                    onSelect={(currentValue) => {
+                                      setSelectedEUTemp(currentValue);
+                                      setOpenEUTempPopover(false);
+                                    }}
+                                  >
+                                    <Check
+                                      className={cn(
+                                        "mr-2 h-4 w-4",
+                                        selectedEUTemp === representative.id
+                                          ? "opacity-100"
+                                          : "opacity-0"
+                                      )}
+                                    />
+                                    {representative.company_name}
+                                  </CommandItem>
+                                ))}
                               </CommandGroup>
                             </CommandList>
                           </Command>
@@ -1121,14 +1165,16 @@ export default function ProductForm({
                         <label className="block text-sm font-medium text-gray-700">
                           Authorised Representative in UK
                         </label>
-                        <Button
-                          variant="ghost"
-                          type="button"
-                          className="text-sm text-primary hover:text-primary/80"
-                        >
-                          <Plus className="w-4 h-4 inline-block mr-1" />
-                          Add AR in UK
-                        </Button>
+                        <Link href="/dashboard/representative">
+                          <Button
+                            variant="ghost"
+                            type="button"
+                            className="text-sm text-primary hover:text-primary/80"
+                          >
+                            <Plus className="w-4 h-4 inline-block mr-1" />
+                            Add UK Representative
+                          </Button>
+                        </Link>
                       </div>
                       <Popover
                         open={openUKTempPopover}
@@ -1143,7 +1189,11 @@ export default function ProductForm({
                           >
                             <div className="flex items-center gap-2">
                               <Shield className="h-4 w-4 text-gray-400" />
-                              {selectedUKTemp || "Not for UK sale"}
+                              {selectedUKTemp
+                                ? ukRepresentatives.find(
+                                    (rep) => rep.id === selectedUKTemp
+                                  )?.company_name || "Select UK Representative"
+                                : "Select UK Representative"}
                             </div>
                             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                           </Button>
@@ -1156,60 +1206,46 @@ export default function ProductForm({
                             />
                             <CommandList>
                               <CommandEmpty>
-                                No representative found.
+                                No UK representative found.
                               </CommandEmpty>
                               <CommandGroup>
                                 <CommandItem
-                                  value="UK Representative 1"
-                                  onSelect={(value) => {
-                                    setSelectedUKTemp(value);
+                                  value=""
+                                  onSelect={(currentValue) => {
+                                    setSelectedUKTemp(currentValue);
                                     setOpenUKTempPopover(false);
                                   }}
                                 >
                                   <Check
                                     className={cn(
                                       "mr-2 h-4 w-4",
-                                      selectedUKTemp === "UK Representative 1"
-                                        ? "opacity-100"
-                                        : "opacity-0"
-                                    )}
-                                  />
-                                  UK Representative 1
-                                </CommandItem>
-                                <CommandItem
-                                  value="UK Representative 2"
-                                  onSelect={(value) => {
-                                    setSelectedUKTemp(value);
-                                    setOpenUKTempPopover(false);
-                                  }}
-                                >
-                                  <Check
-                                    className={cn(
-                                      "mr-2 h-4 w-4",
-                                      selectedUKTemp === "UK Representative 2"
-                                        ? "opacity-100"
-                                        : "opacity-0"
-                                    )}
-                                  />
-                                  UK Representative 2
-                                </CommandItem>
-                                <CommandItem
-                                  value="Not for UK sale"
-                                  onSelect={(value) => {
-                                    setSelectedUKTemp(value);
-                                    setOpenUKTempPopover(false);
-                                  }}
-                                >
-                                  <Check
-                                    className={cn(
-                                      "mr-2 h-4 w-4",
-                                      selectedUKTemp === "Not for UK sale"
+                                      selectedUKTemp === ""
                                         ? "opacity-100"
                                         : "opacity-0"
                                     )}
                                   />
                                   Not for UK sale
                                 </CommandItem>
+                                {ukRepresentatives.map((representative) => (
+                                  <CommandItem
+                                    key={representative.id}
+                                    value={representative.id}
+                                    onSelect={(currentValue) => {
+                                      setSelectedUKTemp(currentValue);
+                                      setOpenUKTempPopover(false);
+                                    }}
+                                  >
+                                    <Check
+                                      className={cn(
+                                        "mr-2 h-4 w-4",
+                                        selectedUKTemp === representative.id
+                                          ? "opacity-100"
+                                          : "opacity-0"
+                                      )}
+                                    />
+                                    {representative.company_name}
+                                  </CommandItem>
+                                ))}
                               </CommandGroup>
                             </CommandList>
                           </Command>
@@ -1222,6 +1258,17 @@ export default function ProductForm({
             </div>
           </CardContent>
         </Card>
+
+        <div className="mt-6 space-x-2 flex justify-end">
+          <Link href="/dashboard/products">
+            <Button variant="outline" type="button">
+              Cancel
+            </Button>
+          </Link>
+          <Button type="submit">
+            {initialData ? "Update Product" : "Add Product"}
+          </Button>
+        </div>
       </form>
     </div>
   );

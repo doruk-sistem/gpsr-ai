@@ -6,10 +6,10 @@ import representativeAddressService, {
   RepresentativeRegion,
 } from "@/lib/services/representative-address-service";
 
-export const useRepresentativeAddresses = () => {
+export const useRepresentativeAddresses = (region?: RepresentativeRegion) => {
   return useQuery({
-    queryKey: ["representative-addresses"],
-    queryFn: () => representativeAddressService.getAddressesByUser(),
+    queryKey: ["representative-addresses", region],
+    queryFn: () => representativeAddressService.getAddressesByUser(region),
   });
 };
 

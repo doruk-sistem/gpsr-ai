@@ -34,12 +34,11 @@ import { Progress } from "@/components/ui/progress";
 export default function ProductsPage() {
   const router = useRouter();
   const deleteProduct = useDeleteProduct();
-  const { data: productsData, isLoading: isProductsLoading } = useProducts();
+  const { data: products = [], isLoading: isProductsLoading } = useProducts();
   const { data: activePlan, isLoading: isActivePlanLoading } = useActivePlan();
   const { data: productsCount, isLoading: isProductsCountLoading } =
     useProductsCount();
 
-  const products = productsData || [];
   const productLimit = activePlan?.product_limit || 0;
   const currentProductCount = productsCount || 0;
   const isLimitReached = currentProductCount >= productLimit;
@@ -178,7 +177,7 @@ export default function ProductsPage() {
                     <TableHead className="w-[100px]">Image</TableHead>
                     <TableHead>Name</TableHead>
                     <TableHead>Category</TableHead>
-                    <TableHead>Subcategory</TableHead>
+                    <TableHead>Product Type</TableHead>
                     <TableHead>CE/UKCA</TableHead>
                     <TableHead className="w-[100px]">Actions</TableHead>
                   </TableRow>
@@ -206,10 +205,10 @@ export default function ProductsPage() {
                         {product.name}
                       </TableCell>
                       <TableCell className="text-muted-foreground">
-                        {product.category}
+                        {product.product_categories.name}
                       </TableCell>
                       <TableCell className="text-muted-foreground">
-                        {product.sub_category}
+                        {product.product_types.product}
                       </TableCell>
                       <TableCell>
                         {product.require_ce_ukca_marking ? (
