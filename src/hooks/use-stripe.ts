@@ -48,7 +48,6 @@ export const useTrialStatus = () => {
   return useQuery({
     queryKey: ["trial-status"],
     queryFn: () => stripeService.getTrialStatus(),
-    refetchInterval: 1000 * 60 * 5, // Refetch every 5 minutes
   });
 };
 

@@ -107,7 +107,6 @@ export default function ManufacturerForm({
                   size="lg"
                   className="flex items-center gap-2"
                 >
-                  <Save className="h-4 w-4" />
                   {initialData ? "Update" : "Save"}
                 </Button>
               </div>

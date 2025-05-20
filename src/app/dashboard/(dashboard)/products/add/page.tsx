@@ -4,9 +4,11 @@ import React from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
-import { useCreateProduct } from "@/hooks/use-products";
+import {
+  useCreateProduct,
+  useCreateProductQuestionAnswers,
+} from "@/hooks/use-products";
 import { useCurrentUser } from "@/hooks/use-auth";
-import { useManufacturers } from "@/hooks/use-manufacturers";
 
 import storageService from "@/lib/services/storage-service";
 import ProductForm from "@/components/products/ProductForm";
@@ -14,8 +16,8 @@ import ProductForm from "@/components/products/ProductForm";
 export default function AddProductPage() {
   const router = useRouter();
   const createProduct = useCreateProduct();
+  const createProductQuestionAnswers = useCreateProductQuestionAnswers();
   const { data: user } = useCurrentUser();
-  const { data: manufacturers } = useManufacturers();
 
   const handleSubmit = async (formData: FormData) => {
     try {
@@ -36,10 +38,11 @@ export default function AddProductPage() {
       // Get standards from the form
       const standards = formData.getAll("standards") as string[];
 
+      // Get selected question IDs
+      const selectedQuestionIds = formData.getAll("question_id") as string[];
+
       // Create product data object
       const data = {
-        category: formData.get("category") as string,
-        sub_category: formData.get("sub_category") as string,
         name: formData.get("name") as string,
         require_ce_ukca_marking:
           formData.get("require_ce_ukca_marking") === "true",
@@ -51,15 +54,32 @@ export default function AddProductPage() {
         regulations: formData.getAll("regulations") as string[],
         standards,
         manufacturer_id: formData.get("manufacturer_id") as string,
-        authorised_representative_in_eu: formData.get(
-          "authorised_representative_in_eu"
+        authorised_representative_eu_id: formData.get(
+          "authorised_representative_eu_id"
         ) as string,
-        authorised_representative_in_uk: formData.get(
-          "authorised_representative_in_uk"
+        authorised_representative_uk_id: formData.get(
+          "authorised_representative_uk_id"
         ) as string,
+        // Category and product type fields
+        category_id: parseInt(formData.get("category_id") as string),
+        product_type_id: parseInt(formData.get("product_type_id") as string),
       };
 
-      await createProduct.mutateAsync(data);
+      // Create the product
+      const newProduct = await createProduct.mutateAsync(data);
+
+      // Save product question answers if there are any selected
+      if (newProduct && selectedQuestionIds.length > 0) {
+        const questionAnswers = selectedQuestionIds.map((questionId) => ({
+          question_id: questionId,
+          answer: true,
+        }));
+
+        await createProductQuestionAnswers.mutateAsync({
+          productId: newProduct.id,
+          questionAnswers,
+        });
+      }
 
       toast.success("Product added successfully");
       router.push("/dashboard/products");
@@ -70,6 +90,11 @@ export default function AddProductPage() {
   };
 
   return (
-    <ProductForm onSubmit={handleSubmit} manufacturers={manufacturers || []} />
+    <ProductForm
+      onSubmit={handleSubmit}
+      isSubmitting={
+        createProduct.isPending || createProductQuestionAnswers.isPending
+      }
+    />
   );
 }

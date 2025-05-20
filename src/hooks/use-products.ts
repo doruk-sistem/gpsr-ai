@@ -93,6 +93,65 @@ export const useDeleteProduct = () => {
         queryKey: ["product", id],
         refetchType: "all",
       });
+      queryClient.invalidateQueries({
+        queryKey: ["product-question-answers", id],
+        refetchType: "all",
+      });
+    },
+  });
+};
+
+// Product Question Answers hooks
+export const useProductQuestionAnswers = (productId: string) => {
+  return useQuery({
+    queryKey: ["product-question-answers", productId],
+    queryFn: () => productsService.getProductQuestionAnswers(productId),
+    enabled: !!productId,
+  });
+};
+
+export const useCreateProductQuestionAnswers = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      productId,
+      questionAnswers,
+    }: {
+      productId: string;
+      questionAnswers: Array<{ question_id: string; answer: boolean }>;
+    }) =>
+      productsService.createProductQuestionAnswers(productId, questionAnswers),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["product-question-answers", variables.productId],
+        refetchType: "all",
+      });
+    },
+  });
+};
+
+export const useUpdateProductQuestionAnswers = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      productId,
+      questionAnswers,
+    }: {
+      productId: string;
+      questionAnswers: Array<{
+        id?: string;
+        question_id: string;
+        answer: boolean;
+      }>;
+    }) =>
+      productsService.updateProductQuestionAnswers(productId, questionAnswers),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["product-question-answers", variables.productId],
+        refetchType: "all",
+      });
     },
   });
 };
