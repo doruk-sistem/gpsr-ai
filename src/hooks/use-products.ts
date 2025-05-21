@@ -131,22 +131,22 @@ export const useCreateProductQuestionAnswers = () => {
   });
 };
 
-export const useUpdateProductQuestionAnswers = () => {
+export function useDeleteProductQuestionAnswersByIds() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({
+    mutationFn: async ({
       productId,
-      questionAnswers,
+      questionIds,
     }: {
       productId: string;
-      questionAnswers: Array<{
-        id?: string;
-        question_id: string;
-        answer: boolean;
-      }>;
-    }) =>
-      productsService.updateProductQuestionAnswers(productId, questionAnswers),
+      questionIds: string[];
+    }) => {
+      await productsService.deleteProductQuestionAnswersByIds(
+        productId,
+        questionIds
+      );
+    },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
         queryKey: ["product-question-answers", variables.productId],
@@ -154,4 +154,4 @@ export const useUpdateProductQuestionAnswers = () => {
       });
     },
   });
-};
+}

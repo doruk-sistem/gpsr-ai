@@ -8,6 +8,7 @@ import {
   useUpdateProduct,
   useProductQuestionAnswers,
   useCreateProductQuestionAnswers,
+  useDeleteProductQuestionAnswersByIds,
 } from "@/hooks/use-products";
 import { toast } from "sonner";
 import storageService from "@/lib/services/storage-service";
@@ -23,6 +24,7 @@ export default function EditProductPage() {
   );
   const updateProduct = useUpdateProduct();
   const createProductQuestionAnswers = useCreateProductQuestionAnswers();
+  const deleteProductQuestionAnswers = useDeleteProductQuestionAnswersByIds();
   const { data: user } = useCurrentUser();
 
   const handleSubmit = async (formData: FormData) => {
@@ -75,9 +77,31 @@ export default function EditProductPage() {
         product: data,
       });
 
-      // Update product question answers
-      if (selectedQuestionIds.length > 0) {
-        const questionAnswers = selectedQuestionIds.map((questionId) => ({
+      // Get current question answers
+      const currentQuestionIds =
+        productQuestionAnswers?.map((qa) => qa.question_id) || [];
+
+      // Find questions to be removed (those that exist in current but not in newly selected ones)
+      const questionsToRemove = currentQuestionIds.filter(
+        (id) => !selectedQuestionIds.includes(id)
+      );
+
+      // Find questions to be added (those that exist in newly selected but not in current ones)
+      const questionsToAdd = selectedQuestionIds.filter(
+        (id) => !currentQuestionIds.includes(id)
+      );
+
+      // Remove questions that are no longer selected
+      if (questionsToRemove.length > 0) {
+        await deleteProductQuestionAnswers.mutateAsync({
+          productId: id as string,
+          questionIds: questionsToRemove,
+        });
+      }
+
+      // Add questions that are newly selected
+      if (questionsToAdd.length > 0) {
+        const questionAnswers = questionsToAdd.map((questionId) => ({
           question_id: questionId,
           answer: true,
         }));

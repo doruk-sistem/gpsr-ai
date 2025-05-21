@@ -168,26 +168,24 @@ class ProductsService {
     return data as ProductQuestionAnswer[];
   }
 
-  public async updateProductQuestionAnswers(
-    productId: string,
-    questionAnswers: Array<{
-      id?: string;
-      question_id: string;
-      answer: boolean;
-    }>
-  ) {
-    // First delete all existing answers for this product
-    await this.deleteProductQuestionAnswers(productId);
-
-    // Then create new answers
-    return this.createProductQuestionAnswers(productId, questionAnswers);
-  }
-
   public async deleteProductQuestionAnswers(productId: string) {
     const { error } = await supabase
       .from("product_question_answers")
       .delete()
       .eq("product_id", productId);
+
+    if (error) throw error;
+  }
+
+  public async deleteProductQuestionAnswersByIds(
+    productId: string,
+    questionIds: string[]
+  ) {
+    const { error } = await supabase
+      .from("product_question_answers")
+      .delete()
+      .eq("product_id", productId)
+      .in("question_id", questionIds);
 
     if (error) throw error;
   }
