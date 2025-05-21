@@ -1,7 +1,6 @@
 // src/app/dashboard/(dashboard)/page.client.tsx
 "use client";
 
-import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -447,6 +446,27 @@ export default function DashboardPageClient() {
               )}
             </div>
 
+            <div className="flex items-center justify-between p-3 bg-muted rounded-lg border">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center h-8 w-8 rounded-full bg-muted-foreground/20 text-muted-foreground">
+                  3
+                </div>
+                <div>
+                  <p className="font-medium">Sign Authorization</p>
+                  <p className="text-sm text-muted-foreground">
+                    Digitally sign the Authorized Representative mandate
+                  </p>
+                </div>
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => router.push("/dashboard/representative")}
+              >
+                Start Now
+              </Button>
+            </div>
+
             <div
               className={`flex items-center justify-between p-3 ${
                 productsCount > 0
@@ -462,7 +482,7 @@ export default function DashboardPageClient() {
                       : "bg-muted-foreground/20 text-muted-foreground"
                   }`}
                 >
-                  3
+                  4
                 </div>
                 <div>
                   <p className="font-medium">Add Products</p>
@@ -484,27 +504,6 @@ export default function DashboardPageClient() {
                   Start Now
                 </Button>
               )}
-            </div>
-
-            <div className="flex items-center justify-between p-3 bg-muted rounded-lg border">
-              <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center h-8 w-8 rounded-full bg-muted-foreground/20 text-muted-foreground">
-                  4
-                </div>
-                <div>
-                  <p className="font-medium">Sign Authorization</p>
-                  <p className="text-sm text-muted-foreground">
-                    Digitally sign the Authorized Representative mandate
-                  </p>
-                </div>
-              </div>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => router.push("/dashboard/representative")}
-              >
-                Start Now
-              </Button>
             </div>
           </div>
         </CardContent>
