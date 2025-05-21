@@ -1,18 +1,21 @@
 "use client";
 
 import React from "react";
-import ProductForm from "@/components/products/ProductForm";
+import { toast } from "sonner";
 import { useParams, useRouter } from "next/navigation";
+
+import ProductForm from "@/components/products/ProductForm";
+
+import { useProduct, useUpdateProduct } from "@/hooks/use-products";
+import { useCurrentUser } from "@/hooks/use-auth";
 import {
-  useProduct,
-  useUpdateProduct,
-  useProductQuestionAnswers,
   useCreateProductQuestionAnswers,
   useDeleteProductQuestionAnswersByIds,
-} from "@/hooks/use-products";
-import { toast } from "sonner";
+  useProductQuestionAnswers,
+} from "@/hooks/use-product-question-answers";
+
 import storageService from "@/lib/services/storage-service";
-import { useCurrentUser } from "@/hooks/use-auth";
+
 import Spinner from "@/components/ui/spinner";
 
 export default function EditProductPage() {
