@@ -72,6 +72,10 @@ interface ProductFormProps {
   isSubmitting?: boolean;
 }
 
+// TODO: add product technical files
+// TODO: add product directives
+// TODO: add product registrations
+// TODO: add product standards
 export default function ProductForm({
   initialData,
   onSubmit,

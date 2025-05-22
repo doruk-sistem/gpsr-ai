@@ -21,6 +21,7 @@ import Spinner from "@/components/ui/spinner";
 export default function EditProductPage() {
   const router = useRouter();
   const { id } = useParams();
+
   const { data: product, isLoading } = useProduct(id as string);
   const { data: productQuestionAnswers } = useProductQuestionAnswers(
     id as string
