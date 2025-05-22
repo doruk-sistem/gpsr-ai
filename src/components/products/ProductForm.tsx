@@ -39,15 +39,15 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils/cn";
 
 import { Checkbox } from "../ui/checkbox";
+
 import { toast } from "sonner";
 import { base64ToFile } from "@/lib/utils/base64ToFile";
-import {
-  useCategories,
-  useProductTypesByCategory,
-  useQuestionsByCategoryAndProductType,
-} from "@/hooks/use-product-categories";
+
+import { useCategories } from "@/hooks/use-product-categories";
 import { useRepresentativeAddresses } from "@/hooks/use-representative-addresses";
 import { useManufacturers } from "@/hooks/use-manufacturers";
+import { useProductTypesByCategory } from "@/hooks/use-product-types";
+import { useQuestionsByCategoryAndProductType } from "@/hooks/use-product-questions";
 
 interface ProductFormProps {
   initialData?: {
@@ -72,6 +72,10 @@ interface ProductFormProps {
   isSubmitting?: boolean;
 }
 
+// TODO: add product technical files
+// TODO: add product directives
+// TODO: add product registrations
+// TODO: add product standards
 export default function ProductForm({
   initialData,
   onSubmit,

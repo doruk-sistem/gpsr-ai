@@ -4,11 +4,9 @@ import React from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
-import {
-  useCreateProduct,
-  useCreateProductQuestionAnswers,
-} from "@/hooks/use-products";
+import { useCreateProduct } from "@/hooks/use-products";
 import { useCurrentUser } from "@/hooks/use-auth";
+import { useCreateProductQuestionAnswers } from "@/hooks/use-product-question-answers";
 
 import storageService from "@/lib/services/storage-service";
 import ProductForm from "@/components/products/ProductForm";

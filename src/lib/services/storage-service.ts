@@ -2,18 +2,17 @@ import storageHelper from "../utils/storage";
 
 class StorageService {
   // Storage bucket names
-  readonly PRODUCTS_IMAGES_BUCKET = "products";
-  readonly MANUFACTURERS_IMAGES_BUCKET = "manufacturers";
-  readonly REPRESENTATIVE_IMAGES_BUCKET = "representative";
+  readonly PRODUCTS_IMAGES_BUCKET = "product-images";
+  readonly MANUFACTURERS_IMAGES_BUCKET = "manufacturer-images";
+  readonly REPRESENTATIVE_IMAGES_BUCKET = "representative-images";
+  readonly PRODUCT_TECHNICAL_FILES_BUCKET = "product-technical-files";
 
   public async uploadManufacturerFile(
     file: File,
     userId: string,
     fileName?: string
   ) {
-    const filePath = `${userId}/manufacturers/${
-      fileName || "unnamed"
-    }-${Date.now()}`;
+    const filePath = `${userId}/${fileName || "unnamed"}-${Date.now()}`;
 
     const data = await storageHelper.uploadFile(
       file,
@@ -34,9 +33,7 @@ class StorageService {
     userId: string,
     fileName?: string
   ) {
-    const filePath = `${userId}/products/${
-      fileName || "unnamed"
-    }-${Date.now()}`;
+    const filePath = `${userId}/${fileName || "unnamed"}-${Date.now()}`;
 
     const data = await storageHelper.uploadFile(
       file,
@@ -52,9 +49,7 @@ class StorageService {
     userId: string,
     fileName?: string
   ) {
-    const filePath = `${userId}/representatives/${
-      fileName || "unnamed"
-    }-${Date.now()}`;
+    const filePath = `${userId}/${fileName || "unnamed"}-${Date.now()}`;
 
     const data = await storageHelper.uploadFile(
       file,
@@ -73,6 +68,25 @@ class StorageService {
   public async deleteRepresentativeAddressFile(fileUrl: string | undefined) {
     if (!fileUrl) return;
     return await this.deleteFile(fileUrl, this.REPRESENTATIVE_IMAGES_BUCKET);
+  }
+
+  public async uploadProductTechnicalFile(
+    file: File,
+    userId: string,
+    fileName?: string
+  ) {
+    const filePath = `${userId}/${fileName || "unnamed"}-${Date.now()}`;
+    const data = await storageHelper.uploadFile(
+      file,
+      this.PRODUCT_TECHNICAL_FILES_BUCKET,
+      filePath
+    );
+    return data;
+  }
+
+  public async deleteProductTechnicalFile(fileUrl: string | undefined) {
+    if (!fileUrl) return;
+    return await this.deleteFile(fileUrl, this.PRODUCT_TECHNICAL_FILES_BUCKET);
   }
 
   private async deleteFile(fileUrl: string, bucketName: string) {

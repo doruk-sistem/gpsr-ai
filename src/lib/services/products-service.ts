@@ -1,9 +1,9 @@
 import { supabase } from "@/lib/supabase/client";
+
 import storageService from "./storage-service";
-import {
-  ProductCategory,
-  ProductType,
-} from "./product-categories-service/types";
+import { ProductCategory } from "./product-categories-service";
+import productQuestionAnswersService from "./product-question-answers-service";
+import { ProductType } from "./product-types-services";
 
 export interface Product {
   id: string;
@@ -27,21 +27,7 @@ export interface Product {
   product_type_id?: number;
 }
 
-export interface ProductQuestionAnswer {
-  id: string;
-  product_id: string;
-  question_id: string;
-  answer: boolean;
-  created_at?: string;
-  updated_at?: string;
-  deleted_at?: string | null;
-  user_id?: string | null;
-}
-
 class ProductsService {
-  // ===============================
-  // Products
-  // ===============================
   public async getProducts() {
     const { data, error } = await supabase
       .from("products")
@@ -115,7 +101,7 @@ class ProductsService {
     const product = await this.getProductById(id);
 
     // delete product question answers first
-    await this.deleteProductQuestionAnswers(id);
+    await productQuestionAnswersService.deleteProductQuestionAnswers(id);
 
     // delete product
     const { error } = await supabase.from("products").delete().eq("id", id);
@@ -128,68 +114,6 @@ class ProductsService {
         await storageService.deleteProductFile(imageUrl);
       }
     }
-  }
-
-  // ===============================
-  // Product Question Answers
-  // ===============================
-  public async getProductQuestionAnswers(productId: string) {
-    const { data, error } = await supabase
-      .from("product_question_answers")
-      .select("*, product_questions(*)")
-      .eq("product_id", productId)
-      .is("deleted_at", null);
-
-    if (error) throw error;
-    return data as ProductQuestionAnswer[];
-  }
-
-  public async createProductQuestionAnswers(
-    productId: string,
-    questionAnswers: Array<{ question_id: string; answer: boolean }>
-  ) {
-    const userId = (await supabase.auth.getUser()).data.user?.id;
-
-    const answers = questionAnswers.map((qa) => ({
-      product_id: productId,
-      question_id: qa.question_id,
-      answer: qa.answer,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      user_id: userId,
-    }));
-
-    const { data, error } = await supabase
-      .from("product_question_answers")
-      .insert(answers)
-      .select();
-
-    if (error) throw error;
-    return data as ProductQuestionAnswer[];
-  }
-
-  public async updateProductQuestionAnswers(
-    productId: string,
-    questionAnswers: Array<{
-      id?: string;
-      question_id: string;
-      answer: boolean;
-    }>
-  ) {
-    // First delete all existing answers for this product
-    await this.deleteProductQuestionAnswers(productId);
-
-    // Then create new answers
-    return this.createProductQuestionAnswers(productId, questionAnswers);
-  }
-
-  public async deleteProductQuestionAnswers(productId: string) {
-    const { error } = await supabase
-      .from("product_question_answers")
-      .delete()
-      .eq("product_id", productId);
-
-    if (error) throw error;
   }
 }
 

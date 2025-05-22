@@ -1,28 +1,34 @@
 "use client";
 
 import React from "react";
-import ProductForm from "@/components/products/ProductForm";
-import { useParams, useRouter } from "next/navigation";
-import {
-  useProduct,
-  useUpdateProduct,
-  useProductQuestionAnswers,
-  useCreateProductQuestionAnswers,
-} from "@/hooks/use-products";
 import { toast } from "sonner";
-import storageService from "@/lib/services/storage-service";
+import { useParams, useRouter } from "next/navigation";
+
+import ProductForm from "@/components/products/ProductForm";
+
+import { useProduct, useUpdateProduct } from "@/hooks/use-products";
 import { useCurrentUser } from "@/hooks/use-auth";
+import {
+  useCreateProductQuestionAnswers,
+  useDeleteProductQuestionAnswersByIds,
+  useProductQuestionAnswers,
+} from "@/hooks/use-product-question-answers";
+
+import storageService from "@/lib/services/storage-service";
+
 import Spinner from "@/components/ui/spinner";
 
 export default function EditProductPage() {
   const router = useRouter();
   const { id } = useParams();
+
   const { data: product, isLoading } = useProduct(id as string);
   const { data: productQuestionAnswers } = useProductQuestionAnswers(
     id as string
   );
   const updateProduct = useUpdateProduct();
   const createProductQuestionAnswers = useCreateProductQuestionAnswers();
+  const deleteProductQuestionAnswers = useDeleteProductQuestionAnswersByIds();
   const { data: user } = useCurrentUser();
 
   const handleSubmit = async (formData: FormData) => {
@@ -75,9 +81,31 @@ export default function EditProductPage() {
         product: data,
       });
 
-      // Update product question answers
-      if (selectedQuestionIds.length > 0) {
-        const questionAnswers = selectedQuestionIds.map((questionId) => ({
+      // Get current question answers
+      const currentQuestionIds =
+        productQuestionAnswers?.map((qa) => qa.question_id) || [];
+
+      // Find questions to be removed (those that exist in current but not in newly selected ones)
+      const questionsToRemove = currentQuestionIds.filter(
+        (id) => !selectedQuestionIds.includes(id)
+      );
+
+      // Find questions to be added (those that exist in newly selected but not in current ones)
+      const questionsToAdd = selectedQuestionIds.filter(
+        (id) => !currentQuestionIds.includes(id)
+      );
+
+      // Remove questions that are no longer selected
+      if (questionsToRemove.length > 0) {
+        await deleteProductQuestionAnswers.mutateAsync({
+          productId: id as string,
+          questionIds: questionsToRemove,
+        });
+      }
+
+      // Add questions that are newly selected
+      if (questionsToAdd.length > 0) {
+        const questionAnswers = questionsToAdd.map((questionId) => ({
           question_id: questionId,
           answer: true,
         }));
