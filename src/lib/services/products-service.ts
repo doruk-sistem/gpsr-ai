@@ -12,10 +12,7 @@ export interface Product {
   batch_number: string;
   model_name: string;
   image_urls: string[];
-  specification: string[];
-  directives: string[];
-  regulations: string[];
-  standards: any;
+  specification: string;
   manufacturer_id: string;
   authorised_representative_eu_id: string;
   authorised_representative_uk_id: string;
@@ -27,10 +24,26 @@ export interface Product {
   product_type_id?: number;
 }
 
+export interface CreateProductRequest {
+  name: string;
+  require_ce_ukca_marking: boolean;
+  batch_number: string;
+  model_name: string;
+  image_urls: string[];
+  specification: string;
+  manufacturer_id: string;
+  authorised_representative_eu_id?: string;
+  authorised_representative_uk_id?: string;
+  category_id?: number;
+  product_type_id?: number;
+}
+
+export type UpdateProductRequest = Partial<CreateProductRequest>;
+
 class ProductsService {
   public async getProducts() {
     const { data, error } = await supabase
-      .from("products")
+      .from("user_products")
       .select("*, product_categories(*), product_types(*)")
       .order("created_at", { ascending: false });
 
@@ -43,7 +56,7 @@ class ProductsService {
 
   public async getProductsCount() {
     const { count, error } = await supabase
-      .from("products")
+      .from("user_products")
       .select("*", { count: "exact", head: true });
 
     if (error) throw error;
@@ -52,7 +65,7 @@ class ProductsService {
 
   public async getProductById(id: string) {
     const { data, error } = await supabase
-      .from("products")
+      .from("user_products")
       .select("*, product_categories(*), product_types(*)")
       .eq("id", id)
       .single();
@@ -66,7 +79,7 @@ class ProductsService {
 
   public async updateProduct(id: string, product: Partial<Product>) {
     const { data, error } = await supabase
-      .from("products")
+      .from("user_products")
       .update({
         ...product,
         updated_at: new Date().toISOString(),
@@ -79,11 +92,9 @@ class ProductsService {
     return data as Product;
   }
 
-  public async createProduct(
-    product: Omit<Product, "id" | "created_at" | "updated_at" | "user_id">
-  ) {
+  public async createProduct(product: CreateProductRequest) {
     const { data, error } = await supabase
-      .from("products")
+      .from("user_products")
       .insert({
         ...product,
         created_at: new Date().toISOString(),
@@ -104,7 +115,10 @@ class ProductsService {
     await productQuestionAnswersService.deleteProductQuestionAnswers(id);
 
     // delete product
-    const { error } = await supabase.from("products").delete().eq("id", id);
+    const { error } = await supabase
+      .from("user_products")
+      .delete()
+      .eq("id", id);
 
     if (error) throw error;
 

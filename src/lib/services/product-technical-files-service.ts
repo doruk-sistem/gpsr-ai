@@ -17,9 +17,9 @@ export interface ProductTechnicalFile {
 class ProductTechnicalFilesService {
   async getProductTechnicalFiles(productId: string) {
     const { data, error } = await supabase
-      .from("product_technical_files")
+      .from("user_product_technical_files")
       .select("*")
-      .eq("product_id", productId)
+      .eq("user_product_id", productId)
       .is("deleted_at", null);
     if (error) throw error;
     return data as ProductTechnicalFile[];
@@ -38,9 +38,9 @@ class ProductTechnicalFilesService {
       fileName
     );
     const { data, error } = await supabase
-      .from("product_technical_files")
+      .from("user_product_technical_files")
       .insert({
-        product_id: productId,
+        user_product_id: productId,
         file_type: fileType,
         file_url: publicUrl,
         user_id: userId,
@@ -58,18 +58,18 @@ class ProductTechnicalFilesService {
     userId?: string
   ) {
     const { data, error } = await supabase
-      .from("product_technical_files")
+      .from("user_product_technical_files")
       .upsert(
         [
           {
-            product_id: productId,
+            user_product_id: productId,
             file_type: fileType,
             not_required: true,
             not_required_reason: reason,
             user_id: userId,
           },
         ],
-        { onConflict: "product_id,file_type" }
+        { onConflict: "user_product_id,file_type" }
       )
       .select()
       .single();
@@ -79,7 +79,7 @@ class ProductTechnicalFilesService {
 
   async deleteProductTechnicalFile(id: string) {
     const { error } = await supabase
-      .from("product_technical_files")
+      .from("user_product_technical_files")
       .update({ deleted_at: new Date().toISOString() })
       .eq("id", id);
     if (error) throw error;
