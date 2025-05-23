@@ -13,9 +13,9 @@ export interface ProductRegulation {
 class ProductRegulationsService {
   async getProductRegulations(productId: string) {
     const { data, error } = await supabase
-      .from("product_regulations")
+      .from("user_product_regulations")
       .select("*, regulations(*)")
-      .eq("product_id", productId)
+      .eq("user_product_id", productId)
       .is("deleted_at", null);
     if (error) throw error;
     return data as ProductRegulation[];
@@ -23,8 +23,14 @@ class ProductRegulationsService {
 
   async addProductRegulation(productId: string, regulationId: number) {
     const { data, error } = await supabase
-      .from("product_regulations")
-      .insert({ product_id: productId, regulation_id: regulationId })
+      .from("user_product_regulations")
+      .insert({
+        user_product_id: productId,
+        regulation_id: regulationId,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        user_id: (await supabase.auth.getUser()).data.user?.id,
+      })
       .select()
       .single();
     if (error) throw error;
@@ -33,9 +39,9 @@ class ProductRegulationsService {
 
   async removeProductRegulation(productId: string, regulationId: number) {
     const { error } = await supabase
-      .from("product_regulations")
+      .from("user_product_regulations")
       .delete()
-      .eq("product_id", productId)
+      .eq("user_product_id", productId)
       .eq("regulation_id", regulationId);
     if (error) throw error;
   }
