@@ -4,6 +4,7 @@ import storageService from "./storage-service";
 import { ProductCategory } from "./product-categories-service";
 import productQuestionAnswersService from "./product-question-answers-service";
 import { ProductType } from "./product-types-services";
+import { Manufacturer } from "./manufacturers-service";
 
 export interface Product {
   id: string;
@@ -51,6 +52,7 @@ class ProductsService {
     return data as (Product & {
       product_categories: ProductCategory;
       product_types: ProductType;
+      manufacturers: Manufacturer;
     })[];
   }
 
@@ -66,7 +68,7 @@ class ProductsService {
   public async getProductById(id: string) {
     const { data, error } = await supabase
       .from("user_products")
-      .select("*, product_categories(*), product_types(*)")
+      .select("*, product_categories(*), product_types(*), manufacturers(*)")
       .eq("id", id)
       .single();
 
@@ -74,6 +76,7 @@ class ProductsService {
     return data as Product & {
       product_categories: ProductCategory;
       product_types: ProductType;
+      manufacturers: Manufacturer;
     };
   }
 
@@ -85,11 +88,15 @@ class ProductsService {
         updated_at: new Date().toISOString(),
       })
       .eq("id", id)
-      .select()
+      .select("*, product_categories(*), product_types(*), manufacturers(*)")
       .single();
 
     if (error) throw error;
-    return data as Product;
+    return data as Product & {
+      product_categories: ProductCategory;
+      product_types: ProductType;
+      manufacturers: Manufacturer;
+    };
   }
 
   public async createProduct(product: CreateProductRequest) {
@@ -101,11 +108,15 @@ class ProductsService {
         updated_at: new Date().toISOString(),
         user_id: (await supabase.auth.getUser()).data.user?.id,
       })
-      .select()
+      .select("*, product_categories(*), product_types(*), manufacturers(*)")
       .single();
 
     if (error) throw error;
-    return data as Product;
+    return data as Product & {
+      product_categories: ProductCategory;
+      product_types: ProductType;
+      manufacturers: Manufacturer;
+    };
   }
 
   public async deleteProduct(id: string) {

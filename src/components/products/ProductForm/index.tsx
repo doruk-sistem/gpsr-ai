@@ -2,6 +2,7 @@
 
 import React, { createContext, useEffect, useState } from "react";
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,11 +15,14 @@ import type { ProductRegulation } from "@/lib/services/product-regulations-servi
 import type { UserProductUserStandard } from "@/lib/services/user-product-user-standards-service";
 import type { ProductTechnicalFile } from "@/lib/services/product-technical-files-service";
 import type { ProductNotifiedBody } from "@/lib/services/product-notified-bodies-service";
+import type { ProductCategory } from "@/lib/services/product-categories-service";
+import type { ProductType } from "@/lib/services/product-types-services";
+import type { Manufacturer } from "@/lib/services/manufacturers-service";
 
 import ProductStep1 from "./steps/ProductStep1";
 import ProductStep2 from "./steps/ProductStep2";
 import ProductStep3 from "./steps/ProductStep3";
-import { ArrowLeft } from "lucide-react";
+import ProductStep4 from "./steps/ProductStep4";
 
 type ProductFormContextType = {
   initialData?: ProductFormProps["initialData"];
@@ -30,7 +34,13 @@ type ProductFormContextType = {
 export const ProductFormContext = createContext<ProductFormContextType>(null);
 
 export interface ProductFormProps {
-  initialData?: Partial<Product> & {
+  initialData?: Partial<
+    Product & {
+      product_categories: ProductCategory;
+      product_types: ProductType;
+      manufacturers: Manufacturer;
+    }
+  > & {
     selectedQuestions?: ProductQuestionAnswer[];
     selectedDirectives?: ProductDirective[];
     selectedRegulations?: ProductRegulation[];
@@ -57,6 +67,11 @@ const STEPS = [
     description: "Upload technical files",
     component: ProductStep3,
   },
+  {
+    title: "Summary",
+    description: "Review your product information",
+    component: ProductStep4,
+  },
 ];
 export default function ProductForm({ initialData, mode }: ProductFormProps) {
   const [initialDataState, setInitialDataState] = useState(initialData);
@@ -66,7 +81,7 @@ export default function ProductForm({ initialData, mode }: ProductFormProps) {
   const StepComponent = STEPS[currentStep - 1].component;
 
   const handleNextStep = () => {
-    if (currentStep < totalSteps && currentStep !== 3) {
+    if (currentStep < totalSteps) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -95,6 +110,7 @@ export default function ProductForm({ initialData, mode }: ProductFormProps) {
         selectedRegulations,
         authorised_representative_eu_id,
         authorised_representative_uk_id,
+        selectedTechnicalFiles,
       } = initialData;
 
       const isFirstStepComplete =
@@ -115,7 +131,10 @@ export default function ProductForm({ initialData, mode }: ProductFormProps) {
         authorised_representative_eu_id &&
         authorised_representative_uk_id;
 
-      if (isSecondStepComplete) setCurrentStep(3);
+      const isThirdStepComplete = selectedTechnicalFiles;
+
+      if (isThirdStepComplete) setCurrentStep(4);
+      else if (isSecondStepComplete) setCurrentStep(3);
       else if (isFirstStepComplete) setCurrentStep(2);
     }
   }, [initialData, mode]);
@@ -156,7 +175,7 @@ export default function ProductForm({ initialData, mode }: ProductFormProps) {
                 </div>
 
                 <div>
-                  {currentStep > 1 && (
+                  {currentStep > 1 && currentStep !== 4 && (
                     <Button
                       variant="outline"
                       type="button"
