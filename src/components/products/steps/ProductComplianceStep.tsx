@@ -52,6 +52,7 @@ import {
   useAddUserProductUserStandard,
   useDeleteUserProductUserStandard,
 } from "@/hooks/use-user-product-user-standards";
+import { useUpdateProduct } from "@/hooks/use-products";
 
 interface ProductComplianceStepProps {
   initialData?: ProductFormProps["initialData"];
@@ -62,8 +63,6 @@ interface ProductComplianceStepProps {
 // TODO Ai support for directives, regulations and standards
 // TODO Fix performance issues
 // TODO Add next step (technical files)
-// TODO Fix Table Name: Authori(s)ed Representative -> Authorized Representative
-// TODO Add initial data for Authorized Representative fields
 export default function ProductComplianceStep({
   initialData,
   setInitialData,
@@ -87,6 +86,7 @@ export default function ProductComplianceStep({
     initialData?.authorised_representative_uk_id
   );
 
+  // Popover States
   const [openDirectivePopover, setOpenDirectivePopover] = useState(false);
   const [openRegulationPopover, setOpenRegulationPopover] = useState(false);
   const [openEuRepPopover, setOpenEuRepPopover] = useState(false);
@@ -101,7 +101,7 @@ export default function ProductComplianceStep({
   const removeProductDirective = useRemoveProductDirective();
   const addProductRegulation = useAddProductRegulation();
   const removeProductRegulation = useRemoveProductRegulation();
-
+  const updateProduct = useUpdateProduct();
   const addStandard = useAddUserProductUserStandard();
   const deleteStandard = useDeleteUserProductUserStandard();
 
@@ -294,7 +294,18 @@ export default function ProductComplianceStep({
           selectedRegulationIds.includes(r.regulation_id)
         ) || [];
 
-      // Update the form state with all directives and regulations
+      // ===============================
+      // Update Authorised Representatives
+      // ===============================
+      await updateProduct.mutateAsync({
+        id: initialData.id,
+        product: {
+          authorised_representative_eu_id: selectedEuRepId,
+          authorised_representative_uk_id: selectedUkRepId,
+        },
+      });
+
+      // Update the form state
       // Combine remaining items with newly added items
       // This ensures the next step has access to the complete objects
       setInitialData({
@@ -302,6 +313,8 @@ export default function ProductComplianceStep({
         selectedDirectives: [...remainingDirectives, ...addedDirectives],
         selectedRegulations: [...remainingRegulations, ...addedRegulations],
         selectedStandards: standards,
+        authorised_representative_eu_id: selectedEuRepId,
+        authorised_representative_uk_id: selectedUkRepId,
       });
 
       toast.success("Compliance data updated successfully");
@@ -596,7 +609,7 @@ export default function ProductComplianceStep({
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <label className="block text-base font-medium text-gray-700">
-                  EU Authorized Representative
+                  EU Authorised Representative
                 </label>
 
                 <Link href="/dashboard/representative">
@@ -668,7 +681,7 @@ export default function ProductComplianceStep({
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <label className="block text-base font-medium text-gray-700">
-                  UK Authorized Representative
+                  UK Authorised Representative
                 </label>
 
                 <Link href="/dashboard/representative">
