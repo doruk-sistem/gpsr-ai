@@ -12,6 +12,8 @@ import { useProductQuestionAnswers } from "@/hooks/use-product-question-answers"
 import { useProductDirectives } from "@/hooks/use-product-directives";
 import { useProductRegulations } from "@/hooks/use-product-regulations";
 import { useUserProductUserStandards } from "@/hooks/use-user-product-user-standards";
+import { useProductTechnicalFiles } from "@/hooks/use-product-technical-files";
+import { useProductNotifiedBodies } from "@/hooks/use-product-notified-bodies";
 
 export default function EditProductPage() {
   const { id } = useParams();
@@ -31,13 +33,23 @@ export default function EditProductPage() {
     data: userProductUserStandards,
     isLoading: isUserProductUserStandardsLoading,
   } = useUserProductUserStandards(id as string);
+  const {
+    data: productTechnicalFiles,
+    isLoading: isProductTechnicalFilesLoading,
+  } = useProductTechnicalFiles(id as string);
+  const {
+    data: productNotifiedBodies,
+    isLoading: isProductNotifiedBodiesLoading,
+  } = useProductNotifiedBodies(id as string);
 
   if (
     isProductLoading ||
     isProductQuestionAnswersLoading ||
     isProductDirectivesLoading ||
     isProductRegulationsLoading ||
-    isUserProductUserStandardsLoading
+    isUserProductUserStandardsLoading ||
+    isProductTechnicalFilesLoading ||
+    isProductNotifiedBodiesLoading
   ) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -59,6 +71,8 @@ export default function EditProductPage() {
         selectedDirectives: productDirectives || [],
         selectedRegulations: productRegulations || [],
         selectedStandards: userProductUserStandards || [],
+        selectedTechnicalFiles: productTechnicalFiles || [],
+        selectedNotifiedBody: productNotifiedBodies || undefined,
       }}
     />
   );

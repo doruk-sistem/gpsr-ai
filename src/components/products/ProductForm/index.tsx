@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useState } from "react";
+import React, { createContext, useEffect, useState } from "react";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
@@ -12,9 +12,13 @@ import type { ProductQuestionAnswer } from "@/lib/services/product-question-answ
 import type { ProductDirective } from "@/lib/services/product-directives-service";
 import type { ProductRegulation } from "@/lib/services/product-regulations-service";
 import type { UserProductUserStandard } from "@/lib/services/user-product-user-standards-service";
+import type { ProductTechnicalFile } from "@/lib/services/product-technical-files-service";
+import type { ProductNotifiedBody } from "@/lib/services/product-notified-bodies-service";
 
 import ProductStep1 from "./steps/ProductStep1";
 import ProductStep2 from "./steps/ProductStep2";
+import ProductStep3 from "./steps/ProductStep3";
+import { ArrowLeft } from "lucide-react";
 
 type ProductFormContextType = {
   initialData?: ProductFormProps["initialData"];
@@ -31,17 +35,38 @@ export interface ProductFormProps {
     selectedDirectives?: ProductDirective[];
     selectedRegulations?: ProductRegulation[];
     selectedStandards?: UserProductUserStandard[];
+    selectedTechnicalFiles?: ProductTechnicalFile[];
+    selectedNotifiedBody?: ProductNotifiedBody;
   };
   mode: "create" | "edit";
 }
 
+const STEPS = [
+  {
+    title: "General Information",
+    description: "Provide information about the product",
+    component: ProductStep1,
+  },
+  {
+    title: "Add Documents",
+    description: "Add documents to the product",
+    component: ProductStep2,
+  },
+  {
+    title: "Technical Files",
+    description: "Upload technical files",
+    component: ProductStep3,
+  },
+];
 export default function ProductForm({ initialData, mode }: ProductFormProps) {
   const [initialDataState, setInitialDataState] = useState(initialData);
-  const [currentStep, setCurrentStep] = useState(1);
-  const totalSteps = 2;
+  const [currentStep, setCurrentStep] = useState<number>(1);
+  const totalSteps = STEPS.length;
+
+  const StepComponent = STEPS[currentStep - 1].component;
 
   const handleNextStep = () => {
-    if (currentStep < totalSteps) {
+    if (currentStep < totalSteps && currentStep !== 3) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -66,6 +91,10 @@ export default function ProductForm({ initialData, mode }: ProductFormProps) {
         model_name,
         name,
         specification,
+        selectedDirectives,
+        selectedRegulations,
+        authorised_representative_eu_id,
+        authorised_representative_uk_id,
       } = initialData;
 
       const isFirstStepComplete =
@@ -80,11 +109,20 @@ export default function ProductForm({ initialData, mode }: ProductFormProps) {
         manufacturer_id &&
         selectedQuestions;
 
-      if (isFirstStepComplete) {
-        setCurrentStep(2);
-      }
+      const isSecondStepComplete =
+        selectedDirectives &&
+        selectedRegulations &&
+        authorised_representative_eu_id &&
+        authorised_representative_uk_id;
+
+      if (isSecondStepComplete) setCurrentStep(3);
+      else if (isFirstStepComplete) setCurrentStep(2);
     }
   }, [initialData, mode]);
+
+  useEffect(() => {
+    setInitialDataState(initialData);
+  }, [initialData]);
 
   return (
     <ProductFormContext.Provider
@@ -100,43 +138,48 @@ export default function ProductForm({ initialData, mode }: ProductFormProps) {
           <div className="space-y-8">
             {/* Step Indicator */}
             <div className="flex items-center justify-between border-b border-gray-200 pb-6">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <span className="text-primary font-semibold">
-                    {currentStep}
-                  </span>
+              <div className="flex items-center justify-between w-full">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <span className="text-primary font-semibold">
+                      {currentStep}
+                    </span>
+                  </div>
+                  <div>
+                    <h1 className="text-2xl font-bold">
+                      Add New Product - {STEPS[currentStep - 1].title}
+                    </h1>
+                    <p className="text-muted-foreground">
+                      Step {currentStep} of {totalSteps}
+                    </p>
+                  </div>
                 </div>
+
                 <div>
-                  <h1 className="text-2xl font-bold">
-                    {initialData ? "Edit Product" : "Add New Product"}
-                  </h1>
-                  <p className="text-muted-foreground">
-                    Step {currentStep} of {totalSteps}
-                  </p>
+                  {currentStep > 1 && (
+                    <Button
+                      variant="outline"
+                      type="button"
+                      onClick={handleBack}
+                    >
+                      <ArrowLeft className="w-4 h-4 mr-2" />
+                      Back to step {currentStep - 1}
+                    </Button>
+                  )}
+                  {currentStep === 1 && (
+                    <Link href="/dashboard/products">
+                      <Button variant="outline" type="button">
+                        Cancel
+                      </Button>
+                    </Link>
+                  )}
                 </div>
               </div>
             </div>
 
             {/* Step Content */}
             <div className="space-y-8">
-              {currentStep === 1 && <ProductStep1 />}
-              {currentStep === 2 && <ProductStep2 />}
-            </div>
-
-            {/* Navigation Buttons */}
-            <div className="mt-6 space-x-2 flex justify-end">
-              {currentStep > 1 && (
-                <Button variant="outline" type="button" onClick={handleBack}>
-                  Back
-                </Button>
-              )}
-              {currentStep === 1 && (
-                <Link href="/dashboard/products">
-                  <Button variant="outline" type="button">
-                    Cancel
-                  </Button>
-                </Link>
-              )}
+              <StepComponent />
             </div>
           </div>
         </CardContent>
