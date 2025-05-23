@@ -12,11 +12,13 @@ export interface ProductQuestionAnswer {
 }
 
 class ProductQuestionAnswersService {
-  public async getProductQuestionAnswers(productId: string) {
+  public async getProductQuestionAnswers(userProductId?: string) {
+    if (!userProductId) return [];
+
     const { data, error } = await supabase
-      .from("product_question_answers")
+      .from("user_product_question_answers")
       .select("*, product_questions(*)")
-      .eq("product_id", productId)
+      .eq("user_product_id", userProductId)
       .is("deleted_at", null);
 
     if (error) throw error;
@@ -24,13 +26,13 @@ class ProductQuestionAnswersService {
   }
 
   public async createProductQuestionAnswers(
-    productId: string,
+    userProductId: string,
     questionAnswers: Array<{ question_id: string; answer: boolean }>
   ) {
     const userId = (await supabase.auth.getUser()).data.user?.id;
 
     const answers = questionAnswers.map((qa) => ({
-      product_id: productId,
+      user_product_id: userProductId,
       question_id: qa.question_id,
       answer: qa.answer,
       created_at: new Date().toISOString(),
@@ -39,7 +41,7 @@ class ProductQuestionAnswersService {
     }));
 
     const { data, error } = await supabase
-      .from("product_question_answers")
+      .from("user_product_question_answers")
       .insert(answers)
       .select();
 
@@ -47,23 +49,23 @@ class ProductQuestionAnswersService {
     return data as ProductQuestionAnswer[];
   }
 
-  public async deleteProductQuestionAnswers(productId: string) {
+  public async deleteProductQuestionAnswers(userProductId: string) {
     const { error } = await supabase
-      .from("product_question_answers")
+      .from("user_product_question_answers")
       .delete()
-      .eq("product_id", productId);
+      .eq("user_product_id", userProductId);
 
     if (error) throw error;
   }
 
   public async deleteProductQuestionAnswersByIds(
-    productId: string,
+    userProductId: string,
     questionIds: string[]
   ) {
     const { error } = await supabase
-      .from("product_question_answers")
+      .from("user_product_question_answers")
       .delete()
-      .eq("product_id", productId)
+      .eq("user_product_id", userProductId)
       .in("question_id", questionIds);
 
     if (error) throw error;
