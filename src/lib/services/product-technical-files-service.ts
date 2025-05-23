@@ -29,12 +29,13 @@ class ProductTechnicalFilesService {
     productId: string,
     fileType: string,
     file: File,
-    userId: string,
     fileName?: string
   ) {
+    const userId = (await supabase.auth.getUser()).data.user?.id;
+
     const { publicUrl } = await storageService.uploadProductTechnicalFile(
       file,
-      userId,
+      userId!,
       fileName
     );
     const { data, error } = await supabase
@@ -54,8 +55,7 @@ class ProductTechnicalFilesService {
   async setProductTechnicalFileNotRequired(
     productId: string,
     fileType: string,
-    reason?: string,
-    userId?: string
+    reason?: string
   ) {
     const { data, error } = await supabase
       .from("user_product_technical_files")
@@ -66,7 +66,7 @@ class ProductTechnicalFilesService {
             file_type: fileType,
             not_required: true,
             not_required_reason: reason,
-            user_id: userId,
+            user_id: (await supabase.auth.getUser()).data.user?.id,
           },
         ],
         { onConflict: "user_product_id,file_type" }
@@ -78,11 +78,17 @@ class ProductTechnicalFilesService {
   }
 
   async deleteProductTechnicalFile(id: string) {
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("user_product_technical_files")
-      .update({ deleted_at: new Date().toISOString() })
-      .eq("id", id);
+      .delete()
+      .eq("id", id)
+      .select()
+      .single();
     if (error) throw error;
+
+    if (!data.file_url) return;
+
+    storageService.deleteProductTechnicalFile(data.file_url);
   }
 }
 
