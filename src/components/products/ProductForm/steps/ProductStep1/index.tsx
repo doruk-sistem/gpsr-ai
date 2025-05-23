@@ -46,13 +46,13 @@ import { useCreateProduct, useUpdateProduct } from "@/hooks/use-products";
 import {
   useCreateProductQuestionAnswers,
   useDeleteProductQuestionAnswersByIds,
-  useProductQuestionAnswers,
 } from "@/hooks/use-product-question-answers";
 import { useManufacturers } from "@/hooks/use-manufacturers";
 
 import { Product } from "@/lib/services/products-service";
 
 import { useProductForm } from "../../hooks/useProductForm";
+import { ProductQuestionAnswer } from "@/lib/services/product-question-answers-service";
 
 export default function ProductStep1() {
   const { initialData, setInitialData, onNextStep, mode } = useProductForm();
@@ -78,10 +78,6 @@ export default function ProductStep1() {
   const [openCategoryPopover, setOpenCategoryPopover] = useState(false);
   const [openSubcategoryPopover, setOpenSubcategoryPopover] = useState(false);
   const [openManufacturerPopover, setOpenManufacturerPopover] = useState(false);
-
-  const { data: productQuestionAnswers = [] } = useProductQuestionAnswers(
-    initialData?.id
-  );
 
   const deleteProductQuestionAnswers = useDeleteProductQuestionAnswersByIds();
   const updateProduct = useUpdateProduct();
@@ -179,6 +175,7 @@ export default function ProductStep1() {
       };
 
       let newProduct: Product | null = null;
+      let newProductQuestionAnswers: ProductQuestionAnswer[] | null = null;
 
       if (mode === "create") {
         // Create the product
@@ -191,10 +188,11 @@ export default function ProductStep1() {
             answer: true,
           }));
 
-          await createProductQuestionAnswers.mutateAsync({
-            productId: newProduct.id,
-            questionAnswers,
-          });
+          newProductQuestionAnswers =
+            await createProductQuestionAnswers.mutateAsync({
+              productId: newProduct.id,
+              questionAnswers,
+            });
         }
       }
 
@@ -206,7 +204,7 @@ export default function ProductStep1() {
 
         // Get current question answers
         const currentQuestionIds =
-          productQuestionAnswers?.map((qa) => qa.question_id) || [];
+          initialData?.selectedQuestions?.map((qa) => qa.question_id) || [];
 
         // Find questions to be removed (those that exist in current but not in newly selected ones)
         const questionsToRemove = currentQuestionIds.filter(
@@ -233,17 +231,18 @@ export default function ProductStep1() {
             answer: true,
           }));
 
-          await createProductQuestionAnswers.mutateAsync({
-            productId: initialData?.id as string,
-            questionAnswers,
-          });
+          newProductQuestionAnswers =
+            await createProductQuestionAnswers.mutateAsync({
+              productId: initialData?.id as string,
+              questionAnswers,
+            });
         }
       }
 
       setInitialData({
         ...initialData,
         ...newProduct,
-        selectedQuestions: productQuestionAnswers,
+        selectedQuestions: newProductQuestionAnswers || [],
       });
 
       onNextStep();

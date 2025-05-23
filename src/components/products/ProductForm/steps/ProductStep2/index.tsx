@@ -240,7 +240,6 @@ export default function ProductStep2() {
         authorised_representative_uk_id: selectedUkRepId,
       });
 
-      toast.success("Compliance data updated successfully");
       onNextStep();
     } catch (error) {
       console.error("Error updating compliance data:", error);

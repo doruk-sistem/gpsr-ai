@@ -67,11 +67,29 @@ export default function EditProductPage() {
       mode="edit"
       initialData={{
         ...product,
-        selectedQuestions: productQuestionAnswers || [],
-        selectedDirectives: productDirectives || [],
-        selectedRegulations: productRegulations || [],
-        selectedStandards: userProductUserStandards || [],
-        selectedTechnicalFiles: productTechnicalFiles || [],
+        selectedQuestions:
+          Array.isArray(productQuestionAnswers) &&
+          productQuestionAnswers?.length > 0
+            ? productQuestionAnswers
+            : undefined,
+        selectedDirectives:
+          Array.isArray(productDirectives) && productDirectives?.length > 0
+            ? productDirectives
+            : undefined,
+        selectedRegulations:
+          Array.isArray(productRegulations) && productRegulations?.length > 0
+            ? productRegulations
+            : undefined,
+        selectedStandards:
+          Array.isArray(userProductUserStandards) &&
+          userProductUserStandards?.length > 0
+            ? userProductUserStandards
+            : undefined,
+        selectedTechnicalFiles:
+          Array.isArray(productTechnicalFiles) &&
+          productTechnicalFiles?.length > 0
+            ? productTechnicalFiles
+            : undefined,
         selectedNotifiedBody: productNotifiedBodies || undefined,
       }}
     />

@@ -23,6 +23,7 @@ import { ProductTechnicalFile } from "@/lib/services/product-technical-files-ser
 
 import { useProductForm } from "../../hooks/useProductForm";
 import Confirmation from "./Confirmation";
+import { useUpdateProduct } from "@/hooks/use-products";
 
 // Teknik dosya tipleri sabiti
 const TECHNICAL_FILE_TYPES = [
@@ -72,6 +73,9 @@ export default function ProductStep3() {
   // Notified body hooks
   const createNotifiedBody = useCreateProductNotifiedBody();
   const updateNotifiedBody = useUpdateProductNotifiedBody();
+
+  // Product status hooks
+  const updateProductStatus = useUpdateProduct();
 
   // Fill the form with the existing notified body record
   useEffect(() => {
@@ -251,7 +255,19 @@ export default function ProductStep3() {
 
     try {
       await handleNotifiedBodySubmit();
-      toast.success("All data saved");
+
+      await updateProductStatus.mutateAsync({
+        id: productId!,
+        product: {
+          status: "pending",
+        },
+      });
+
+      setInitialData({
+        ...initialData,
+        status: "pending",
+      });
+
       onNextStep();
     } catch (err) {
       toast.error("Operation failed");

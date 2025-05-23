@@ -110,7 +110,7 @@ export default function ProductForm({ initialData, mode }: ProductFormProps) {
         selectedRegulations,
         authorised_representative_eu_id,
         authorised_representative_uk_id,
-        selectedTechnicalFiles,
+        status,
       } = initialData;
 
       const isFirstStepComplete =
@@ -131,7 +131,7 @@ export default function ProductForm({ initialData, mode }: ProductFormProps) {
         authorised_representative_eu_id &&
         authorised_representative_uk_id;
 
-      const isThirdStepComplete = selectedTechnicalFiles;
+      const isThirdStepComplete = status === "pending";
 
       if (isThirdStepComplete) setCurrentStep(4);
       else if (isSecondStepComplete) setCurrentStep(3);

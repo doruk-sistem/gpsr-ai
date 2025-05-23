@@ -238,6 +238,7 @@ export default function ProductsPage() {
                             size="icon"
                             onClick={() => handleDelete(product.id)}
                             className="hover:bg-red-50 hover:text-red-600"
+                            disabled={deleteProduct.isPending}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
