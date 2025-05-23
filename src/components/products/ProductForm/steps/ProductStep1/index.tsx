@@ -49,22 +49,14 @@ import {
   useProductQuestionAnswers,
 } from "@/hooks/use-product-question-answers";
 import { useManufacturers } from "@/hooks/use-manufacturers";
-import { ProductFormProps } from "../ProductForm";
+
 import { Product } from "@/lib/services/products-service";
 
-interface ProductBasicInfoStepProps {
-  initialData?: ProductFormProps["initialData"];
-  setInitialData: (data: ProductFormProps["initialData"]) => void;
-  onNextStep: () => void;
-  mode: "create" | "edit";
-}
+import { useProductForm } from "../../hooks/useProductForm";
 
-export default function ProductBasicInfoStep({
-  initialData,
-  setInitialData,
-  onNextStep,
-  mode,
-}: ProductBasicInfoStepProps) {
+export default function ProductStep1() {
+  const { initialData, setInitialData, onNextStep, mode } = useProductForm();
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [imagePreview, setImagePreview] = useState<string[]>([]);

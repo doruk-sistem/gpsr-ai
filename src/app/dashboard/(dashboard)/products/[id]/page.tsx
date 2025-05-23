@@ -16,17 +16,29 @@ import { useUserProductUserStandards } from "@/hooks/use-user-product-user-stand
 export default function EditProductPage() {
   const { id } = useParams();
 
-  const { data: product, isLoading } = useProduct(id as string);
-  const { data: productQuestionAnswers } = useProductQuestionAnswers(
+  const { data: product, isLoading: isProductLoading } = useProduct(
     id as string
   );
-  const { data: productDirectives } = useProductDirectives(id as string);
-  const { data: productRegulations } = useProductRegulations(id as string);
-  const { data: userProductUserStandards } = useUserProductUserStandards(
-    id as string
-  );
+  const {
+    data: productQuestionAnswers,
+    isLoading: isProductQuestionAnswersLoading,
+  } = useProductQuestionAnswers(id as string);
+  const { data: productDirectives, isLoading: isProductDirectivesLoading } =
+    useProductDirectives(id as string);
+  const { data: productRegulations, isLoading: isProductRegulationsLoading } =
+    useProductRegulations(id as string);
+  const {
+    data: userProductUserStandards,
+    isLoading: isUserProductUserStandardsLoading,
+  } = useUserProductUserStandards(id as string);
 
-  if (isLoading) {
+  if (
+    isProductLoading ||
+    isProductQuestionAnswersLoading ||
+    isProductDirectivesLoading ||
+    isProductRegulationsLoading ||
+    isUserProductUserStandardsLoading
+  ) {
     return (
       <div className="flex justify-center items-center h-64">
         <Spinner size="lg" />

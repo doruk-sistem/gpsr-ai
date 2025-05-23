@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { createContext, useState } from "react";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
@@ -13,8 +13,17 @@ import type { ProductDirective } from "@/lib/services/product-directives-service
 import type { ProductRegulation } from "@/lib/services/product-regulations-service";
 import type { UserProductUserStandard } from "@/lib/services/user-product-user-standards-service";
 
-import ProductBasicInfoStep from "./steps/ProductBasicInfoStep";
-import ProductComplianceStep from "./steps/ProductComplianceStep";
+import ProductStep1 from "./steps/ProductStep1";
+import ProductStep2 from "./steps/ProductStep2";
+
+type ProductFormContextType = {
+  initialData?: ProductFormProps["initialData"];
+  setInitialData: (data: ProductFormProps["initialData"]) => void;
+  onNextStep: () => void;
+  mode: "create" | "edit";
+} | null;
+
+export const ProductFormContext = createContext<ProductFormContextType>(null);
 
 export interface ProductFormProps {
   initialData?: Partial<Product> & {
@@ -78,7 +87,14 @@ export default function ProductForm({ initialData, mode }: ProductFormProps) {
   }, [initialData, mode]);
 
   return (
-    <div>
+    <ProductFormContext.Provider
+      value={{
+        initialData: initialDataState,
+        setInitialData: setInitialDataState,
+        mode,
+        onNextStep: handleNextStep,
+      }}
+    >
       <Card className="border shadow-sm">
         <CardContent className="p-8">
           <div className="space-y-8">
@@ -103,21 +119,8 @@ export default function ProductForm({ initialData, mode }: ProductFormProps) {
 
             {/* Step Content */}
             <div className="space-y-8">
-              {currentStep === 1 && (
-                <ProductBasicInfoStep
-                  initialData={initialDataState}
-                  setInitialData={setInitialDataState}
-                  onNextStep={handleNextStep}
-                  mode={mode}
-                />
-              )}
-              {currentStep === 2 && (
-                <ProductComplianceStep
-                  initialData={initialDataState}
-                  setInitialData={setInitialDataState}
-                  onNextStep={handleNextStep}
-                />
-              )}
+              {currentStep === 1 && <ProductStep1 />}
+              {currentStep === 2 && <ProductStep2 />}
             </div>
 
             {/* Navigation Buttons */}
@@ -138,6 +141,6 @@ export default function ProductForm({ initialData, mode }: ProductFormProps) {
           </div>
         </CardContent>
       </Card>
-    </div>
+    </ProductFormContext.Provider>
   );
 }

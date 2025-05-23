@@ -2,8 +2,6 @@
 
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Command,
   CommandEmpty,
@@ -44,30 +42,17 @@ import {
 } from "@/hooks/use-product-regulations";
 
 import { ProductDirective } from "@/lib/services/product-directives-service";
-import { UserProductUserStandard } from "@/lib/services/user-product-user-standards-service";
 import { ProductRegulation } from "@/lib/services/product-regulations-service";
 
-import { ProductFormProps } from "../ProductForm";
-import {
-  useAddUserProductUserStandard,
-  useDeleteUserProductUserStandard,
-} from "@/hooks/use-user-product-user-standards";
 import { useUpdateProduct } from "@/hooks/use-products";
-
-interface ProductComplianceStepProps {
-  initialData?: ProductFormProps["initialData"];
-  onNextStep: () => void;
-  setInitialData: (data: ProductFormProps["initialData"]) => void;
-}
+import { useProductForm } from "../../hooks/useProductForm";
+import Standards from "./Standards";
 
 // TODO Ai support for directives, regulations and standards
-// TODO Fix performance issues
 // TODO Add next step (technical files)
-export default function ProductComplianceStep({
-  initialData,
-  setInitialData,
-  onNextStep,
-}: ProductComplianceStepProps) {
+export default function ProductStep2() {
+  const { initialData, setInitialData, onNextStep } = useProductForm();
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [selectedDirectiveIds, setSelectedDirectiveIds] = useState<number[]>(
@@ -75,9 +60,6 @@ export default function ProductComplianceStep({
   );
   const [selectedRegulationIds, setSelectedRegulationIds] = useState<number[]>(
     initialData?.selectedRegulations?.map((r) => r.regulation_id) || []
-  );
-  const [standards, setStandards] = useState<UserProductUserStandard[]>(
-    initialData?.selectedStandards || []
   );
   const [selectedEuRepId, setSelectedEuRepId] = useState<string | undefined>(
     initialData?.authorised_representative_eu_id
@@ -102,18 +84,6 @@ export default function ProductComplianceStep({
   const addProductRegulation = useAddProductRegulation();
   const removeProductRegulation = useRemoveProductRegulation();
   const updateProduct = useUpdateProduct();
-  const addStandard = useAddUserProductUserStandard();
-  const deleteStandard = useDeleteUserProductUserStandard();
-
-  const [newStandard, setNewStandard] = useState<{
-    ref_no: string;
-    edition_date: string;
-    title: string;
-  }>({
-    ref_no: "",
-    edition_date: "",
-    title: "",
-  });
 
   const handleDirectiveToggle = (directiveId: number) => {
     if (selectedDirectiveIds.includes(directiveId)) {
@@ -132,52 +102,6 @@ export default function ProductComplianceStep({
       );
     } else {
       setSelectedRegulationIds([...selectedRegulationIds, regulationId]);
-    }
-  };
-
-  const handleAddStandard = async () => {
-    if (
-      !newStandard.ref_no ||
-      !newStandard.edition_date ||
-      !newStandard.title
-    ) {
-      toast.error("Please fill in all fields");
-      return;
-    }
-
-    try {
-      const addedStandard = await addStandard.mutateAsync({
-        ref_no: newStandard.ref_no,
-        edition_date: newStandard.edition_date,
-        title: newStandard.title,
-        user_product_id: initialData?.id || "",
-      });
-
-      setStandards([...standards, addedStandard]);
-
-      setNewStandard({
-        ref_no: "",
-        edition_date: "",
-        title: "",
-      });
-
-      toast.success("Standard added successfully");
-    } catch (error) {
-      console.error("Error adding standard:", error);
-      toast.error("Failed to add standard");
-    }
-  };
-
-  const handleRemoveStandard = async (standardId: string) => {
-    try {
-      await deleteStandard.mutateAsync(standardId);
-
-      setStandards(standards.filter((s) => s.id !== standardId));
-
-      toast.success("Standard removed successfully");
-    } catch (error) {
-      console.error("Error removing standard:", error);
-      toast.error("Failed to remove standard");
     }
   };
 
@@ -312,7 +236,6 @@ export default function ProductComplianceStep({
         ...initialData,
         selectedDirectives: [...remainingDirectives, ...addedDirectives],
         selectedRegulations: [...remainingRegulations, ...addedRegulations],
-        selectedStandards: standards,
         authorised_representative_eu_id: selectedEuRepId,
         authorised_representative_uk_id: selectedUkRepId,
       });
@@ -500,107 +423,7 @@ export default function ProductComplianceStep({
           </div>
         </div>
 
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <FileText className="h-5 w-5 text-primary" />
-            <h3 className="text-lg font-medium">Standards</h3>
-          </div>
-
-          <div className="space-y-4">
-            {standards.length > 0 && (
-              <div className="space-y-4">
-                {standards.map((standard) => (
-                  <div key={standard.id} className="grid grid-cols-3 gap-4">
-                    <div className="space-y-2">
-                      <Label>Reference Number</Label>
-                      <div className="flex items-center gap-2">
-                        <Input
-                          value={standard.ref_no}
-                          disabled
-                          className="bg-muted"
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Edition/Date</Label>
-                      <div className="flex items-center gap-2">
-                        <Input
-                          value={standard.edition_date || ""}
-                          disabled
-                          className="bg-muted"
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-2 w-full">
-                      <Label>Title</Label>
-                      <div className="flex items-center justify-between gap-2">
-                        <Input
-                          value={standard.title}
-                          disabled
-                          className="bg-muted"
-                        />
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleRemoveStandard(standard.id)}
-                          type="button"
-                        >
-                          <Trash className="h-4 w-4 text-primary" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <div className="grid grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label>Reference Number</Label>
-                <Input
-                  value={newStandard.ref_no}
-                  onChange={(e) =>
-                    setNewStandard({ ...newStandard, ref_no: e.target.value })
-                  }
-                  placeholder="e.g., EN 12345"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Edition/Date</Label>
-                <Input
-                  value={newStandard.edition_date}
-                  onChange={(e) =>
-                    setNewStandard({
-                      ...newStandard,
-                      edition_date: e.target.value,
-                    })
-                  }
-                  placeholder="e.g., 2023"
-                />
-              </div>
-              <div className="space-y-2 w-full">
-                <Label>Title</Label>
-                <div className="flex items-center justify-between gap-2">
-                  <Input
-                    value={newStandard.title}
-                    onChange={(e) =>
-                      setNewStandard({ ...newStandard, title: e.target.value })
-                    }
-                    placeholder="Standard title"
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={handleAddStandard}
-                  >
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <Standards />
 
         {/* Manufacturer and Representatives Section */}
         <div className="space-y-6">
