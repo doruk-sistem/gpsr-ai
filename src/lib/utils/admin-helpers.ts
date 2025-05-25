@@ -9,7 +9,7 @@ export const isAdmin = async (user: User | null): Promise<boolean> => {
       .from('admins')
       .select('*')
       .eq('user_id', user.id)
-      .single();
+      .maybeSingle();
 
     if (error) {
       console.error("Error checking admin status:", error);
@@ -31,7 +31,7 @@ export const isSuperAdmin = async (user: User | null): Promise<boolean> => {
       .from('admins')
       .select('role')
       .eq('user_id', user.id)
-      .single();
+      .maybeSingle();
 
     if (error) {
       console.error("Error checking superadmin status:", error);
