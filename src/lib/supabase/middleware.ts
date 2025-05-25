@@ -61,7 +61,10 @@ export async function updateSession(request: NextRequest) {
   console.log(`[Middleware] Auth cookie present: ${!!authCookie}`);
 
   // If user tried to access dashboard without authentication, redirect to login
-  if (!user && (pathname.startsWith("/dashboard") || pathname.startsWith("/admin"))) {
+  if (
+    !user &&
+    (pathname.startsWith("/dashboard") || pathname.startsWith("/admin"))
+  ) {
     console.log(
       "[Middleware] Unauthenticated user trying to access protected area, redirecting to login"
     );
@@ -78,27 +81,39 @@ export async function updateSession(request: NextRequest) {
     console.log(
       "[Middleware] Authenticated user trying to access auth pages, determining redirect destination"
     );
-    
+
     // Check if user is an admin
-    const adminStatus = await isAdmin(user);
-    
+    const adminStatus = await isAdmin(user, supabase);
+
+    console.log("[Middleware] Admin status:", adminStatus);
+
     if (adminStatus) {
-      console.log("[Middleware] Admin user detected, redirecting to admin dashboard");
+      console.log(
+        "[Middleware] Admin user detected, redirecting to admin dashboard"
+      );
       url.pathname = "/admin/dashboard";
     } else {
-      console.log("[Middleware] Regular user detected, redirecting to user dashboard");
+      console.log(
+        "[Middleware] Regular user detected, redirecting to user dashboard"
+      );
       url.pathname = "/dashboard";
     }
-    
+
     return NextResponse.redirect(url);
   }
 
   // If regular user tries to access admin routes, redirect to dashboard
   if (user && pathname.startsWith("/admin")) {
-    const adminStatus = await isAdmin(user);
-    
+    console.log("[Middleware] User trying to access admin area");
+
+    const adminStatus = await isAdmin(user, supabase);
+
+    console.log("[Middleware] Admin status:", adminStatus);
+
     if (!adminStatus) {
-      console.log("[Middleware] Non-admin user trying to access admin area, redirecting to dashboard");
+      console.log(
+        "[Middleware] Non-admin user trying to access admin area, redirecting to dashboard"
+      );
       url.pathname = "/dashboard";
       return NextResponse.redirect(url);
     }
