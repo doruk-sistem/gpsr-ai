@@ -2,6 +2,8 @@
 
 -- Add role field to existing admins table
 ALTER TABLE admins ADD COLUMN role TEXT NOT NULL DEFAULT 'admin' CHECK (role IN ('admin', 'superadmin'));
+-- We need to commit this change before using it
+COMMIT;
 
 -- Create invitations table for new admins
 CREATE TABLE admin_invitations (
@@ -86,22 +88,22 @@ GRANT EXECUTE ON FUNCTION is_superadmin TO authenticated;
 GRANT EXECUTE ON FUNCTION use_admin_invitation TO authenticated;
 
 -- Insert initial superadmin (Furkan Arslan)
+-- This is now a separate transaction that will run after the role column is committed
 DO $$
 DECLARE
-  user_id UUID;
+  v_user_id UUID;  -- Using a different variable name to avoid ambiguity
 BEGIN
   -- First check if the user exists
-  SELECT id INTO user_id FROM auth.users WHERE email = 'furkan.arslan@doruksistem.com.tr';
+  SELECT id INTO v_user_id FROM auth.users WHERE email = 'furkan.arslan@doruksistem.com.tr';
   
   -- If user exists, make them superadmin
-  IF user_id IS NOT NULL THEN
+  IF v_user_id IS NOT NULL THEN
     -- Check if admin record already exists
-    IF NOT EXISTS (SELECT 1 FROM admins WHERE admins.user_id = user_id) THEN
-      INSERT INTO admins (user_id, role) VALUES (user_id, 'superadmin');
+    IF NOT EXISTS (SELECT 1 FROM admins WHERE user_id = v_user_id) THEN
+      INSERT INTO admins (user_id, role) VALUES (v_user_id, 'superadmin');
     ELSE
       -- Update existing record to superadmin
-      UPDATE admins SET role = 'superadmin' WHERE user_id = user_id;
+      UPDATE admins SET role = 'superadmin' WHERE user_id = v_user_id;
     END IF;
   END IF;
 END $$;
-
