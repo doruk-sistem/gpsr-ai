@@ -1,12 +1,12 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase/client";
 
 export interface RepresentativeRequestDetail {
   id: string;
   user_id: string;
-  region: 'eu' | 'uk';
+  region: "eu" | "uk";
   // Company details
   company_name: string;
   company_number: string;
@@ -37,7 +37,7 @@ export interface RepresentativeRequestDetail {
   confirm_responsibility: boolean;
   confirm_terms: boolean;
   // Status
-  status: 'pending' | 'approved' | 'rejected' | 'cancelled';
+  status: "pending" | "approved" | "rejected" | "cancelled";
   admin_notes?: string;
   created_at: string;
   updated_at: string;
@@ -48,44 +48,46 @@ export interface RepresentativeRequestDetail {
       first_name?: string;
       last_name?: string;
       company?: string;
-    }
-  }
+    };
+  };
 }
 
 export const useAdminRepresentativeRequest = (requestId: string | null) => {
   const queryClient = useQueryClient();
-  
+
   const query = useQuery({
-    queryKey: ['admin', 'representative-request', requestId],
+    queryKey: ["admin", "representative-request", requestId],
     queryFn: async () => {
       if (!requestId) return null;
-      
+
       try {
         const { data, error } = await supabase
-          .from('authorised_representative_requests')
-          .select(`
+          .from("authorised_representative_requests")
+          .select(
+            `
             *,
             auth_users:user_id (
               email,
               user_metadata
             )
-          `)
-          .eq('id', requestId)
+          `
+          )
+          .eq("id", requestId)
           .single();
 
         if (error) throw error;
-        
+
         // Reshape the data to match our interface
         const formattedData: RepresentativeRequestDetail = {
           ...data,
-          user: data.auth_users ? {
-            email: data.auth_users.email,
-            user_metadata: data.auth_users.user_metadata
-          } : undefined
+          user: data.auth_users
+            ? {
+                email: data.auth_users.email,
+                user_metadata: data.auth_users.user_metadata,
+              }
+            : undefined,
         };
-        
-        delete formattedData.auth_users;
-        
+
         return formattedData;
       } catch (error) {
         console.error("Error fetching admin representative request:", error);
@@ -99,23 +101,25 @@ export const useAdminRepresentativeRequest = (requestId: string | null) => {
   const updateNotes = useMutation({
     mutationFn: async ({ id, notes }: { id: string; notes: string }) => {
       const { data, error } = await supabase
-        .from('authorised_representative_requests')
+        .from("authorised_representative_requests")
         .update({ admin_notes: notes, updated_at: new Date().toISOString() })
-        .eq('id', id)
+        .eq("id", id)
         .select()
         .single();
 
       if (error) throw error;
-      
+
       return data;
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['admin', 'representative-request', variables.id] });
-    }
+      queryClient.invalidateQueries({
+        queryKey: ["admin", "representative-request", variables.id],
+      });
+    },
   });
 
   return {
     ...query,
-    updateNotes
+    updateNotes,
   };
 };

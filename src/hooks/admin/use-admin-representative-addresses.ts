@@ -1,12 +1,12 @@
 "use client";
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase/client";
 
 export interface RepresentativeAddress {
   id: string;
   user_id: string;
-  region: 'eu' | 'uk';
+  region: "eu" | "uk";
   company_name: string;
   company_address: string;
   company_logo_url: string | null;
@@ -20,24 +20,23 @@ export interface RepresentativeAddress {
       first_name?: string;
       last_name?: string;
       company?: string;
-    }
-  }
+    };
+  };
 }
 
 interface AddressParams {
   search?: string;
   region?: string;
   sort?: string;
-  order?: 'asc' | 'desc';
+  order?: "asc" | "desc";
 }
 
 export const useAdminRepresentativeAddresses = (params: AddressParams = {}) => {
   return useQuery({
-    queryKey: ['admin', 'representative-addresses', params],
+    queryKey: ["admin", "representative-addresses", params],
     queryFn: async () => {
       try {
-        let query = supabase
-          .from('authorised_representative_addresses')
+        let query = supabase.from("authorised_representative_addresses")
           .select(`
             *,
             auth_users:user_id (
@@ -55,36 +54,36 @@ export const useAdminRepresentativeAddresses = (params: AddressParams = {}) => {
 
         // Apply region filter
         if (params.region) {
-          query = query.eq('region', params.region);
+          query = query.eq("region", params.region);
         }
 
         // Apply sorting
         if (params.sort) {
-          const order = params.order || 'asc';
-          query = query.order(params.sort, { ascending: order === 'asc' });
+          const order = params.order || "asc";
+          query = query.order(params.sort, { ascending: order === "asc" });
         } else {
-          query = query.order('created_at', { ascending: false });
+          query = query.order("created_at", { ascending: false });
         }
 
         const { data, error } = await query;
 
         if (error) throw error;
-        
+
         // Reshape the data to match our interface
-        const formattedData: RepresentativeAddress[] = data.map(item => {
+        const formattedData: RepresentativeAddress[] = data.map((item) => {
           const formattedItem: RepresentativeAddress = {
             ...item,
-            user: item.auth_users ? {
-              email: item.auth_users.email,
-              user_metadata: item.auth_users.user_metadata
-            } : undefined
+            user: item.auth_users
+              ? {
+                  email: item.auth_users.email,
+                  user_metadata: item.auth_users.user_metadata,
+                }
+              : undefined,
           };
-          
-          delete formattedItem.auth_users;
-          
+
           return formattedItem;
         });
-        
+
         return formattedData;
       } catch (error) {
         console.error("Error fetching admin representative addresses:", error);
