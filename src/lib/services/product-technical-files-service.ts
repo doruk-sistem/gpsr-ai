@@ -17,9 +17,9 @@ export interface ProductTechnicalFile {
 class ProductTechnicalFilesService {
   async getProductTechnicalFiles(productId: string) {
     const { data, error } = await supabase
-      .from("product_technical_files")
+      .from("user_product_technical_files")
       .select("*")
-      .eq("product_id", productId)
+      .eq("user_product_id", productId)
       .is("deleted_at", null);
     if (error) throw error;
     return data as ProductTechnicalFile[];
@@ -29,18 +29,19 @@ class ProductTechnicalFilesService {
     productId: string,
     fileType: string,
     file: File,
-    userId: string,
     fileName?: string
   ) {
+    const userId = (await supabase.auth.getUser()).data.user?.id;
+
     const { publicUrl } = await storageService.uploadProductTechnicalFile(
       file,
-      userId,
+      userId!,
       fileName
     );
     const { data, error } = await supabase
-      .from("product_technical_files")
+      .from("user_product_technical_files")
       .insert({
-        product_id: productId,
+        user_product_id: productId,
         file_type: fileType,
         file_url: publicUrl,
         user_id: userId,
@@ -54,22 +55,21 @@ class ProductTechnicalFilesService {
   async setProductTechnicalFileNotRequired(
     productId: string,
     fileType: string,
-    reason?: string,
-    userId?: string
+    reason?: string
   ) {
     const { data, error } = await supabase
-      .from("product_technical_files")
+      .from("user_product_technical_files")
       .upsert(
         [
           {
-            product_id: productId,
+            user_product_id: productId,
             file_type: fileType,
             not_required: true,
             not_required_reason: reason,
-            user_id: userId,
+            user_id: (await supabase.auth.getUser()).data.user?.id,
           },
         ],
-        { onConflict: "product_id,file_type" }
+        { onConflict: "user_product_id,file_type" }
       )
       .select()
       .single();
@@ -78,11 +78,17 @@ class ProductTechnicalFilesService {
   }
 
   async deleteProductTechnicalFile(id: string) {
-    const { error } = await supabase
-      .from("product_technical_files")
-      .update({ deleted_at: new Date().toISOString() })
-      .eq("id", id);
+    const { data, error } = await supabase
+      .from("user_product_technical_files")
+      .delete()
+      .eq("id", id)
+      .select()
+      .single();
     if (error) throw error;
+
+    if (!data.file_url) return;
+
+    storageService.deleteProductTechnicalFile(data.file_url);
   }
 }
 

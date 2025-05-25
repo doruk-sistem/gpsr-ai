@@ -1,130 +1,56 @@
 "use client";
 
 import React from "react";
-import { toast } from "sonner";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 
 import ProductForm from "@/components/products/ProductForm";
 
-import { useProduct, useUpdateProduct } from "@/hooks/use-products";
-import { useCurrentUser } from "@/hooks/use-auth";
-import {
-  useCreateProductQuestionAnswers,
-  useDeleteProductQuestionAnswersByIds,
-  useProductQuestionAnswers,
-} from "@/hooks/use-product-question-answers";
-
-import storageService from "@/lib/services/storage-service";
-
 import Spinner from "@/components/ui/spinner";
 
+import { useProduct } from "@/hooks/use-products";
+import { useProductQuestionAnswers } from "@/hooks/use-product-question-answers";
+import { useProductDirectives } from "@/hooks/use-product-directives";
+import { useProductRegulations } from "@/hooks/use-product-regulations";
+import { useUserProductUserStandards } from "@/hooks/use-user-product-user-standards";
+import { useProductTechnicalFiles } from "@/hooks/use-product-technical-files";
+import { useProductNotifiedBodies } from "@/hooks/use-product-notified-bodies";
+
 export default function EditProductPage() {
-  const router = useRouter();
   const { id } = useParams();
 
-  const { data: product, isLoading } = useProduct(id as string);
-  const { data: productQuestionAnswers } = useProductQuestionAnswers(
+  const { data: product, isLoading: isProductLoading } = useProduct(
     id as string
   );
-  const updateProduct = useUpdateProduct();
-  const createProductQuestionAnswers = useCreateProductQuestionAnswers();
-  const deleteProductQuestionAnswers = useDeleteProductQuestionAnswersByIds();
-  const { data: user } = useCurrentUser();
+  const {
+    data: productQuestionAnswers,
+    isLoading: isProductQuestionAnswersLoading,
+  } = useProductQuestionAnswers(id as string);
+  const { data: productDirectives, isLoading: isProductDirectivesLoading } =
+    useProductDirectives(id as string);
+  const { data: productRegulations, isLoading: isProductRegulationsLoading } =
+    useProductRegulations(id as string);
+  const {
+    data: userProductUserStandards,
+    isLoading: isUserProductUserStandardsLoading,
+  } = useUserProductUserStandards(id as string);
+  const {
+    data: productTechnicalFiles,
+    isLoading: isProductTechnicalFilesLoading,
+  } = useProductTechnicalFiles(id as string);
+  const {
+    data: productNotifiedBodies,
+    isLoading: isProductNotifiedBodiesLoading,
+  } = useProductNotifiedBodies(id as string);
 
-  const handleSubmit = async (formData: FormData) => {
-    try {
-      let imageUrls = product?.image_urls || [];
-
-      const imageFiles = formData.getAll("images") as File[];
-
-      for (let i = 0; i < imageFiles.length; i++) {
-        const file = imageFiles[i];
-        if (file && file.name !== "") {
-          const { publicUrl } = await storageService.uploadProductFile(
-            file,
-            user?.id as string
-          );
-          imageUrls[i] = publicUrl;
-        }
-      }
-
-      // Get standards from the form
-      const standards = formData.getAll("standards") as string[];
-      const selectedQuestionIds = formData.getAll("question_id") as string[];
-
-      const data = {
-        name: formData.get("name") as string,
-        require_ce_ukca_marking:
-          formData.get("require_ce_ukca_marking") === "true",
-        batch_number: formData.get("batch_number") as string,
-        model_name: formData.get("model_name") as string,
-        image_urls: imageUrls,
-        specification: (formData.get("specification") as string)
-          ?.split("\n")
-          .filter(Boolean),
-        directives: formData.getAll("directives") as string[],
-        regulations: formData.getAll("regulations") as string[],
-        standards,
-        manufacturer_id: formData.get("manufacturer_id") as string,
-        authorised_representative_eu_id: formData.get(
-          "authorised_representative_eu_id"
-        ) as string,
-        authorised_representative_uk_id: formData.get(
-          "authorised_representative_uk_id"
-        ) as string,
-        category_id: parseInt(formData.get("category_id") as string),
-        product_type_id: parseInt(formData.get("product_type_id") as string),
-      };
-
-      await updateProduct.mutateAsync({
-        id: id as string,
-        product: data,
-      });
-
-      // Get current question answers
-      const currentQuestionIds =
-        productQuestionAnswers?.map((qa) => qa.question_id) || [];
-
-      // Find questions to be removed (those that exist in current but not in newly selected ones)
-      const questionsToRemove = currentQuestionIds.filter(
-        (id) => !selectedQuestionIds.includes(id)
-      );
-
-      // Find questions to be added (those that exist in newly selected but not in current ones)
-      const questionsToAdd = selectedQuestionIds.filter(
-        (id) => !currentQuestionIds.includes(id)
-      );
-
-      // Remove questions that are no longer selected
-      if (questionsToRemove.length > 0) {
-        await deleteProductQuestionAnswers.mutateAsync({
-          productId: id as string,
-          questionIds: questionsToRemove,
-        });
-      }
-
-      // Add questions that are newly selected
-      if (questionsToAdd.length > 0) {
-        const questionAnswers = questionsToAdd.map((questionId) => ({
-          question_id: questionId,
-          answer: true,
-        }));
-
-        await createProductQuestionAnswers.mutateAsync({
-          productId: id as string,
-          questionAnswers,
-        });
-      }
-
-      toast.success("Product updated successfully");
-      router.push("/dashboard/products");
-    } catch (error) {
-      console.error("Error:", error);
-      toast.error("Error updating product");
-    }
-  };
-
-  if (isLoading) {
+  if (
+    isProductLoading ||
+    isProductQuestionAnswersLoading ||
+    isProductDirectivesLoading ||
+    isProductRegulationsLoading ||
+    isUserProductUserStandardsLoading ||
+    isProductTechnicalFilesLoading ||
+    isProductNotifiedBodiesLoading
+  ) {
     return (
       <div className="flex justify-center items-center h-64">
         <Spinner size="lg" />
@@ -138,15 +64,34 @@ export default function EditProductPage() {
 
   return (
     <ProductForm
+      mode="edit"
       initialData={{
         ...product,
         selectedQuestions:
-          productQuestionAnswers?.map((qa) => qa.question_id) || [],
+          Array.isArray(productQuestionAnswers) &&
+          productQuestionAnswers?.length > 0
+            ? productQuestionAnswers
+            : undefined,
+        selectedDirectives:
+          Array.isArray(productDirectives) && productDirectives?.length > 0
+            ? productDirectives
+            : undefined,
+        selectedRegulations:
+          Array.isArray(productRegulations) && productRegulations?.length > 0
+            ? productRegulations
+            : undefined,
+        selectedStandards:
+          Array.isArray(userProductUserStandards) &&
+          userProductUserStandards?.length > 0
+            ? userProductUserStandards
+            : undefined,
+        selectedTechnicalFiles:
+          Array.isArray(productTechnicalFiles) &&
+          productTechnicalFiles?.length > 0
+            ? productTechnicalFiles
+            : undefined,
+        selectedNotifiedBody: productNotifiedBodies || undefined,
       }}
-      onSubmit={handleSubmit}
-      isSubmitting={
-        updateProduct.isPending || createProductQuestionAnswers.isPending
-      }
     />
   );
 }

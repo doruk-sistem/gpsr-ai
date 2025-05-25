@@ -17,20 +17,17 @@ export const useUploadProductTechnicalFile = () => {
       productId,
       fileType,
       file,
-      userId,
       fileName,
     }: {
       productId: string;
       fileType: string;
       file: File;
-      userId: string;
       fileName?: string;
     }) =>
       productTechnicalFilesService.uploadProductTechnicalFile(
         productId,
         fileType,
         file,
-        userId,
         fileName
       ),
     onSuccess: (_, variables) => {
@@ -48,18 +45,15 @@ export const useSetProductTechnicalFileNotRequired = () => {
       productId,
       fileType,
       reason,
-      userId,
     }: {
       productId: string;
       fileType: string;
       reason?: string;
-      userId?: string;
     }) =>
       productTechnicalFilesService.setProductTechnicalFileNotRequired(
         productId,
         fileType,
-        reason,
-        userId
+        reason
       ),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({

@@ -18,7 +18,6 @@ export const useCreateProductNotifiedBody = () => {
     mutationFn: ({
       productId,
       notifiedBody,
-      userId,
     }: {
       productId: string;
       notifiedBody: Omit<
@@ -29,8 +28,7 @@ export const useCreateProductNotifiedBody = () => {
     }) =>
       productNotifiedBodiesService.createProductNotifiedBody(
         productId,
-        notifiedBody,
-        userId
+        notifiedBody
       ),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
