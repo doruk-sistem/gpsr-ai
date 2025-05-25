@@ -17,12 +17,14 @@ export interface ProductNotifiedBody {
 class ProductNotifiedBodiesService {
   async getProductNotifiedBodies(productId: string) {
     const { data, error } = await supabase
-      .from("product_notified_bodies")
+      .from("user_product_notified_bodies")
       .select("*")
-      .eq("product_id", productId)
-      .is("deleted_at", null);
+      .eq("user_product_id", productId)
+      .is("deleted_at", null)
+      .single();
+
     if (error) throw error;
-    return data as ProductNotifiedBody[];
+    return data as ProductNotifiedBody;
   }
 
   async createProductNotifiedBody(
@@ -30,15 +32,14 @@ class ProductNotifiedBodiesService {
     notifiedBody: Omit<
       ProductNotifiedBody,
       "id" | "product_id" | "created_at" | "updated_at"
-    >,
-    userId?: string
+    >
   ) {
     const { data, error } = await supabase
-      .from("product_notified_bodies")
+      .from("user_product_notified_bodies")
       .insert({
         ...notifiedBody,
-        product_id: productId,
-        user_id: userId,
+        user_product_id: productId,
+        user_id: (await supabase.auth.getUser()).data.user?.id,
       })
       .select()
       .single();
@@ -51,7 +52,7 @@ class ProductNotifiedBodiesService {
     notifiedBody: Partial<ProductNotifiedBody>
   ) {
     const { data, error } = await supabase
-      .from("product_notified_bodies")
+      .from("user_product_notified_bodies")
       .update(notifiedBody)
       .eq("id", id)
       .select()
@@ -62,8 +63,8 @@ class ProductNotifiedBodiesService {
 
   async deleteProductNotifiedBody(id: string) {
     const { error } = await supabase
-      .from("product_notified_bodies")
-      .update({ deleted_at: new Date().toISOString() })
+      .from("user_product_notified_bodies")
+      .delete()
       .eq("id", id);
     if (error) throw error;
   }
