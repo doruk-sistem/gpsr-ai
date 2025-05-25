@@ -97,12 +97,13 @@ export async function updateSession(request: NextRequest) {
         "[Middleware] Regular user detected, redirecting to user dashboard"
       );
       url.pathname = "/dashboard";
+      return NextResponse.redirect(url);
     }
 
     return NextResponse.redirect(url);
   }
 
-  // If regular user tries to access admin routes, redirect to dashboard
+  // If user tries to access admin routes, check if they're an admin
   if (user && pathname.startsWith("/admin")) {
     console.log("[Middleware] User trying to access admin area");
 
@@ -175,6 +176,31 @@ export async function updateSession(request: NextRequest) {
         url.pathname = "/dashboard/billing";
         return NextResponse.redirect(url);
       }
+    }
+  }
+
+  // Special handling for login success - check if user is admin and redirect accordingly
+  if (
+    user &&
+    pathname === "/auth/login" &&
+    url.searchParams.get("redirected") !== "true"
+  ) {
+    try {
+      const adminStatus = await isAdmin(user);
+
+      if (adminStatus) {
+        console.log(
+          "[Middleware] Admin user logged in, redirecting to admin dashboard"
+        );
+        url.pathname = "/admin/dashboard";
+        url.searchParams.set("redirected", "true");
+        return NextResponse.redirect(url);
+      }
+    } catch (error) {
+      console.error(
+        "[Middleware] Error checking admin status after login:",
+        error
+      );
     }
   }
 
