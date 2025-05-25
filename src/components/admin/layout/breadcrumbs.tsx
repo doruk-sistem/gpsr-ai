@@ -10,6 +10,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Home } from "lucide-react";
+import React from "react";
 
 interface BreadcrumbItem {
   label: string;
@@ -31,7 +32,7 @@ export function AdminBreadcrumbs({ items }: AdminBreadcrumbsProps) {
             </Link>
           </BreadcrumbLink>
         </BreadcrumbItem>
-        
+
         {items.map((item, index) => (
           <React.Fragment key={item.href}>
             <BreadcrumbSeparator />
