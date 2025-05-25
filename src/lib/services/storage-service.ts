@@ -2,10 +2,10 @@ import storageHelper from "../utils/storage";
 
 class StorageService {
   // Storage bucket names
-  readonly PRODUCTS_IMAGES_BUCKET = "product-images";
+  readonly PRODUCTS_IMAGES_BUCKET = "user-product-images";
   readonly MANUFACTURERS_IMAGES_BUCKET = "manufacturer-images";
   readonly REPRESENTATIVE_IMAGES_BUCKET = "representative-images";
-  readonly PRODUCT_TECHNICAL_FILES_BUCKET = "product-technical-files";
+  readonly PRODUCT_TECHNICAL_FILES_BUCKET = "user-product-technical-files";
 
   public async uploadManufacturerFile(
     file: File,

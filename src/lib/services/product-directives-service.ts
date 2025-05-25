@@ -11,20 +11,26 @@ export interface ProductDirective {
 }
 
 class ProductDirectivesService {
-  async getProductDirectives(productId: string) {
+  async getProductDirectives(userProductId: string) {
     const { data, error } = await supabase
-      .from("product_directives")
+      .from("user_product_directives")
       .select("*, directives(*)")
-      .eq("product_id", productId)
+      .eq("user_product_id", userProductId)
       .is("deleted_at", null);
     if (error) throw error;
     return data as ProductDirective[];
   }
 
-  async addProductDirective(productId: string, directiveId: number) {
+  async addProductDirective(userProductId: string, directiveId: number) {
     const { data, error } = await supabase
-      .from("product_directives")
-      .insert({ product_id: productId, directive_id: directiveId })
+      .from("user_product_directives")
+      .insert({
+        user_product_id: userProductId,
+        directive_id: directiveId,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        user_id: (await supabase.auth.getUser()).data.user?.id,
+      })
       .select()
       .single();
     if (error) throw error;
@@ -33,9 +39,9 @@ class ProductDirectivesService {
 
   async removeProductDirective(productId: string, directiveId: number) {
     const { error } = await supabase
-      .from("product_directives")
+      .from("user_product_directives")
       .delete()
-      .eq("product_id", productId)
+      .eq("user_product_id", productId)
       .eq("directive_id", directiveId);
     if (error) throw error;
   }

@@ -3,7 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import productQuestionAnswersService from "@/lib/services/product-question-answers-service";
 
-export const useProductQuestionAnswers = (productId: string) => {
+export const useProductQuestionAnswers = (productId?: string) => {
   return useQuery({
     queryKey: ["product-question-answers", productId],
     queryFn: () =>
