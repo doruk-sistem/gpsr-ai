@@ -21,18 +21,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { 
-  MoreHorizontal, 
-  Eye, 
-  User,
-  Package,
-  Calendar,
-  Building2,
-  ArrowUpDown,
-  CreditCard,
-  Lock,
-  LucideIcon
-} from "lucide-react";
+import { MoreHorizontal, Eye, User, Package, Calendar, Building2, ArrowUpDown, CreditCard, Lock, DivideIcon as LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { format } from "date-fns";
 import { CustomerModal } from "@/components/admin/customers/customer-modal";
