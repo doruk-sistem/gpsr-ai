@@ -96,7 +96,7 @@ BEGIN
   -- If user exists, make them superadmin
   IF user_id IS NOT NULL THEN
     -- Check if admin record already exists
-    IF NOT EXISTS (SELECT 1 FROM admins WHERE user_id = user_id) THEN
+    IF NOT EXISTS (SELECT 1 FROM admins WHERE admins.user_id = user_id) THEN
       INSERT INTO admins (user_id, role) VALUES (user_id, 'superadmin');
     ELSE
       -- Update existing record to superadmin
@@ -104,3 +104,4 @@ BEGIN
     END IF;
   END IF;
 END $$;
+
