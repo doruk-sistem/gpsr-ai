@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCurrentUser } from "@/hooks/use-auth";
-import { isAdmin, redirectIfNotAdmin } from "@/lib/utils/is-admin";
+import { isAdmin } from "@/lib/utils/admin-helpers";
 import { Loader2 } from "lucide-react";
 
 export default function AdminLayout({

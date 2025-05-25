@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils/cn';
@@ -13,10 +13,13 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
-  Shield
+  Shield,
+  Users2
 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useCurrentUser } from '@/hooks/use-auth';
+import { isSuperAdmin } from '@/lib/utils/admin-helpers';
 
 interface AdminSidebarProps {
   open: boolean;
@@ -25,6 +28,19 @@ interface AdminSidebarProps {
 
 export function AdminSidebar({ open, onOpenChange }: AdminSidebarProps) {
   const pathname = usePathname();
+  const { data: user } = useCurrentUser();
+  const [hasSuperAdminAccess, setHasSuperAdminAccess] = useState(false);
+
+  useEffect(() => {
+    const checkSuperAdminStatus = async () => {
+      if (user) {
+        const isSuperAdminUser = await isSuperAdmin(user);
+        setHasSuperAdminAccess(isSuperAdminUser);
+      }
+    };
+    
+    checkSuperAdminStatus();
+  }, [user]);
 
   const routes = [
     {
@@ -58,12 +74,23 @@ export function AdminSidebar({ open, onOpenChange }: AdminSidebarProps) {
       active: pathname === '/admin/customers',
     },
     {
+      label: 'Admin Management',
+      icon: Users2,
+      href: '/admin/admin-management',
+      active: pathname === '/admin/admin-management',
+      requiresSuperAdmin: true,
+    },
+    {
       label: 'Settings',
       icon: Settings,
       href: '/admin/settings',
       active: pathname === '/admin/settings',
     },
   ];
+
+  const filteredRoutes = routes.filter(route => 
+    !route.requiresSuperAdmin || hasSuperAdminAccess
+  );
 
   return (
     <div
@@ -87,7 +114,7 @@ export function AdminSidebar({ open, onOpenChange }: AdminSidebarProps) {
         <ScrollArea className="flex-1 px-1">
           <nav className="flex flex-col gap-1">
             <TooltipProvider delayDuration={0}>
-              {routes.map((route) => (
+              {filteredRoutes.map((route) => (
                 <Tooltip key={route.href}>
                   <TooltipTrigger asChild>
                     <Link
