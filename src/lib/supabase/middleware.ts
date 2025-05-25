@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { isAdmin } from "@/lib/utils/admin-helpers";
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -60,25 +61,47 @@ export async function updateSession(request: NextRequest) {
   console.log(`[Middleware] Auth cookie present: ${!!authCookie}`);
 
   // If user tried to access dashboard without authentication, redirect to login
-  if (!user && pathname.startsWith("/dashboard")) {
+  if (!user && (pathname.startsWith("/dashboard") || pathname.startsWith("/admin"))) {
     console.log(
-      "[Middleware] Unauthenticated user trying to access dashboard, redirecting to login"
+      "[Middleware] Unauthenticated user trying to access protected area, redirecting to login"
     );
     url.pathname = "/auth/login";
     return NextResponse.redirect(url);
   }
 
-  // If authenticated user tried to access auth pages, redirect to dashboard
+  // If authenticated user tried to access auth pages, redirect to appropriate dashboard
   if (
     user &&
     pathname.startsWith("/auth") &&
     !pathname.startsWith("/auth/logout")
   ) {
     console.log(
-      "[Middleware] Authenticated user trying to access auth pages, redirecting to dashboard"
+      "[Middleware] Authenticated user trying to access auth pages, determining redirect destination"
     );
-    url.pathname = "/dashboard";
+    
+    // Check if user is an admin
+    const adminStatus = await isAdmin(user);
+    
+    if (adminStatus) {
+      console.log("[Middleware] Admin user detected, redirecting to admin dashboard");
+      url.pathname = "/admin/dashboard";
+    } else {
+      console.log("[Middleware] Regular user detected, redirecting to user dashboard");
+      url.pathname = "/dashboard";
+    }
+    
     return NextResponse.redirect(url);
+  }
+
+  // If regular user tries to access admin routes, redirect to dashboard
+  if (user && pathname.startsWith("/admin")) {
+    const adminStatus = await isAdmin(user);
+    
+    if (!adminStatus) {
+      console.log("[Middleware] Non-admin user trying to access admin area, redirecting to dashboard");
+      url.pathname = "/dashboard";
+      return NextResponse.redirect(url);
+    }
   }
 
   // If authenticated user trying to access dashboard pages, handle profile completion check
