@@ -66,7 +66,9 @@ export function RecentActivityList() {
                 dangerouslySetInnerHTML={{ __html: activity.message }}
               />
               <p className="text-xs text-muted-foreground">
-                {formatDistanceToNow(new Date(activity.created_at), { addSuffix: true })}
+                {formatDistanceToNow(new Date(activity.timestamp), {
+                  addSuffix: true,
+                })}
               </p>
             </div>
           </div>

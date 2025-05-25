@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { User } from "@/lib/api/endpoints";
+import { isAdmin } from "@/lib/utils/admin-helpers";
 import authService from "@/lib/services/auth-service";
 import { supabase } from "@/lib/supabase/client";
 

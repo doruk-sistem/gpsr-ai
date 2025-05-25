@@ -19,6 +19,7 @@ import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { useLogin, useSignInWithGoogle } from "@/hooks/use-auth";
+import { isAdmin } from "@/lib/utils/admin-helpers";
 
 interface FormData {
   email: string;
@@ -106,17 +107,28 @@ export default function Login() {
         password: formData.password,
       });
 
-      console.log("Login successful, session established:", !!result.data.session);
-      
+      console.log(
+        "Login successful, session established:",
+        !!result.data.session
+      );
+
       toast.success("Login successful", {
         description: "Redirecting...",
         duration: 3000,
       });
 
+      // Check if the user is an admin
+      const user = result.data.user;
+      const adminStatus = await isAdmin(user);
+
       // Wait a moment for session to be properly established
       setTimeout(() => {
-        console.log("Redirecting to dashboard after login");
-        router.push("/dashboard");
+        console.log(
+          "Redirecting after login",
+          adminStatus ? "to admin dashboard" : "to user dashboard"
+        );
+        // Redirect to admin dashboard if user is admin, otherwise to user dashboard
+        router.push(adminStatus ? "/admin/dashboard" : "/dashboard");
       }, 2000);
     } catch (error: any) {
       console.error("Login error:", error);
