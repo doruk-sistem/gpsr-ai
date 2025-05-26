@@ -9,8 +9,6 @@ import Spinner from "@/components/ui/spinner";
 
 import { useProduct } from "@/hooks/use-products";
 import { useProductQuestionAnswers } from "@/hooks/use-product-question-answers";
-import { useProductDirectives } from "@/hooks/use-product-directives";
-import { useProductRegulations } from "@/hooks/use-product-regulations";
 import { useUserProductUserStandards } from "@/hooks/use-user-product-user-standards";
 import { useProductTechnicalFiles } from "@/hooks/use-product-technical-files";
 import { useProductNotifiedBodies } from "@/hooks/use-product-notified-bodies";
@@ -27,10 +25,6 @@ export default function EditProductPage() {
     data: productQuestionAnswers,
     isLoading: isProductQuestionAnswersLoading,
   } = useProductQuestionAnswers(id as string);
-  const { data: productDirectives, isLoading: isProductDirectivesLoading } =
-    useProductDirectives(id as string);
-  const { data: productRegulations, isLoading: isProductRegulationsLoading } =
-    useProductRegulations(id as string);
   const {
     data: productTechnicalFiles,
     isLoading: isProductTechnicalFilesLoading,
@@ -55,8 +49,6 @@ export default function EditProductPage() {
   if (
     isProductLoading ||
     isProductQuestionAnswersLoading ||
-    isProductDirectivesLoading ||
-    isProductRegulationsLoading ||
     isProductTechnicalFilesLoading ||
     isProductNotifiedBodiesLoading ||
     isUserProductUserStandardsLoading ||

@@ -3,16 +3,8 @@ import axios from "axios";
 import { supabase } from "@/lib/supabase/client";
 
 import storageService from "./storage-service";
-import productQuestionAnswersService from "./product-question-answers-service";
-import productTechnicalFilesService from "./product-technical-files-service";
-import productNotifiedBodiesService from "./product-notified-bodies-service";
-import userProductUserStandardsService, {
-  type UserProductUserStandard,
-} from "./user-product-user-standards-service";
-import productDirectivesService from "./product-directives-service";
-import productRegulationsService from "./product-regulations-service";
-import productStandardsService from "./product-standards-service";
 
+import { type UserProductUserStandard } from "./user-product-user-standards-service";
 import { type ProductCategory } from "./product-categories-service";
 import { type ProductType } from "./product-types-services";
 import { type Manufacturer } from "./manufacturers-service";
