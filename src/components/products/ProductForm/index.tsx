@@ -10,8 +10,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Product } from "@/lib/services/products-service";
 
 import type { ProductQuestionAnswer } from "@/lib/services/product-question-answers-service";
-import type { ProductDirective } from "@/lib/services/product-directives-service";
-import type { ProductRegulation } from "@/lib/services/product-regulations-service";
 import type { UserProductUserStandard } from "@/lib/services/user-product-user-standards-service";
 import type { ProductTechnicalFile } from "@/lib/services/product-technical-files-service";
 import type { ProductNotifiedBody } from "@/lib/services/product-notified-bodies-service";
