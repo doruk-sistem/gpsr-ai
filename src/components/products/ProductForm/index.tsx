@@ -44,8 +44,6 @@ export interface ProductFormProps {
     }
   > & {
     selectedQuestions?: ProductQuestionAnswer[];
-    selectedDirectives?: ProductDirective[];
-    selectedRegulations?: ProductRegulation[];
     selectedTechnicalFiles?: ProductTechnicalFile[];
     selectedNotifiedBody?: ProductNotifiedBody;
     selectedUserProductUserDirectives?: UserProductUserDirective[];
@@ -109,31 +107,31 @@ export default function ProductForm({ initialData, mode }: ProductFormProps) {
         image_urls,
         model_name,
         name,
-        specification,
-        selectedDirectives,
-        selectedRegulations,
         authorised_representative_eu_id,
         authorised_representative_uk_id,
         status,
+        selectedUserProductUserRegulations,
+        selectedUserProductUserStandards,
+        selectedUserProductUserDirectives,
       } = initialData;
 
       const isFirstStepComplete =
-        name &&
+        !!name &&
         require_ce_ukca_marking !== null &&
-        batch_number &&
-        model_name &&
-        image_urls &&
-        specification &&
-        category_id &&
-        product_type_id &&
-        manufacturer_id &&
-        selectedQuestions;
+        !!batch_number &&
+        !!model_name &&
+        !!image_urls &&
+        !!category_id &&
+        !!product_type_id &&
+        !!manufacturer_id &&
+        !!selectedQuestions;
 
       const isSecondStepComplete =
-        selectedDirectives &&
-        selectedRegulations &&
-        authorised_representative_eu_id &&
-        authorised_representative_uk_id;
+        !!selectedUserProductUserDirectives &&
+        !!selectedUserProductUserRegulations &&
+        !!selectedUserProductUserStandards &&
+        !!authorised_representative_eu_id &&
+        !!authorised_representative_uk_id;
 
       const isThirdStepComplete = status === "pending";
 
