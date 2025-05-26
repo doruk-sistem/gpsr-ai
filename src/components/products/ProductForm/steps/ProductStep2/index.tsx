@@ -63,6 +63,17 @@ export default function ProductStep2() {
         return;
       }
 
+      // Form validation
+      if (!selectedEuRepId) {
+        toast.error("Please select an EU Authorised Representative");
+        return;
+      }
+
+      if (!selectedUkRepId) {
+        toast.error("Please select a UK Authorised Representative");
+        return;
+      }
+
       // ===============================
       // Update Authorised Representatives
       // ===============================

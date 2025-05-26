@@ -130,6 +130,19 @@ export default function ProductStep3() {
     }
   }, [needsNotifiedBody, initialData?.selectedNotifiedBody]);
 
+  // Initialize not required states from initialData
+  useEffect(() => {
+    if (initialData?.selectedTechnicalFiles) {
+      const states: Record<string, boolean> = {};
+      initialData.selectedTechnicalFiles.forEach(
+        (file: ProductTechnicalFile) => {
+          states[file.file_type] = !!file.not_required;
+        }
+      );
+      setNotRequiredStates(states);
+    }
+  }, [initialData?.selectedTechnicalFiles]);
+
   // File upload handler
   const handleFileChange = async (
     fileType: string,
@@ -200,19 +213,6 @@ export default function ProductStep3() {
     }
   };
 
-  // Initialize not required states from initialData
-  useEffect(() => {
-    if (initialData?.selectedTechnicalFiles) {
-      const states: Record<string, boolean> = {};
-      initialData.selectedTechnicalFiles.forEach(
-        (file: ProductTechnicalFile) => {
-          states[file.file_type] = !!file.not_required;
-        }
-      );
-      setNotRequiredStates(states);
-    }
-  }, [initialData?.selectedTechnicalFiles]);
-
   // Delete file handler
   const handleDeleteFile = async (id: string) => {
     try {
@@ -278,7 +278,7 @@ export default function ProductStep3() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // Technical file validation
+    // Technical file form validation
     const missingFiles = TECHNICAL_FILE_TYPES.filter(({ key }) => {
       // Check EC/EU and UKCA DoC fields based on DoC question
       if ((key === "ec_eu_doc" || key === "ukca_doc") && hasDoc !== "yes")

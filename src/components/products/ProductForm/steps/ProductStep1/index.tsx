@@ -150,7 +150,51 @@ export default function ProductStep1() {
 
     try {
       e.preventDefault();
+
+      // Form validation
+      if (!selectedCategoryId) {
+        toast.error("Please select a category");
+        return;
+      }
+
+      if (!selectedProductTypeId) {
+        toast.error("Please select a product type");
+        return;
+      }
+
+      if (!selectedManufacturerId) {
+        toast.error("Please select a manufacturer");
+        return;
+      }
+
       const formData = new FormData(e.target as HTMLFormElement);
+      const productName = formData.get("name") as string;
+      const batchNumber = formData.get("batch_number") as string;
+      const modelName = formData.get("model_name") as string;
+
+      if (!productName?.trim()) {
+        toast.error("Please enter a product name");
+        return;
+      }
+
+      if (!batchNumber?.trim()) {
+        toast.error("Please enter a batch number");
+        return;
+      }
+
+      if (!modelName?.trim()) {
+        toast.error("Please enter a model name");
+        return;
+      }
+
+      // Check if at least one product image is uploaded
+      const hasExistingImages = (initialData?.image_urls || []).length > 0;
+      const hasNewImages = imagePreview.some((preview) => preview);
+
+      if (!hasExistingImages && !hasNewImages) {
+        toast.error("Please upload at least one product image");
+        return;
+      }
 
       const imageFiles =
         imagePreview.length > 0
@@ -172,11 +216,11 @@ export default function ProductStep1() {
       }
 
       const data = {
-        name: formData.get("name") as string,
+        name: productName,
         require_ce_ukca_marking:
           formData.get("require_ce_ukca_marking") === "true",
-        batch_number: formData.get("batch_number") as string,
-        model_name: formData.get("model_name") as string,
+        batch_number: batchNumber,
+        model_name: modelName,
         image_urls: imageUrls,
         specification: formData.get("specification") as string,
         category_id: selectedCategoryId,
