@@ -18,6 +18,8 @@ import type { ProductNotifiedBody } from "@/lib/services/product-notified-bodies
 import type { ProductCategory } from "@/lib/services/product-categories-service";
 import type { ProductType } from "@/lib/services/product-types-services";
 import type { Manufacturer } from "@/lib/services/manufacturers-service";
+import type { UserProductUserDirective } from "@/lib/services/user-product-user-directives-service";
+import type { UserProductUserRegulation } from "@/lib/services/user-product-user-regulations-service";
 
 import ProductStep1 from "./steps/ProductStep1";
 import ProductStep2 from "./steps/ProductStep2";
@@ -44,9 +46,11 @@ export interface ProductFormProps {
     selectedQuestions?: ProductQuestionAnswer[];
     selectedDirectives?: ProductDirective[];
     selectedRegulations?: ProductRegulation[];
-    selectedStandards?: UserProductUserStandard[];
     selectedTechnicalFiles?: ProductTechnicalFile[];
     selectedNotifiedBody?: ProductNotifiedBody;
+    selectedUserProductUserDirectives?: UserProductUserDirective[];
+    selectedUserProductUserRegulations?: UserProductUserRegulation[];
+    selectedUserProductUserStandards?: UserProductUserStandard[];
   };
   mode: "create" | "edit";
 }
@@ -138,10 +142,6 @@ export default function ProductForm({ initialData, mode }: ProductFormProps) {
       else if (isFirstStepComplete) setCurrentStep(2);
     }
   }, [initialData, mode]);
-
-  useEffect(() => {
-    setInitialDataState(initialData);
-  }, [initialData]);
 
   return (
     <ProductFormContext.Provider

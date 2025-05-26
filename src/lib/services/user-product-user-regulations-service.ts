@@ -1,39 +1,42 @@
 import { supabase } from "@/lib/supabase/client";
 
-export interface UserProductUserStandard {
+export interface UserProductUserRegulation {
   id: string;
-  ref_no: string;
-  edition_date: string | null;
-  title: string;
+  regulation_number: string;
+  regulation_name: string;
+  regulation_description: string | null;
+  regulation_edition_date: string;
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
   user_product_id: string;
   user_id: string | null;
-  reference_standard_id: string | null;
+  reference_regulation_id: number | null;
 }
 
-export interface CreateUserProductUserStandardRequest {
-  ref_no: string;
-  edition_date?: string;
-  title: string;
+export interface CreateUserProductUserRegulationRequest {
+  regulation_number: string;
+  regulation_name: string;
+  regulation_description?: string;
+  regulation_edition_date: string;
   user_product_id: string;
-  reference_standard_id?: string | null;
+  reference_regulation_id?: number | null;
 }
 
-export interface UpdateUserProductUserStandardRequest {
-  ref_no?: string;
-  edition_date?: string;
-  title?: string;
-  reference_standard_id?: string | null;
+export interface UpdateUserProductUserRegulationRequest {
+  regulation_number?: string;
+  regulation_name?: string;
+  regulation_description?: string;
+  regulation_edition_date?: string;
+  reference_regulation_id?: number | null;
 }
 
-class UserProductUserStandardsService {
-  private table = "user_product_user_standards";
+class UserProductUserRegulationsService {
+  private table = "user_product_user_regulations";
 
   async getAllByProductId(
     productId: string
-  ): Promise<UserProductUserStandard[]> {
+  ): Promise<UserProductUserRegulation[]> {
     const { data, error } = await supabase
       .from(this.table)
       .select("*")
@@ -46,8 +49,8 @@ class UserProductUserStandardsService {
   }
 
   async create(
-    input: CreateUserProductUserStandardRequest
-  ): Promise<UserProductUserStandard> {
+    input: CreateUserProductUserRegulationRequest
+  ): Promise<UserProductUserRegulation> {
     const { data, error } = await supabase
       .from(this.table)
       .insert([
@@ -67,8 +70,8 @@ class UserProductUserStandardsService {
 
   async update(
     id: string,
-    input: UpdateUserProductUserStandardRequest
-  ): Promise<UserProductUserStandard> {
+    input: UpdateUserProductUserRegulationRequest
+  ): Promise<UserProductUserRegulation> {
     const { data, error } = await supabase
       .from(this.table)
       .update({
@@ -90,5 +93,6 @@ class UserProductUserStandardsService {
   }
 }
 
-const userProductUserStandardsService = new UserProductUserStandardsService();
-export default userProductUserStandardsService;
+const userProductUserRegulationsService =
+  new UserProductUserRegulationsService();
+export default userProductUserRegulationsService;

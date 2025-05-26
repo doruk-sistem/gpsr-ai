@@ -14,6 +14,8 @@ import { useProductRegulations } from "@/hooks/use-product-regulations";
 import { useUserProductUserStandards } from "@/hooks/use-user-product-user-standards";
 import { useProductTechnicalFiles } from "@/hooks/use-product-technical-files";
 import { useProductNotifiedBodies } from "@/hooks/use-product-notified-bodies";
+import { useUserProductUserDirectives } from "@/hooks/use-user-product-user-directives";
+import { useUserProductUserRegulations } from "@/hooks/use-user-product-user-regulations";
 
 export default function EditProductPage() {
   const { id } = useParams();
@@ -30,10 +32,6 @@ export default function EditProductPage() {
   const { data: productRegulations, isLoading: isProductRegulationsLoading } =
     useProductRegulations(id as string);
   const {
-    data: userProductUserStandards,
-    isLoading: isUserProductUserStandardsLoading,
-  } = useUserProductUserStandards(id as string);
-  const {
     data: productTechnicalFiles,
     isLoading: isProductTechnicalFilesLoading,
   } = useProductTechnicalFiles(id as string);
@@ -41,15 +39,29 @@ export default function EditProductPage() {
     data: productNotifiedBodies,
     isLoading: isProductNotifiedBodiesLoading,
   } = useProductNotifiedBodies(id as string);
+  const {
+    data: productUserProductUserDirectives,
+    isLoading: isProductUserProductUserDirectivesLoading,
+  } = useUserProductUserDirectives(id as string);
+  const {
+    data: productUserProductUserRegulations,
+    isLoading: isProductUserProductUserRegulationsLoading,
+  } = useUserProductUserRegulations(id as string);
+  const {
+    data: userProductUserStandards,
+    isLoading: isUserProductUserStandardsLoading,
+  } = useUserProductUserStandards(id as string);
 
   if (
     isProductLoading ||
     isProductQuestionAnswersLoading ||
     isProductDirectivesLoading ||
     isProductRegulationsLoading ||
-    isUserProductUserStandardsLoading ||
     isProductTechnicalFilesLoading ||
-    isProductNotifiedBodiesLoading
+    isProductNotifiedBodiesLoading ||
+    isUserProductUserStandardsLoading ||
+    isProductUserProductUserDirectivesLoading ||
+    isProductUserProductUserRegulationsLoading
   ) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -72,25 +84,27 @@ export default function EditProductPage() {
           productQuestionAnswers?.length > 0
             ? productQuestionAnswers
             : undefined,
-        selectedDirectives:
-          Array.isArray(productDirectives) && productDirectives?.length > 0
-            ? productDirectives
-            : undefined,
-        selectedRegulations:
-          Array.isArray(productRegulations) && productRegulations?.length > 0
-            ? productRegulations
-            : undefined,
-        selectedStandards:
-          Array.isArray(userProductUserStandards) &&
-          userProductUserStandards?.length > 0
-            ? userProductUserStandards
-            : undefined,
         selectedTechnicalFiles:
           Array.isArray(productTechnicalFiles) &&
           productTechnicalFiles?.length > 0
             ? productTechnicalFiles
             : undefined,
         selectedNotifiedBody: productNotifiedBodies || undefined,
+        selectedUserProductUserStandards:
+          Array.isArray(userProductUserStandards) &&
+          userProductUserStandards?.length > 0
+            ? userProductUserStandards
+            : undefined,
+        selectedUserProductUserDirectives:
+          Array.isArray(productUserProductUserDirectives) &&
+          productUserProductUserDirectives?.length > 0
+            ? productUserProductUserDirectives
+            : undefined,
+        selectedUserProductUserRegulations:
+          Array.isArray(productUserProductUserRegulations) &&
+          productUserProductUserRegulations?.length > 0
+            ? productUserProductUserRegulations
+            : undefined,
       }}
     />
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -42,14 +43,21 @@ import { useCategories } from "@/hooks/use-product-categories";
 import { useProductTypesByCategory } from "@/hooks/use-product-types";
 import { useQuestionsByCategoryAndProductType } from "@/hooks/use-product-questions";
 import { useCurrentUser } from "@/hooks/use-auth";
-import { useCreateProduct, useUpdateProduct } from "@/hooks/use-products";
+import {
+  useCreateProduct,
+  useSaveDefaultDirectivesRegulationsStandards,
+  useUpdateProduct,
+} from "@/hooks/use-products";
 import {
   useCreateProductQuestionAnswers,
   useDeleteProductQuestionAnswersByIds,
 } from "@/hooks/use-product-question-answers";
 import { useManufacturers } from "@/hooks/use-manufacturers";
 
-import { Product } from "@/lib/services/products-service";
+import {
+  Product,
+  SaveDefaultDirectivesRegulationsStandardsResponse,
+} from "@/lib/services/products-service";
 
 import { useProductForm } from "../../hooks/useProductForm";
 import { ProductQuestionAnswer } from "@/lib/services/product-question-answers-service";
@@ -79,12 +87,14 @@ export default function ProductStep1() {
   const [openSubcategoryPopover, setOpenSubcategoryPopover] = useState(false);
   const [openManufacturerPopover, setOpenManufacturerPopover] = useState(false);
 
-  const deleteProductQuestionAnswers = useDeleteProductQuestionAnswersByIds();
-  const updateProduct = useUpdateProduct();
-
-  const createProduct = useCreateProduct();
-  const createProductQuestionAnswers = useCreateProductQuestionAnswers();
   const { data: user } = useCurrentUser();
+
+  const updateProduct = useUpdateProduct();
+  const createProduct = useCreateProduct();
+  const deleteProductQuestionAnswers = useDeleteProductQuestionAnswersByIds();
+  const createProductQuestionAnswers = useCreateProductQuestionAnswers();
+  const saveDefaultDirectivesRegulationsStandards =
+    useSaveDefaultDirectivesRegulationsStandards();
 
   const { data: manufacturers = [] } = useManufacturers();
   const { data: categories = [] } = useCategories({
@@ -176,6 +186,8 @@ export default function ProductStep1() {
 
       let newProduct: Product | null = null;
       let newProductQuestionAnswers: ProductQuestionAnswer[] | null = null;
+      let defaultDirectivesRegulationsStandards: SaveDefaultDirectivesRegulationsStandardsResponse | null =
+        null;
 
       if (mode === "create") {
         // Create the product
@@ -194,6 +206,17 @@ export default function ProductStep1() {
               questionAnswers,
             });
         }
+
+        defaultDirectivesRegulationsStandards =
+          await saveDefaultDirectivesRegulationsStandards.mutateAsync({
+            userProductId: newProduct?.id as string,
+            categoryName:
+              categories.find((cat) => cat.id === selectedCategoryId)?.name ||
+              "",
+            productName:
+              productTypes.find((type) => type.id === selectedProductTypeId)
+                ?.product || "",
+          });
       }
 
       if (mode === "edit" && initialData?.id) {
@@ -243,6 +266,16 @@ export default function ProductStep1() {
         ...initialData,
         ...newProduct,
         selectedQuestions: newProductQuestionAnswers || [],
+        ...(defaultDirectivesRegulationsStandards
+          ? {
+              selectedUserProductUserDirectives:
+                defaultDirectivesRegulationsStandards.directives,
+              selectedUserProductUserRegulations:
+                defaultDirectivesRegulationsStandards.regulations,
+              selectedUserProductUserStandards:
+                defaultDirectivesRegulationsStandards.standards,
+            }
+          : {}),
       });
 
       onNextStep();

@@ -3,6 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import productsService, {
   CreateProductRequest,
+  SaveDefaultDirectivesRegulationsStandardsRequest,
   UpdateProductRequest,
 } from "@/lib/services/products-service";
 
@@ -102,6 +103,21 @@ export const useDeleteProduct = () => {
       });
       queryClient.invalidateQueries({
         queryKey: ["product-question-answers", id],
+        refetchType: "all",
+      });
+    },
+  });
+};
+
+export const useSaveDefaultDirectivesRegulationsStandards = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: SaveDefaultDirectivesRegulationsStandardsRequest) =>
+      productsService.saveDefaultDirectivesRegulationsStandards(data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["product", variables.userProductId],
         refetchType: "all",
       });
     },
