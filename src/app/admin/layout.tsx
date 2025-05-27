@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { useCurrentUser } from "@/hooks/use-auth";
 import { isAdmin } from "@/lib/utils/admin-helpers";
 import { Loader2 } from "lucide-react";
@@ -11,7 +10,6 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const router = useRouter();
   const { data: user, isLoading } = useCurrentUser();
   const [isAdminUser, setIsAdminUser] = useState(false);
   const [isCheckingAdmin, setIsCheckingAdmin] = useState(true);
@@ -27,12 +25,6 @@ export default function AdminLayout({
 
     checkAdminStatus();
   }, [isLoading, user]);
-
-  useEffect(() => {
-    if (!isCheckingAdmin && !isLoading && (!user || !isAdminUser)) {
-      router.push('/auth/login');
-    }
-  }, [isCheckingAdmin, isLoading, user, isAdminUser, router]);
 
   if (isLoading || isCheckingAdmin) {
     return (

@@ -6,9 +6,6 @@ import {
   FormatSelectQuerySelectObject,
 } from "../utils/from-select-query";
 
-export type BusinessRole = "manufacturer" | "importer" | "distributor";
-export type RequestStatus = "pending" | "approved" | "rejected" | "cancelled";
-
 export interface Representative {
   id: string;
   user_id: string;
@@ -28,7 +25,7 @@ export interface Representative {
   contact_position: string;
   // Additional info
   website_url?: string;
-  business_role: BusinessRole;
+  business_role: "manufacturer" | "importer" | "distributor";
   // Product details
   product_category: string;
   product_information: string;
@@ -43,8 +40,7 @@ export interface Representative {
   confirm_responsibility: boolean;
   confirm_terms: boolean;
   // Status
-  status: RequestStatus;
-  admin_notes?: string;
+  status: "pending" | "approved" | "rejected" | "cancelled";
   created_at: string;
   updated_at: string;
 }

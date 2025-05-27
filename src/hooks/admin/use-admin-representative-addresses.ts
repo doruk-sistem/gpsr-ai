@@ -3,32 +3,16 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase/client";
 
-export interface RepresentativeAddress {
-  id: string;
-  user_id: string;
-  region: "eu" | "uk";
-  company_name: string;
-  company_address: string;
-  company_logo_url: string | null;
-  country: string;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-  user?: {
-    email: string;
-    user_metadata: {
-      first_name?: string;
-      last_name?: string;
-      company?: string;
-    };
-  };
-}
+import { type RepresentativeAddress } from "@/lib/services/representative-address-service";
+import sh from "@/lib/utils/supabase-helper";
 
 interface AddressParams {
   search?: string;
   region?: string;
   sort?: string;
   order?: "asc" | "desc";
+  page?: number;
+  pageSize?: number;
 }
 
 export const useAdminRepresentativeAddresses = (params: AddressParams = {}) => {
@@ -36,14 +20,9 @@ export const useAdminRepresentativeAddresses = (params: AddressParams = {}) => {
     queryKey: ["admin", "representative-addresses", params],
     queryFn: async () => {
       try {
-        let query = supabase.from("authorised_representative_addresses")
-          .select(`
-            *,
-            auth_users:user_id (
-              email,
-              user_metadata
-            )
-          `);
+        let query = supabase
+          .from("authorised_representative_addresses")
+          .select(`*`, { count: "exact" });
 
         // Apply search filter
         if (params.search) {
@@ -58,38 +37,21 @@ export const useAdminRepresentativeAddresses = (params: AddressParams = {}) => {
         }
 
         // Apply sorting
-        if (params.sort) {
-          const order = params.order || "asc";
-          query = query.order(params.sort, { ascending: order === "asc" });
-        } else {
-          query = query.order("created_at", { ascending: false });
-        }
-
-        const { data, error } = await query;
-
-        if (error) throw error;
-
-        // Reshape the data to match our interface
-        const formattedData: RepresentativeAddress[] = data.map((item) => {
-          const formattedItem: RepresentativeAddress = {
-            ...item,
-            user: item.auth_users
-              ? {
-                  email: item.auth_users.email,
-                  user_metadata: item.auth_users.user_metadata,
-                }
-              : undefined,
-          };
-
-          return formattedItem;
+        query = sh.applySort(query, {
+          sort: params.sort,
+          order: params.order,
+          defaultSort: "created_at",
+          defaultOrder: "desc",
         });
 
-        return formattedData;
+        return sh.getPaginationResult<RepresentativeAddress>(query, {
+          page: params.page,
+          pageSize: params.pageSize,
+        });
       } catch (error) {
         console.error("Error fetching admin representative addresses:", error);
         throw error;
       }
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 };
