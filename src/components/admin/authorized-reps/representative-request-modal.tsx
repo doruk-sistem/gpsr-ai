@@ -17,7 +17,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState } from "react";
@@ -51,28 +50,8 @@ export function RepresentativeRequestModal({
   onApprove,
   onReject,
 }: RepresentativeRequestModalProps) {
-  const [adminNotes, setAdminNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const {
-    data: request,
-    isLoading,
-    updateNotes,
-  } = useAdminRepresentativeRequest(requestId);
-
-  const saveNotes = async () => {
-    if (!requestId) return;
-
-    try {
-      setIsSubmitting(true);
-      await updateNotes.mutateAsync({ id: requestId, notes: adminNotes });
-      toast.success("Notes saved successfully");
-    } catch (error) {
-      toast.error("Failed to save notes");
-      console.error(error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const { data: request, isLoading } = useAdminRepresentativeRequest(requestId);
 
   const handleApprove = async () => {
     if (!requestId) return;
@@ -143,7 +122,6 @@ export function RepresentativeRequestModal({
           <TabsList className="flex-none justify-start mx-6">
             <TabsTrigger value="details">Request Details</TabsTrigger>
             <TabsTrigger value="documents">Documents</TabsTrigger>
-            <TabsTrigger value="notes">Admin Notes</TabsTrigger>
           </TabsList>
 
           <div className="flex-1 px-6 overflow-auto">
@@ -478,26 +456,6 @@ export function RepresentativeRequestModal({
                   </div>
                 </div>
               )}
-            </TabsContent>
-
-            <TabsContent value="notes" className="mt-6">
-              <div className="space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  Add private notes about this representative request. These
-                  notes are only visible to administrators.
-                </p>
-
-                <Textarea
-                  className="min-h-[150px]"
-                  placeholder="Add your notes here..."
-                  value={adminNotes}
-                  onChange={(e) => setAdminNotes(e.target.value)}
-                />
-
-                <Button onClick={saveNotes} disabled={isSubmitting}>
-                  {isSubmitting ? "Saving..." : "Save Notes"}
-                </Button>
-              </div>
             </TabsContent>
           </div>
         </Tabs>
