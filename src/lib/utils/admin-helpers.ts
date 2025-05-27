@@ -19,8 +19,6 @@ export const isAdmin = async (
       .eq("user_id", user.id)
       .maybeSingle();
 
-    console.log("Admin data:", data);
-
     if (error) {
       console.error("Error checking admin status:", error);
       return false;

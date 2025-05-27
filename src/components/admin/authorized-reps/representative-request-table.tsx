@@ -234,9 +234,9 @@ export function RepresentativeRequestTable() {
                           <Eye className="mr-2 h-4 w-4" />
                           View Details
                         </DropdownMenuItem>
-                        <DropdownMenuSeparator />
                         {request.status === "pending" && (
                           <>
+                            <DropdownMenuSeparator />
                             <DropdownMenuItem
                               onClick={() => handleApproveRequest(request.id)}
                             >

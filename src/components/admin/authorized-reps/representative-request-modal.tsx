@@ -115,350 +115,297 @@ export function RepresentativeRequestModal({
           </div>
         </DialogHeader>
 
-        <Tabs
-          defaultValue="details"
-          className="flex-1 flex flex-col overflow-hidden"
-        >
-          <TabsList className="flex-none justify-start mx-6">
-            <TabsTrigger value="details">Request Details</TabsTrigger>
-            <TabsTrigger value="documents">Documents</TabsTrigger>
-          </TabsList>
+        <div className="flex-1 flex flex-col overflow-auto px-6 pt-6">
+          <div className="space-y-6">
+            {isLoading ? (
+              <div className="space-y-6">
+                <Skeleton className="h-24 w-full" />
+                <Skeleton className="h-24 w-full" />
+                <Skeleton className="h-24 w-full" />
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="col-span-2">
+                    <h3 className="text-lg font-medium flex items-center mb-4">
+                      <Building2 className="mr-2 h-5 w-5 text-primary" />
+                      Company Information
+                    </h3>
 
-          <div className="flex-1 px-6 overflow-auto">
-            <TabsContent value="details" className="mt-6 space-y-6">
-              {isLoading ? (
-                <div className="space-y-6">
-                  <Skeleton className="h-24 w-full" />
-                  <Skeleton className="h-24 w-full" />
-                  <Skeleton className="h-24 w-full" />
-                </div>
-              ) : (
-                <>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="col-span-2">
-                      <h3 className="text-lg font-medium flex items-center mb-4">
-                        <Building2 className="mr-2 h-5 w-5 text-primary" />
-                        Company Information
-                      </h3>
-
-                      <div className="space-y-4 bg-muted/50 rounded-lg p-4 border">
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <p className="text-sm text-muted-foreground">
-                              Company Name
-                            </p>
-                            <p className="font-medium">
-                              {request?.company_name}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-sm text-muted-foreground">
-                              Company Number
-                            </p>
-                            <p className="font-medium">
-                              {request?.company_number}
-                            </p>
-                          </div>
-                        </div>
-
+                    <div className="space-y-4 bg-muted/50 rounded-lg p-4 border">
+                      <div className="grid grid-cols-2 gap-4">
                         <div>
                           <p className="text-sm text-muted-foreground">
-                            Address
+                            Company Name
+                          </p>
+                          <p className="font-medium">{request?.company_name}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">
+                            Company Number
                           </p>
                           <p className="font-medium">
-                            {request?.street_address}, {request?.city},{" "}
-                            {request?.postal_code}, {request?.country}
-                          </p>
-                        </div>
-
-                        {request?.vat_number && (
-                          <div>
-                            <p className="text-sm text-muted-foreground">
-                              VAT Number
-                            </p>
-                            <p className="font-medium">{request?.vat_number}</p>
-                          </div>
-                        )}
-
-                        {request?.website_url && (
-                          <div>
-                            <p className="text-sm text-muted-foreground">
-                              Website
-                            </p>
-                            <div className="flex items-center">
-                              <a
-                                href={request?.website_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-primary hover:underline font-medium flex items-center"
-                              >
-                                {request?.website_url}
-                                <ExternalLink className="ml-1 h-3 w-3" />
-                              </a>
-                            </div>
-                          </div>
-                        )}
-
-                        <div>
-                          <p className="text-sm text-muted-foreground">
-                            Business Role
-                          </p>
-                          <p className="font-medium capitalize">
-                            {request?.business_role}
+                            {request?.company_number}
                           </p>
                         </div>
                       </div>
-                    </div>
 
-                    <div>
-                      <h3 className="text-lg font-medium flex items-center mb-4">
-                        <User className="mr-2 h-5 w-5 text-primary" />
-                        Contact Information
-                      </h3>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Address</p>
+                        <p className="font-medium">
+                          {request?.street_address}, {request?.city},{" "}
+                          {request?.postal_code}, {request?.country}
+                        </p>
+                      </div>
 
-                      <div className="space-y-4 bg-muted/50 rounded-lg p-4 border">
+                      {request?.vat_number && (
                         <div>
                           <p className="text-sm text-muted-foreground">
-                            Contact Name
+                            VAT Number
                           </p>
-                          <p className="font-medium truncate block">
-                            {request?.contact_name}
-                          </p>
+                          <p className="font-medium">{request?.vat_number}</p>
                         </div>
+                      )}
 
-                        <div>
-                          <p className="text-sm text-muted-foreground ">
-                            Contact Email
-                          </p>
-                          <a
-                            href={`mailto:${request?.contact_email}`}
-                            className="text-primary hover:underline truncate block"
-                          >
-                            {request?.contact_email}
-                          </a>
-                        </div>
-
-                        <div>
-                          <p className="text-sm text-muted-foreground ">
-                            Contact Email
-                          </p>
-                          <a
-                            href={`tel:${request?.contact_phone}`}
-                            className="text-primary hover:underline truncate block"
-                          >
-                            {request?.contact_phone}
-                          </a>
-                        </div>
-
+                      {request?.website_url && (
                         <div>
                           <p className="text-sm text-muted-foreground">
-                            Position
+                            Website
                           </p>
-                          <p className="font-medium break-words">
-                            {request?.contact_position}
-                          </p>
+                          <div className="flex items-center">
+                            <a
+                              href={request?.website_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-primary hover:underline font-medium flex items-center"
+                            >
+                              {request?.website_url}
+                              <ExternalLink className="ml-1 h-3 w-3" />
+                            </a>
+                          </div>
                         </div>
+                      )}
+
+                      <div>
+                        <p className="text-sm text-muted-foreground">
+                          Business Role
+                        </p>
+                        <p className="font-medium capitalize">
+                          {request?.business_role}
+                        </p>
                       </div>
                     </div>
                   </div>
 
-                  <Separator />
-
                   <div>
                     <h3 className="text-lg font-medium flex items-center mb-4">
-                      <Package className="mr-2 h-5 w-5 text-primary" />
-                      Product Information
+                      <User className="mr-2 h-5 w-5 text-primary" />
+                      Contact Information
                     </h3>
 
                     <div className="space-y-4 bg-muted/50 rounded-lg p-4 border">
                       <div>
                         <p className="text-sm text-muted-foreground">
-                          Product Category
+                          Contact Name
                         </p>
-                        <p className="font-medium">
-                          {request?.product_category}
+                        <p className="font-medium truncate block">
+                          {request?.contact_name}
                         </p>
                       </div>
 
                       <div>
+                        <p className="text-sm text-muted-foreground ">
+                          Contact Email
+                        </p>
+                        <a
+                          href={`mailto:${request?.contact_email}`}
+                          className="text-primary hover:underline truncate block"
+                        >
+                          {request?.contact_email}
+                        </a>
+                      </div>
+
+                      <div>
+                        <p className="text-sm text-muted-foreground ">
+                          Contact Email
+                        </p>
+                        <a
+                          href={`tel:${request?.contact_phone}`}
+                          className="text-primary hover:underline truncate block"
+                        >
+                          {request?.contact_phone}
+                        </a>
+                      </div>
+
+                      <div>
                         <p className="text-sm text-muted-foreground">
-                          Product Information
+                          Position
                         </p>
-                        <p className="whitespace-pre-wrap">
-                          {request?.product_information}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <Separator />
-
-                  <div>
-                    <h3 className="text-lg font-medium flex items-center mb-4">
-                      <ShieldCheck className="mr-2 h-5 w-5 text-primary" />
-                      Compliance Information
-                    </h3>
-
-                    <div className="space-y-4">
-                      <Accordion type="multiple" className="w-full">
-                        <AccordionItem value="ce-marking">
-                          <AccordionTrigger>CE/UKCA Marking</AccordionTrigger>
-                          <AccordionContent>
-                            <Badge>{request?.ce_ukca_marking}</Badge>
-                          </AccordionContent>
-                        </AccordionItem>
-
-                        <AccordionItem value="technical-file">
-                          <AccordionTrigger>
-                            Technical File Status
-                          </AccordionTrigger>
-                          <AccordionContent>
-                            <Badge>{request?.technical_file_ready}</Badge>
-                          </AccordionContent>
-                        </AccordionItem>
-
-                        <AccordionItem value="required-tests">
-                          <AccordionTrigger>Required Tests</AccordionTrigger>
-                          <AccordionContent>
-                            <Badge>{request?.required_tests_conducted}</Badge>
-                          </AccordionContent>
-                        </AccordionItem>
-
-                        <AccordionItem value="test-reports">
-                          <AccordionTrigger>Test Reports</AccordionTrigger>
-                          <AccordionContent>
-                            <Badge>{request?.test_reports_available}</Badge>
-                            {request?.test_reports_file_url && (
-                              <div className="mt-2">
-                                <a
-                                  href={request.test_reports_file_url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="flex items-center text-primary hover:underline"
-                                >
-                                  <File className="h-4 w-4 mr-2" />
-                                  View Test Report File
-                                  <ExternalLink className="ml-1 h-3 w-3" />
-                                </a>
-                              </div>
-                            )}
-                          </AccordionContent>
-                        </AccordionItem>
-                      </Accordion>
-                    </div>
-                  </div>
-
-                  <Separator />
-
-                  <div>
-                    <h3 className="text-lg font-medium flex items-center mb-4">
-                      <FileText className="mr-2 h-5 w-5 text-primary" />
-                      Confirmations
-                    </h3>
-
-                    <div className="space-y-2">
-                      <div className="flex items-start">
-                        <div
-                          className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${
-                            request?.confirm_accuracy
-                              ? "bg-green-100"
-                              : "bg-red-100"
-                          } mr-2`}
-                        >
-                          {request?.confirm_accuracy ? (
-                            <Check className="h-3 w-3 text-green-700" />
-                          ) : (
-                            <X className="h-3 w-3 text-red-700" />
-                          )}
-                        </div>
-                        <p className="text-sm">
-                          Confirmed that all information provided is accurate
-                          and complete
-                        </p>
-                      </div>
-
-                      <div className="flex items-start">
-                        <div
-                          className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${
-                            request?.confirm_responsibility
-                              ? "bg-green-100"
-                              : "bg-red-100"
-                          } mr-2`}
-                        >
-                          {request?.confirm_responsibility ? (
-                            <Check className="h-3 w-3 text-green-700" />
-                          ) : (
-                            <X className="h-3 w-3 text-red-700" />
-                          )}
-                        </div>
-                        <p className="text-sm">
-                          Understands that Dorukwell does not verify technical
-                          files, and compliance remains the manufacturer&apos;s
-                          responsibility
-                        </p>
-                      </div>
-
-                      <div className="flex items-start">
-                        <div
-                          className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${
-                            request?.confirm_terms
-                              ? "bg-green-100"
-                              : "bg-red-100"
-                          } mr-2`}
-                        >
-                          {request?.confirm_terms ? (
-                            <Check className="h-3 w-3 text-green-700" />
-                          ) : (
-                            <X className="h-3 w-3 text-red-700" />
-                          )}
-                        </div>
-                        <p className="text-sm">
-                          Agrees to Dorukwell&apos;s Authorised Representative
-                          service terms
+                        <p className="font-medium break-words">
+                          {request?.contact_position}
                         </p>
                       </div>
                     </div>
                   </div>
-                </>
-              )}
-            </TabsContent>
-
-            <TabsContent value="documents" className="mt-6 space-y-6">
-              {isLoading ? (
-                <div className="space-y-6">
-                  <Skeleton className="h-24 w-full" />
-                  <Skeleton className="h-24 w-full" />
                 </div>
-              ) : (
-                <div className="space-y-4">
-                  <div className="bg-muted/50 rounded-lg p-4 border">
-                    <h3 className="font-medium mb-2 flex items-center">
-                      <FileText className="h-5 w-5 mr-2 text-primary" />
-                      Test Reports File
-                    </h3>
 
-                    {request?.test_reports_file_url ? (
-                      <a
-                        href={request.test_reports_file_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center text-primary hover:underline"
-                      >
-                        <File className="h-4 w-4 mr-2" />
-                        View Test Report File
-                        <ExternalLink className="ml-1 h-3 w-3" />
-                      </a>
-                    ) : (
-                      <p className="text-muted-foreground text-sm">
-                        No test report file available
+                <Separator />
+
+                <div>
+                  <h3 className="text-lg font-medium flex items-center mb-4">
+                    <Package className="mr-2 h-5 w-5 text-primary" />
+                    Product Information
+                  </h3>
+
+                  <div className="space-y-4 bg-muted/50 rounded-lg p-4 border">
+                    <div>
+                      <p className="text-sm text-muted-foreground">
+                        Product Category
                       </p>
-                    )}
+                      <p className="font-medium">{request?.product_category}</p>
+                    </div>
+
+                    <div>
+                      <p className="text-sm text-muted-foreground">
+                        Product Information
+                      </p>
+                      <p className="whitespace-pre-wrap">
+                        {request?.product_information}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              )}
-            </TabsContent>
+
+                <Separator />
+
+                <div>
+                  <h3 className="text-lg font-medium flex items-center mb-4">
+                    <ShieldCheck className="mr-2 h-5 w-5 text-primary" />
+                    Compliance Information
+                  </h3>
+
+                  <div className="space-y-4">
+                    <Accordion type="multiple" className="w-full">
+                      <AccordionItem value="ce-marking">
+                        <AccordionTrigger>CE/UKCA Marking</AccordionTrigger>
+                        <AccordionContent>
+                          <Badge>{request?.ce_ukca_marking}</Badge>
+                        </AccordionContent>
+                      </AccordionItem>
+
+                      <AccordionItem value="technical-file">
+                        <AccordionTrigger>
+                          Technical File Status
+                        </AccordionTrigger>
+                        <AccordionContent>
+                          <Badge>{request?.technical_file_ready}</Badge>
+                        </AccordionContent>
+                      </AccordionItem>
+
+                      <AccordionItem value="required-tests">
+                        <AccordionTrigger>Required Tests</AccordionTrigger>
+                        <AccordionContent>
+                          <Badge>{request?.required_tests_conducted}</Badge>
+                        </AccordionContent>
+                      </AccordionItem>
+
+                      <AccordionItem value="test-reports">
+                        <AccordionTrigger>Test Reports</AccordionTrigger>
+                        <AccordionContent>
+                          <Badge>{request?.test_reports_available}</Badge>
+                          {request?.test_reports_file_url && (
+                            <div className="mt-2">
+                              <a
+                                href={request.test_reports_file_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center text-primary hover:underline"
+                              >
+                                <File className="h-4 w-4 mr-2" />
+                                View Test Report File
+                                <ExternalLink className="ml-1 h-3 w-3" />
+                              </a>
+                            </div>
+                          )}
+                        </AccordionContent>
+                      </AccordionItem>
+                    </Accordion>
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div>
+                  <h3 className="text-lg font-medium flex items-center mb-4">
+                    <FileText className="mr-2 h-5 w-5 text-primary" />
+                    Confirmations
+                  </h3>
+
+                  <div className="space-y-2">
+                    <div className="flex items-start">
+                      <div
+                        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${
+                          request?.confirm_accuracy
+                            ? "bg-green-100"
+                            : "bg-red-100"
+                        } mr-2`}
+                      >
+                        {request?.confirm_accuracy ? (
+                          <Check className="h-3 w-3 text-green-700" />
+                        ) : (
+                          <X className="h-3 w-3 text-red-700" />
+                        )}
+                      </div>
+                      <p className="text-sm">
+                        Confirmed that all information provided is accurate and
+                        complete
+                      </p>
+                    </div>
+
+                    <div className="flex items-start">
+                      <div
+                        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${
+                          request?.confirm_responsibility
+                            ? "bg-green-100"
+                            : "bg-red-100"
+                        } mr-2`}
+                      >
+                        {request?.confirm_responsibility ? (
+                          <Check className="h-3 w-3 text-green-700" />
+                        ) : (
+                          <X className="h-3 w-3 text-red-700" />
+                        )}
+                      </div>
+                      <p className="text-sm">
+                        Understands that Dorukwell does not verify technical
+                        files, and compliance remains the manufacturer&apos;s
+                        responsibility
+                      </p>
+                    </div>
+
+                    <div className="flex items-start">
+                      <div
+                        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${
+                          request?.confirm_terms ? "bg-green-100" : "bg-red-100"
+                        } mr-2`}
+                      >
+                        {request?.confirm_terms ? (
+                          <Check className="h-3 w-3 text-green-700" />
+                        ) : (
+                          <X className="h-3 w-3 text-red-700" />
+                        )}
+                      </div>
+                      <p className="text-sm">
+                        Agrees to Dorukwell&apos;s Authorised Representative
+                        service terms
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
-        </Tabs>
+        </div>
 
         <DialogFooter className="flex-none px-6 pt-4">
           {request?.status === "pending" ? (
