@@ -43,31 +43,20 @@ export async function updateSession(request: NextRequest) {
   const url = request.nextUrl.clone();
   const pathname = url.pathname;
 
-  console.log(
-    `[Middleware] Path: ${pathname} | Auth: ${
-      user ? "Authenticated as " + user.id : "Not authenticated"
-    }`
-  );
-
   // Check for URL params that might indicate we should skip auth checks (for debugging)
   const skipAuth = url.searchParams.get("skipAuth") === "true";
   if (skipAuth) {
-    console.log("[Middleware] Skipping auth checks due to skipAuth parameter");
     return supabaseResponse;
   }
 
   // Get the auth cookie for debugging
   const authCookie = request.cookies.get("sb-access-token");
-  console.log(`[Middleware] Auth cookie present: ${!!authCookie}`);
 
   // If user tried to access dashboard without authentication, redirect to login
   if (
     !user &&
     (pathname.startsWith("/dashboard") || pathname.startsWith("/admin"))
   ) {
-    console.log(
-      "[Middleware] Unauthenticated user trying to access protected area, redirecting to login"
-    );
     url.pathname = "/auth/login";
     return NextResponse.redirect(url);
   }
@@ -78,24 +67,12 @@ export async function updateSession(request: NextRequest) {
     pathname.startsWith("/auth") &&
     !pathname.startsWith("/auth/logout")
   ) {
-    console.log(
-      "[Middleware] Authenticated user trying to access auth pages, determining redirect destination"
-    );
-
     // Check if user is an admin
     const adminStatus = await isAdmin(user, supabase);
 
-    console.log("[Middleware] Admin status:", adminStatus);
-
     if (adminStatus) {
-      console.log(
-        "[Middleware] Admin user detected, redirecting to admin dashboard"
-      );
       url.pathname = "/admin/dashboard";
     } else {
-      console.log(
-        "[Middleware] Regular user detected, redirecting to user dashboard"
-      );
       url.pathname = "/dashboard";
       return NextResponse.redirect(url);
     }
@@ -105,16 +82,9 @@ export async function updateSession(request: NextRequest) {
 
   // If user tries to access admin routes, check if they're an admin
   if (user && pathname.startsWith("/admin")) {
-    console.log("[Middleware] User trying to access admin area");
-
     const adminStatus = await isAdmin(user, supabase);
 
-    console.log("[Middleware] Admin status:", adminStatus);
-
     if (!adminStatus) {
-      console.log(
-        "[Middleware] Non-admin user trying to access admin area, redirecting to dashboard"
-      );
       url.pathname = "/dashboard";
       return NextResponse.redirect(url);
     }
@@ -123,26 +93,18 @@ export async function updateSession(request: NextRequest) {
   // If authenticated user trying to access dashboard pages, handle profile completion check
   if (user && pathname.startsWith("/dashboard")) {
     // Missing profile info and not on complete-profile page
-    console.log(`[Middleware] User metadata:`, user.user_metadata);
-
     const isProfileComplete =
       user?.user_metadata?.first_name &&
       user?.user_metadata?.last_name &&
       user?.user_metadata?.company;
 
     if (!isProfileComplete && pathname !== "/dashboard/complete-profile") {
-      console.log(
-        "[Middleware] User missing profile info, redirecting to complete profile page"
-      );
       url.pathname = "/dashboard/complete-profile";
       return NextResponse.redirect(url);
     }
 
     // Profile complete but on complete-profile page
     if (isProfileComplete && pathname === "/dashboard/complete-profile") {
-      console.log(
-        "[Middleware] User profile already complete, redirecting to dashboard"
-      );
       url.pathname = "/dashboard";
       return NextResponse.redirect(url);
     }
@@ -160,8 +122,6 @@ export async function updateSession(request: NextRequest) {
         .select("*")
         .maybeSingle();
 
-      console.log("[Middleware] Subscription:", subscription);
-
       if (error) {
         console.error("[Middleware] Error fetching subscription:", error);
         throw error;
@@ -170,9 +130,6 @@ export async function updateSession(request: NextRequest) {
       const hasActiveSubscription = subscription?.has_active_subscription;
 
       if (!hasActiveSubscription && privatePaths.includes(pathname)) {
-        console.log(
-          "[Middleware] User without active subscription trying to access restricted area, redirecting to billing"
-        );
         url.pathname = "/dashboard/billing";
         return NextResponse.redirect(url);
       }
@@ -189,9 +146,6 @@ export async function updateSession(request: NextRequest) {
       const adminStatus = await isAdmin(user);
 
       if (adminStatus) {
-        console.log(
-          "[Middleware] Admin user logged in, redirecting to admin dashboard"
-        );
         url.pathname = "/admin/dashboard";
         url.searchParams.set("redirected", "true");
         return NextResponse.redirect(url);
