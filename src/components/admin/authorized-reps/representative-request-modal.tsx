@@ -11,14 +11,12 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -28,10 +26,6 @@ import {
   X,
   User,
   Building2,
-  Globe,
-  Phone,
-  Mail,
-  MapPin,
   FileText,
   File,
   Package,
@@ -46,8 +40,8 @@ interface RepresentativeRequestModalProps {
   requestId: string | null;
   open: boolean;
   onClose: () => void;
-  onApprove: (id: string) => void;
-  onReject: (id: string) => void;
+  onApprove: (id: string) => Promise<void>;
+  onReject: (id: string) => Promise<void>;
 }
 
 export function RepresentativeRequestModal({
@@ -114,8 +108,8 @@ export function RepresentativeRequestModal({
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col">
-        <DialogHeader className="pb-4">
+      <DialogContent className="max-w-4xl h-[90vh] flex flex-col">
+        <DialogHeader className="flex-none pb-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <div>
               <DialogTitle>Representative Request Details</DialogTitle>
@@ -146,13 +140,13 @@ export function RepresentativeRequestModal({
           defaultValue="details"
           className="flex-1 flex flex-col overflow-hidden"
         >
-          <TabsList className="mx-6">
+          <TabsList className="flex-none justify-start mx-6">
             <TabsTrigger value="details">Request Details</TabsTrigger>
             <TabsTrigger value="documents">Documents</TabsTrigger>
             <TabsTrigger value="notes">Admin Notes</TabsTrigger>
           </TabsList>
 
-          <ScrollArea className="flex-1 px-6">
+          <div className="flex-1 px-6 overflow-auto">
             <TabsContent value="details" className="mt-6 space-y-6">
               {isLoading ? (
                 <div className="space-y-6">
@@ -249,24 +243,30 @@ export function RepresentativeRequestModal({
                           <p className="text-sm text-muted-foreground">
                             Contact Name
                           </p>
-                          <p className="font-medium">{request?.contact_name}</p>
+                          <p className="font-medium truncate block">
+                            {request?.contact_name}
+                          </p>
                         </div>
 
-                        <div className="flex items-center">
-                          <Mail className="h-4 w-4 mr-2 text-muted-foreground" />
+                        <div>
+                          <p className="text-sm text-muted-foreground ">
+                            Contact Email
+                          </p>
                           <a
                             href={`mailto:${request?.contact_email}`}
-                            className="text-primary hover:underline"
+                            className="text-primary hover:underline truncate block"
                           >
                             {request?.contact_email}
                           </a>
                         </div>
 
-                        <div className="flex items-center">
-                          <Phone className="h-4 w-4 mr-2 text-muted-foreground" />
+                        <div>
+                          <p className="text-sm text-muted-foreground ">
+                            Contact Email
+                          </p>
                           <a
                             href={`tel:${request?.contact_phone}`}
-                            className="text-primary hover:underline"
+                            className="text-primary hover:underline truncate block"
                           >
                             {request?.contact_phone}
                           </a>
@@ -276,7 +276,7 @@ export function RepresentativeRequestModal({
                           <p className="text-sm text-muted-foreground">
                             Position
                           </p>
-                          <p className="font-medium">
+                          <p className="font-medium break-words">
                             {request?.contact_position}
                           </p>
                         </div>
@@ -326,9 +326,7 @@ export function RepresentativeRequestModal({
                         <AccordionItem value="ce-marking">
                           <AccordionTrigger>CE/UKCA Marking</AccordionTrigger>
                           <AccordionContent>
-                            <p className="font-medium">
-                              {request?.ce_ukca_marking}
-                            </p>
+                            <Badge>{request?.ce_ukca_marking}</Badge>
                           </AccordionContent>
                         </AccordionItem>
 
@@ -337,27 +335,21 @@ export function RepresentativeRequestModal({
                             Technical File Status
                           </AccordionTrigger>
                           <AccordionContent>
-                            <p className="font-medium">
-                              {request?.technical_file_ready}
-                            </p>
+                            <Badge>{request?.technical_file_ready}</Badge>
                           </AccordionContent>
                         </AccordionItem>
 
                         <AccordionItem value="required-tests">
                           <AccordionTrigger>Required Tests</AccordionTrigger>
                           <AccordionContent>
-                            <p className="font-medium">
-                              {request?.required_tests_conducted}
-                            </p>
+                            <Badge>{request?.required_tests_conducted}</Badge>
                           </AccordionContent>
                         </AccordionItem>
 
                         <AccordionItem value="test-reports">
                           <AccordionTrigger>Test Reports</AccordionTrigger>
                           <AccordionContent>
-                            <p className="font-medium">
-                              {request?.test_reports_available}
-                            </p>
+                            <Badge>{request?.test_reports_available}</Badge>
                             {request?.test_reports_file_url && (
                               <div className="mt-2">
                                 <a
@@ -423,7 +415,7 @@ export function RepresentativeRequestModal({
                         </div>
                         <p className="text-sm">
                           Understands that Dorukwell does not verify technical
-                          files, and compliance remains the manufacturer's
+                          files, and compliance remains the manufacturer&apos;s
                           responsibility
                         </p>
                       </div>
@@ -443,7 +435,7 @@ export function RepresentativeRequestModal({
                           )}
                         </div>
                         <p className="text-sm">
-                          Agrees to Dorukwell's Authorised Representative
+                          Agrees to Dorukwell&apos;s Authorised Representative
                           service terms
                         </p>
                       </div>
@@ -484,17 +476,6 @@ export function RepresentativeRequestModal({
                       </p>
                     )}
                   </div>
-
-                  <div className="bg-amber-50/50 rounded-lg p-4 border border-amber-200">
-                    <h3 className="font-medium mb-2 text-amber-800">
-                      Additional Documents
-                    </h3>
-                    <p className="text-amber-700 text-sm">
-                      The customer has not uploaded any additional documents
-                      yet. They will be prompted to upload required
-                      documentation after their request is approved.
-                    </p>
-                  </div>
                 </div>
               )}
             </TabsContent>
@@ -518,10 +499,10 @@ export function RepresentativeRequestModal({
                 </Button>
               </div>
             </TabsContent>
-          </ScrollArea>
+          </div>
         </Tabs>
 
-        <DialogFooter className="px-6 pt-4">
+        <DialogFooter className="flex-none px-6 pt-4">
           {request?.status === "pending" ? (
             <div className="flex w-full gap-2">
               <Button

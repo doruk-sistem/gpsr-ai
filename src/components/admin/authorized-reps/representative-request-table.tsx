@@ -26,7 +26,6 @@ import {
   Check,
   X,
   Eye,
-  FileText,
   ArrowUpDown,
   Building2,
 } from "lucide-react";
@@ -234,10 +233,6 @@ export function RepresentativeRequestTable() {
                         >
                           <Eye className="mr-2 h-4 w-4" />
                           View Details
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <FileText className="mr-2 h-4 w-4" />
-                          View Documents
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         {request.status === "pending" && (
