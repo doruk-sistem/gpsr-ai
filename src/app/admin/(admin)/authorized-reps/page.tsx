@@ -13,21 +13,10 @@ import { Button } from "@/components/ui/button";
 import { AdminBreadcrumbs } from "@/components/admin/layout/breadcrumbs";
 import { RepresentativeRequestTable } from "@/components/admin/authorized-reps/representative-request-table";
 import { RepresentativeAddressTable } from "@/components/admin/authorized-reps/representative-address-table";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Filter, Search, Download } from "lucide-react";
+import { Download } from "lucide-react";
 
 export default function AuthorizedRepsPage() {
   const [tabValue, setTabValue] = useState("requests");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [regionFilter, setRegionFilter] = useState("all");
 
   const breadcrumbItems = [
     { label: "Dashboard", href: "/admin/dashboard" },
@@ -76,45 +65,6 @@ export default function AuthorizedRepsPage() {
           </CardHeader>
 
           <CardContent>
-            <div className="flex flex-col md:flex-row gap-4 mb-6">
-              <div className="flex-1 relative">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search by company name, contact, or email..."
-                  className="pl-9"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-
-              <div className="flex gap-2">
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-[160px]">
-                    <Filter className="mr-2 h-4 w-4" />
-                    <SelectValue placeholder="Status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Statuses</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="approved">Approved</SelectItem>
-                    <SelectItem value="rejected">Rejected</SelectItem>
-                    <SelectItem value="cancelled">Cancelled</SelectItem>
-                  </SelectContent>
-                </Select>
-
-                <Select value={regionFilter} onValueChange={setRegionFilter}>
-                  <SelectTrigger className="w-[140px]">
-                    <SelectValue placeholder="Region" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Regions</SelectItem>
-                    <SelectItem value="eu">EU</SelectItem>
-                    <SelectItem value="uk">UK</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
             <TabsContent value="requests" className="m-0">
               <RepresentativeRequestTable />
             </TabsContent>

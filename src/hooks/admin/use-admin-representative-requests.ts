@@ -2,29 +2,23 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase/client";
-
-export interface RepresentativeRequest {
-  id: string;
-  region: "eu" | "uk";
-  company_name: string;
-  contact_name: string;
-  contact_email: string;
-  contact_phone: string;
-  business_role: string;
-  status: "pending" | "approved" | "rejected" | "cancelled";
-  created_at: string;
-}
+import { type Representative } from "@/lib/services/representative-request-service";
+import sh from "@/lib/utils/supabase-helper";
 
 interface RequestParams {
   search?: string;
-  status?: string;
-  region?: string;
+  status?: Representative["status"];
+  region?: Representative["region"];
   sort?: string;
   order?: "asc" | "desc";
+  page?: number;
+  pageSize?: number;
 }
 
 export const useAdminRepresentativeRequests = (params: RequestParams = {}) => {
   const queryClient = useQueryClient();
+  const page = params.page || 1;
+  const pageSize = params.pageSize || 10;
 
   const query = useQuery({
     queryKey: ["admin", "representative-requests", params],
@@ -32,7 +26,7 @@ export const useAdminRepresentativeRequests = (params: RequestParams = {}) => {
       try {
         let query = supabase
           .from("authorised_representative_requests")
-          .select("*");
+          .select("*", { count: "exact" });
 
         // Apply search filter
         if (params.search) {
@@ -52,24 +46,23 @@ export const useAdminRepresentativeRequests = (params: RequestParams = {}) => {
         }
 
         // Apply sorting
-        if (params.sort) {
-          const order = params.order || "asc";
-          query = query.order(params.sort, { ascending: order === "asc" });
-        } else {
-          query = query.order("created_at", { ascending: false });
-        }
+        query = sh.applySort(query, {
+          sort: params.sort,
+          order: params.order,
+          defaultSort: "created_at",
+          defaultOrder: "desc",
+        });
 
-        const { data, error } = await query;
-
-        if (error) throw error;
-
-        return data as RepresentativeRequest[];
+        // Get paginated result
+        return sh.getPaginationResult<Representative>(query, {
+          page,
+          pageSize,
+        });
       } catch (error) {
         console.error("Error fetching admin representative requests:", error);
         throw error;
       }
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   const updateRequestStatus = useMutation({
