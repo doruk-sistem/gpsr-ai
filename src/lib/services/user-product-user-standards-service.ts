@@ -10,6 +10,7 @@ export interface UserProductUserStandard {
   deleted_at: string | null;
   user_product_id: string;
   user_id: string | null;
+  reference_standard_id: string | null;
 }
 
 export interface CreateUserProductUserStandardRequest {
@@ -17,12 +18,14 @@ export interface CreateUserProductUserStandardRequest {
   edition_date?: string;
   title: string;
   user_product_id: string;
+  reference_standard_id?: string | null;
 }
 
 export interface UpdateUserProductUserStandardRequest {
   ref_no?: string;
   edition_date?: string;
   title?: string;
+  reference_standard_id?: string | null;
 }
 
 class UserProductUserStandardsService {

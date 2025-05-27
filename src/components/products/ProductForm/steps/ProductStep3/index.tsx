@@ -54,6 +54,10 @@ export default function ProductStep3() {
   const [hasDoc, setHasDoc] = useState<string>("yes");
   // Notified body question state
   const [needsNotifiedBody, setNeedsNotifiedBody] = useState<string>("no");
+  // Not required checkboxes state
+  const [notRequiredStates, setNotRequiredStates] = useState<
+    Record<string, boolean>
+  >({});
 
   // Notified body form state
   const [notifiedBody, setNotifiedBody] = useState({
@@ -126,6 +130,19 @@ export default function ProductStep3() {
     }
   }, [needsNotifiedBody, initialData?.selectedNotifiedBody]);
 
+  // Initialize not required states from initialData
+  useEffect(() => {
+    if (initialData?.selectedTechnicalFiles) {
+      const states: Record<string, boolean> = {};
+      initialData.selectedTechnicalFiles.forEach(
+        (file: ProductTechnicalFile) => {
+          states[file.file_type] = !!file.not_required;
+        }
+      );
+      setNotRequiredStates(states);
+    }
+  }, [initialData?.selectedTechnicalFiles]);
+
   // File upload handler
   const handleFileChange = async (
     fileType: string,
@@ -144,13 +161,51 @@ export default function ProductStep3() {
   const handleNotRequired = async (fileType: string, checked: boolean) => {
     if (!productId) return;
 
-    const fileData = getFileData(fileType);
     try {
       if (checked) {
-        await setNotRequired.mutateAsync({ productId, fileType });
-      } else if (fileData && fileData.id) {
-        // When unchecked, delete the record
-        await deleteFile.mutateAsync(fileData.id);
+        const newFile = await setNotRequired.mutateAsync({
+          productId,
+          fileType,
+        });
+        setNotRequiredStates((prev) => ({ ...prev, [fileType]: true }));
+
+        // Update initialData with the new file data
+        const updatedFiles = initialData?.selectedTechnicalFiles
+          ? [...initialData.selectedTechnicalFiles, newFile]
+          : [newFile];
+
+        setInitialData({
+          ...initialData,
+          ...(updatedFiles
+            ? {
+                selectedTechnicalFiles: updatedFiles,
+              }
+            : {}),
+        });
+      } else {
+        // When unchecked, we need to find the file in initialData
+        const existingFile = initialData?.selectedTechnicalFiles?.find(
+          (file) => file.file_type === fileType
+        );
+
+        if (existingFile?.id) {
+          await deleteFile.mutateAsync(existingFile.id);
+          setNotRequiredStates((prev) => ({ ...prev, [fileType]: false }));
+
+          // Update initialData by removing the not_required flag
+          if (initialData?.selectedTechnicalFiles) {
+            const updatedFiles = initialData.selectedTechnicalFiles.map(
+              (file) =>
+                file.file_type === fileType
+                  ? { ...file, not_required: false }
+                  : file
+            );
+            setInitialData({
+              ...initialData,
+              selectedTechnicalFiles: updatedFiles,
+            });
+          }
+        }
       }
     } catch (err) {
       console.error(err);
@@ -223,7 +278,7 @@ export default function ProductStep3() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // Technical file validation
+    // Technical file form validation
     const missingFiles = TECHNICAL_FILE_TYPES.filter(({ key }) => {
       // Check EC/EU and UKCA DoC fields based on DoC question
       if ((key === "ec_eu_doc" || key === "ukca_doc") && hasDoc !== "yes")
@@ -319,7 +374,7 @@ export default function ProductStep3() {
               <div className="flex items-center gap-4">
                 <Checkbox
                   id={`not-required-${key}`}
-                  checked={!!fileData?.not_required}
+                  checked={notRequiredStates[key] || false}
                   onCheckedChange={(checked) =>
                     handleNotRequired(key, !!checked)
                   }

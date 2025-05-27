@@ -18,12 +18,12 @@ import { useProductForm } from "../../hooks/useProductForm";
 export default function Standards() {
   const { initialData, setInitialData } = useProductForm();
 
-  const deleteStandard = useDeleteUserProductUserStandard();
-  const addStandard = useAddUserProductUserStandard();
+  const deleteUserStandard = useDeleteUserProductUserStandard();
+  const addUserStandard = useAddUserProductUserStandard();
 
-  const [standards, setStandards] = useState<UserProductUserStandard[]>(
-    initialData?.selectedStandards || []
-  );
+  const [selectedStandards, setSelectedStandards] = useState<
+    UserProductUserStandard[]
+  >(initialData?.selectedUserProductUserStandards || []);
 
   const [newStandard, setNewStandard] = useState<{
     ref_no: string;
@@ -35,11 +35,19 @@ export default function Standards() {
     title: "",
   });
 
-  const handleRemoveStandard = async (standardId: string) => {
+  const handleRemoveStandard = async (userStandardId: string) => {
     try {
-      await deleteStandard.mutateAsync(standardId);
+      await deleteUserStandard.mutateAsync(userStandardId);
 
-      setStandards(standards.filter((s) => s.id !== standardId));
+      const newStandards = selectedStandards.filter(
+        (s) => s.id !== userStandardId
+      );
+
+      setSelectedStandards(newStandards);
+      setInitialData({
+        ...initialData,
+        selectedUserProductUserStandards: newStandards,
+      });
 
       toast.success("Standard removed successfully");
     } catch (error) {
@@ -66,14 +74,14 @@ export default function Standards() {
     }
 
     try {
-      const addedStandard = await addStandard.mutateAsync({
+      const addedStandard = await addUserStandard.mutateAsync({
         ref_no: newStandard.ref_no,
         edition_date: newStandard.edition_date,
         title: newStandard.title,
         user_product_id: initialData?.id || "",
       });
 
-      setStandards([...standards, addedStandard]);
+      setSelectedStandards([...selectedStandards, addedStandard]);
 
       setNewStandard({
         ref_no: "",
@@ -83,7 +91,7 @@ export default function Standards() {
 
       setInitialData({
         ...initialData,
-        selectedStandards: [...standards, addedStandard],
+        selectedUserProductUserStandards: [...selectedStandards, addedStandard],
       });
 
       toast.success("Standard added successfully");
@@ -101,9 +109,9 @@ export default function Standards() {
       </div>
 
       <div className="space-y-4">
-        {standards.length > 0 && (
+        {selectedStandards.length > 0 && (
           <div className="space-y-4">
-            {standards.map((standard) => (
+            {selectedStandards.map((standard) => (
               <div key={standard.id} className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label>Reference Number</Label>
