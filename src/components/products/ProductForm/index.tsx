@@ -10,14 +10,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Product } from "@/lib/services/products-service";
 
 import type { ProductQuestionAnswer } from "@/lib/services/product-question-answers-service";
-import type { ProductDirective } from "@/lib/services/product-directives-service";
-import type { ProductRegulation } from "@/lib/services/product-regulations-service";
 import type { UserProductUserStandard } from "@/lib/services/user-product-user-standards-service";
 import type { ProductTechnicalFile } from "@/lib/services/product-technical-files-service";
 import type { ProductNotifiedBody } from "@/lib/services/product-notified-bodies-service";
 import type { ProductCategory } from "@/lib/services/product-categories-service";
 import type { ProductType } from "@/lib/services/product-types-services";
 import type { Manufacturer } from "@/lib/services/manufacturers-service";
+import type { UserProductUserDirective } from "@/lib/services/user-product-user-directives-service";
+import type { UserProductUserRegulation } from "@/lib/services/user-product-user-regulations-service";
 
 import ProductStep1 from "./steps/ProductStep1";
 import ProductStep2 from "./steps/ProductStep2";
@@ -42,11 +42,11 @@ export interface ProductFormProps {
     }
   > & {
     selectedQuestions?: ProductQuestionAnswer[];
-    selectedDirectives?: ProductDirective[];
-    selectedRegulations?: ProductRegulation[];
-    selectedStandards?: UserProductUserStandard[];
     selectedTechnicalFiles?: ProductTechnicalFile[];
     selectedNotifiedBody?: ProductNotifiedBody;
+    selectedUserProductUserDirectives?: UserProductUserDirective[];
+    selectedUserProductUserRegulations?: UserProductUserRegulation[];
+    selectedUserProductUserStandards?: UserProductUserStandard[];
   };
   mode: "create" | "edit";
 }
@@ -105,31 +105,31 @@ export default function ProductForm({ initialData, mode }: ProductFormProps) {
         image_urls,
         model_name,
         name,
-        specification,
-        selectedDirectives,
-        selectedRegulations,
         authorised_representative_eu_id,
         authorised_representative_uk_id,
         status,
+        selectedUserProductUserRegulations,
+        selectedUserProductUserStandards,
+        selectedUserProductUserDirectives,
       } = initialData;
 
       const isFirstStepComplete =
-        name &&
+        !!name &&
         require_ce_ukca_marking !== null &&
-        batch_number &&
-        model_name &&
-        image_urls &&
-        specification &&
-        category_id &&
-        product_type_id &&
-        manufacturer_id &&
-        selectedQuestions;
+        !!batch_number &&
+        !!model_name &&
+        !!image_urls &&
+        !!category_id &&
+        !!product_type_id &&
+        !!manufacturer_id &&
+        !!selectedQuestions;
 
       const isSecondStepComplete =
-        selectedDirectives &&
-        selectedRegulations &&
-        authorised_representative_eu_id &&
-        authorised_representative_uk_id;
+        !!selectedUserProductUserDirectives &&
+        !!selectedUserProductUserRegulations &&
+        !!selectedUserProductUserStandards &&
+        !!authorised_representative_eu_id &&
+        !!authorised_representative_uk_id;
 
       const isThirdStepComplete = status === "pending";
 
@@ -138,10 +138,6 @@ export default function ProductForm({ initialData, mode }: ProductFormProps) {
       else if (isFirstStepComplete) setCurrentStep(2);
     }
   }, [initialData, mode]);
-
-  useEffect(() => {
-    setInitialDataState(initialData);
-  }, [initialData]);
 
   return (
     <ProductFormContext.Provider
