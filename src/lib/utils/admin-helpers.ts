@@ -123,7 +123,7 @@ export async function isAdminOrSuperAdmin(
     const superadmin = await isSuperAdmin(supabase, id);
 
     if (!admin && !superadmin) {
-      throw new Error("User is not an admin or superadmin");
+      return false;
     }
 
     return true;
