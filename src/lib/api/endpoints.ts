@@ -14,5 +14,6 @@ export type User = SupabaseUser & {
     company?: string;
     package_id?: string | null;
     avatar_url?: string | null;
+    role?: "admin" | "superadmin" | "user" | null;
   };
 };
