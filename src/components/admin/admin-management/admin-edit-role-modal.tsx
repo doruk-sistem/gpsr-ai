@@ -17,50 +17,40 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Shield } from "lucide-react";
-
-interface Admin {
-  id: string;
-  user_id: string;
-  role: 'admin' | 'superadmin';
-  user: {
-    email: string;
-    user_metadata: {
-      first_name?: string;
-      last_name?: string;
-    }
-  }
-}
+import { type UserProfile } from "@/lib/services/user-service";
 
 interface AdminEditRoleModalProps {
-  admin: Admin | null;
+  userProfile: UserProfile | null;
   open: boolean;
   onClose: () => void;
-  onUpdate: (role: 'admin' | 'superadmin') => void;
+  onUpdate: (role: UserProfile["role"]) => void;
   isLoading: boolean;
 }
 
 export function AdminEditRoleModal({
-  admin,
+  userProfile,
   open,
   onClose,
   onUpdate,
-  isLoading
+  isLoading,
 }: AdminEditRoleModalProps) {
-  const [role, setRole] = useState<'admin' | 'superadmin'>(
-    admin?.role || 'admin'
+  const [role, setRole] = useState<UserProfile["role"]>(
+    userProfile?.role || "user"
   );
-  
-  // Update local state when admin changes
-  if (admin && admin.role !== role) {
-    setRole(admin.role);
-  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onUpdate(role);
   };
+
+  useEffect(() => {
+    // Update local state when admin changes
+    if (userProfile && userProfile.role !== role) {
+      setRole(userProfile.role);
+    }
+  }, [userProfile, userProfile?.role]);
 
   return (
     <Dialog open={open} onOpenChange={(open) => !open && onClose()}>
@@ -68,17 +58,19 @@ export function AdminEditRoleModal({
         <DialogHeader>
           <DialogTitle>Change Admin Role</DialogTitle>
           <DialogDescription>
-            Update permissions for {admin?.user.email}
+            Update permissions for {userProfile?.email}
           </DialogDescription>
         </DialogHeader>
-        
+
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label htmlFor="role">Role</Label>
-              <Select 
-                value={role} 
-                onValueChange={(value: "admin" | "superadmin") => setRole(value)}
+              <Select
+                value={role}
+                onValueChange={(value: "admin" | "superadmin") =>
+                  setRole(value)
+                }
               >
                 <SelectTrigger id="role">
                   <div className="flex items-center">
@@ -91,11 +83,11 @@ export function AdminEditRoleModal({
                   <SelectItem value="superadmin">Superadmin</SelectItem>
                 </SelectContent>
               </Select>
-              
+
               <div className="bg-muted p-3 rounded-md mt-2">
                 <p className="text-sm font-medium mb-1">Role permissions:</p>
                 <ul className="text-sm text-muted-foreground space-y-1">
-                  {role === 'superadmin' ? (
+                  {role === "superadmin" ? (
                     <>
                       <li>• Invite new administrators</li>
                       <li>• Manage admin accounts and permissions</li>
@@ -112,12 +104,15 @@ export function AdminEditRoleModal({
               </div>
             </div>
           </div>
-          
+
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isLoading || role === admin?.role}>
+            <Button
+              type="submit"
+              disabled={isLoading || role === userProfile?.role}
+            >
               {isLoading ? "Updating..." : "Update Role"}
             </Button>
           </DialogFooter>
