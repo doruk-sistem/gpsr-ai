@@ -26,11 +26,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Package,
   Building2,
-  FileText,
-  CheckCircle2,
-  XCircle,
-  User,
-  Calendar,
   AlertTriangle,
   ExternalLink,
   File,
@@ -72,7 +67,7 @@ export function ProductApplicationModal({
           defaultValue="details"
           className="flex-1 flex flex-col overflow-hidden"
         >
-          <TabsList className="mx-6">
+          <TabsList className="mx-6 justify-start">
             <TabsTrigger value="details">Product Details</TabsTrigger>
             <TabsTrigger value="documents">Technical Files</TabsTrigger>
             <TabsTrigger value="images">Product Images</TabsTrigger>

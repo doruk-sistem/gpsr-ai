@@ -58,8 +58,8 @@ const STEPS = [
     component: ProductStep1,
   },
   {
-    title: "Add Documents",
-    description: "Add documents to the product",
+    title: "GPSR Compliance Requirements",
+    description: "Add GPSR compliance requirements to the product",
     component: ProductStep2,
   },
   {

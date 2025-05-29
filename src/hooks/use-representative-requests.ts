@@ -6,7 +6,6 @@ import representativeRequestService, {
   type CreateRepresentativeRequestInput,
   type RepresentativeRequest,
 } from "@/lib/services/representative-request-service";
-import { RepresentativeRegion } from "@/lib/services/representative-address-service";
 
 export const useRepresentativeRequests = (params?: RepresentativeRequest) => {
   return useQuery({

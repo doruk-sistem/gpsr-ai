@@ -63,7 +63,7 @@ class AuthService {
   public async signUp(credentials: LoginRequest): Promise<void> {
     try {
       console.log("Signup attempt for email:", credentials.email);
-      
+
       // First sign up the user
       const { data, error } = await supabase.auth.signUp({
         email: credentials.email,
@@ -77,26 +77,30 @@ class AuthService {
         console.error("Signup error:", error);
         throw error;
       }
-      
+
       console.log("Signup successful, session created:", !!data.session);
-      
+
       // If email confirmations are disabled (as configured in supabase/config.toml),
       // the user should already be signed in. However, in some cases we need to ensure
       // the session is properly established, so we'll explicitly sign in.
       if (!data.session) {
         console.log("No session after signup, attempting explicit login");
         // Sign in the user immediately after sign up
-        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-          email: credentials.email,
-          password: credentials.password,
-        });
+        const { data: signInData, error: signInError } =
+          await supabase.auth.signInWithPassword({
+            email: credentials.email,
+            password: credentials.password,
+          });
 
         if (signInError) {
           console.error("Post-signup login error:", signInError);
           throw signInError;
         }
-        
-        console.log("Post-signup login successful, session established:", !!signInData.session);
+
+        console.log(
+          "Post-signup login successful, session established:",
+          !!signInData.session
+        );
       }
     } catch (error) {
       console.error("Signup process exception:", error);

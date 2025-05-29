@@ -1,29 +1,37 @@
 "use client";
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase/client";
+import { Product } from "@/lib/services/products-service";
+import { ProductCategory } from "@/lib/services/product-categories-service";
+import { Manufacturer } from "@/lib/services/manufacturers-service";
+import { ProductType } from "@/lib/services/product-types-services";
+import supabaseHelper from "@/lib/utils/supabase-helper";
 
 interface ProductsParams {
   search?: string;
-  category?: string;
+  categoryId?: string;
   requireCeMarking?: boolean;
   sort?: string;
-  order?: 'asc' | 'desc';
+  order?: "asc" | "desc";
+  page?: number;
+  pageSize?: number;
 }
 
 export const useAdminProducts = (params: ProductsParams = {}) => {
   return useQuery({
-    queryKey: ['admin', 'products', params],
+    queryKey: ["admin", "products", params],
     queryFn: async () => {
       try {
-        let query = supabase
-          .from('products')
-          .select(`
+        let query = supabase.from("user_products").select(
+          `
             *,
             product_categories (*),
-            product_types (*),
-            manufacturers (*)
-          `);
+            manufacturers (*),
+            product_types (*)
+          `,
+          { count: "exact" }
+        );
 
         // Apply search filter
         if (params.search) {
@@ -33,33 +41,37 @@ export const useAdminProducts = (params: ProductsParams = {}) => {
         }
 
         // Apply category filter
-        if (params.category) {
-          query = query.eq('product_categories.name', params.category);
+        if (params.categoryId) {
+          query = query.eq("category_id", params.categoryId);
         }
 
         // Apply CE/UKCA marking filter
         if (params.requireCeMarking !== undefined) {
-          query = query.eq('require_ce_ukca_marking', params.requireCeMarking);
+          query = query.eq("require_ce_ukca_marking", params.requireCeMarking);
         }
 
         // Apply sorting
-        if (params.sort) {
-          const order = params.order || 'asc';
-          query = query.order(params.sort, { ascending: order === 'asc' });
-        } else {
-          query = query.order('created_at', { ascending: false });
-        }
+        supabaseHelper.applySort(query, {
+          sort: params.sort,
+          order: params.order,
+          defaultSort: "created_at",
+          defaultOrder: "desc",
+        });
 
-        const { data, error } = await query;
-
-        if (error) throw error;
-        
-        return data;
+        return supabaseHelper.getPaginationResult<
+          Product & {
+            product_categories: ProductCategory;
+            product_types: ProductType;
+            manufacturers: Manufacturer;
+          }
+        >(query, {
+          page: params.page,
+          pageSize: params.pageSize,
+        });
       } catch (error) {
         console.error("Error fetching admin products:", error);
         throw error;
       }
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 };

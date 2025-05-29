@@ -1,6 +1,13 @@
+"use server";
+
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
+/**
+ * Creates a Supabase Client for use on the server-side of a server-side rendering (SSR) framework.
+ *
+ * There are two categories of uses for this function: use in middlewares and use in pages, components or routes.
+ */
 export async function createClient() {
   const cookieStore = await cookies();
 
