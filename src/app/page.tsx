@@ -4,15 +4,7 @@ import Link from "next/link";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
-import {
-  Shield,
-  Clock,
-  FileCheck,
-  CreditCard,
-  CheckCircle2,
-  ArrowRight,
-  Gift,
-} from "lucide-react";
+import { Shield, Clock, FileCheck, CheckCircle2 } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -28,49 +20,8 @@ export default function Home() {
       <Navbar />
 
       <main className="flex-grow">
-        {/* Hero Section */}
-        <section className="bg-gradient-to-b from-background to-muted/30 py-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center">
-              <h2 className="text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl md:text-6xl">
-                <span className="block">Simplify Your</span>
-                <span className="block text-primary">GPSR Compliance</span>
-              </h2>
-              <p className="mt-6 max-w-lg mx-auto text-xl text-muted-foreground sm:max-w-3xl">
-                Secure EU market access with our complete Authorized
-                Representative and GPSR compliance services. Stay compliant,
-                stay competitive.
-              </p>
-              <div className="mt-10 flex justify-center gap-4">
-                <Link href="/auth/register">
-                  <Button
-                    size="lg"
-                    className="bg-primary hover:bg-primary/90 text-primary-foreground"
-                  >
-                    Start Free Trial
-                  </Button>
-                </Link>
-                <Link href="/about-gpsr">
-                  <Button size="lg" variant="outline">
-                    Learn More
-                  </Button>
-                </Link>
-              </div>
-              <div className="mt-8 text-sm text-muted-foreground">
-                Already a customer?{" "}
-                <Link
-                  href="/auth/login"
-                  className="font-medium text-primary hover:underline"
-                >
-                  Log in
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
-
         {/* GPSR Compliance Checker Section */}
-        <section className="bg-gradient-to-b from-primary/10 via-background to-muted pt-16 pb-12">
+        <section className="min-h-screen bg-gradient-to-b from-primary/10 via-background to-muted pt-16 pb-12">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto text-center">
               <h1 className="text-4xl md:text-5xl font-extrabold mb-6">
@@ -238,169 +189,6 @@ export default function Home() {
                   Receive your compliance documents and start selling in the EU
                 </p>
               </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Pricing Section Preview */}
-        <section className="py-20 bg-background">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center">
-              <h2 className="text-3xl font-extrabold text-foreground sm:text-4xl">
-                Simple, Transparent Pricing
-              </h2>
-              <p className="mt-4 max-w-2xl text-xl text-muted-foreground mx-auto">
-                Choose the plan that fits your business needs
-              </p>
-            </div>
-
-            {/* Free Trial Banner */}
-            <div className="mt-8 max-w-3xl mx-auto bg-primary/10 border border-primary/20 rounded-xl p-5 flex flex-col md:flex-row items-center justify-center gap-4 mb-8">
-              <div className="flex items-center text-center md:text-left">
-                <Gift className="h-8 w-8 text-primary mr-3 flex-shrink-0" />
-                <div>
-                  <h3 className="text-lg font-bold text-primary">
-                    14-Day Free Trial
-                  </h3>
-                  <p className="text-muted-foreground">
-                    Try free for 14 days, no credit card required
-                  </p>
-                </div>
-              </div>
-              <Link href="/auth/register" className="md:ml-auto">
-                <Button size="lg" className="font-medium">
-                  Start Free Trial
-                </Button>
-              </Link>
-            </div>
-
-            <div className="mt-8 grid gap-8 md:grid-cols-3">
-              <Card className="border shadow-sm hover:shadow-md transition-shadow relative flex flex-col">
-                <CardHeader>
-                  <CardTitle>Starter</CardTitle>
-                  <CardDescription className="mt-2">
-                    For businesses with up to 5 product types
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="flex-grow">
-                  <div className="text-3xl font-bold mb-4">
-                    £39
-                    <span className="text-lg text-muted-foreground ml-1">
-                      /month
-                    </span>
-                  </div>
-                  <div className="text-sm text-muted-foreground mb-6">
-                    or £390 billed annually
-                  </div>
-                  <ul className="space-y-2">
-                    <li className="flex items-start">
-                      <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mr-2" />
-                      <span>EU REP compliance</span>
-                    </li>
-                    <li className="flex items-start">
-                      <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mr-2" />
-                      <span>GPSR compliance</span>
-                    </li>
-                  </ul>
-                  <Link href="/pricing" className="block w-full mt-6">
-                    <Button className="w-full flex items-center justify-center">
-                      View Details
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
-
-              <Card className="border-2 border-primary/30 shadow-md hover:shadow-lg transition-shadow relative flex flex-col">
-                <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-sm font-medium py-1 px-3 rounded-bl-lg rounded-tr-lg">
-                  Most Popular
-                </div>
-                <CardHeader>
-                  <CardTitle>Growth</CardTitle>
-                  <CardDescription className="mt-2">
-                    For businesses with up to 20 product types
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="flex-grow">
-                  <div className="text-3xl font-bold mb-4">
-                    £49
-                    <span className="text-lg text-muted-foreground ml-1">
-                      /month
-                    </span>
-                  </div>
-                  <div className="text-sm text-muted-foreground mb-6">
-                    or £490 billed annually
-                  </div>
-                  <ul className="space-y-2">
-                    <li className="flex items-start">
-                      <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mr-2" />
-                      <span>Everything in Starter</span>
-                    </li>
-                    <li className="flex items-start">
-                      <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mr-2" />
-                      <span>Priority support</span>
-                    </li>
-                  </ul>
-                  <Link href="/pricing" className="block w-full mt-6">
-                    <Button className="w-full flex items-center justify-center bg-primary text-primary-foreground hover:bg-primary/90">
-                      View Details
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
-
-              <Card className="border shadow-sm hover:shadow-md transition-shadow flex flex-col">
-                <CardHeader>
-                  <CardTitle>Scale</CardTitle>
-                  <CardDescription className="mt-2">
-                    For businesses with up to 50 product types
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="flex-grow">
-                  <div className="text-3xl font-bold mb-4">
-                    £59
-                    <span className="text-lg text-muted-foreground ml-1">
-                      /month
-                    </span>
-                  </div>
-                  <div className="text-sm text-muted-foreground mb-6">
-                    or £590 billed annually
-                  </div>
-                  <ul className="space-y-2">
-                    <li className="flex items-start">
-                      <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mr-2" />
-                      <span>Everything in Growth</span>
-                    </li>
-                    <li className="flex items-start">
-                      <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mr-2" />
-                      <span>Advanced features</span>
-                    </li>
-                  </ul>
-                  <Link href="/pricing" className="block w-full mt-6">
-                    <Button
-                      className="w-full flex items-center justify-center"
-                      variant="outline"
-                    >
-                      View Details
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
-            </div>
-
-            <div className="text-center mt-12">
-              <p className="text-muted-foreground mb-6">
-                Find more options for larger businesses with our Professional,
-                Business, Enterprise, and Ultimate plans
-              </p>
-              <Link href="/pricing">
-                <Button size="lg">
-                  See All Pricing Plans
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
             </div>
           </div>
         </section>
