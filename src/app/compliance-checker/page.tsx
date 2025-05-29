@@ -1,29 +1,31 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Shield, Upload, Search, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { ComplianceSearchBar } from "@/components/compliance-search-bar";
 
 export default function ComplianceChecker() {
-  const [query, setQuery] = useState("");
+  const searchParams = useSearchParams();
+  const [query, setQuery] = useState(searchParams.get("q") || "");
   const [isChecking, setIsChecking] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const router = useRouter();
   
-  const sampleQuestions = [
-    "Is my children's toy compliant with GPSR safety standards?",
-    "What documentation do I need for EU market access?",
-    "Are my product labels GPSR compliant?",
-    "Do I need additional testing for UK market?",
-    "What are the GPSR requirements for my cosmetic product?"
-  ];
+  // Check if there's an initial query from URL params
+  useEffect(() => {
+    const initialQuery = searchParams.get("q");
+    if (initialQuery) {
+      setQuery(initialQuery);
+      handleSearch(initialQuery);
+    }
+  }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -31,8 +33,8 @@ export default function ComplianceChecker() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSearch = (searchQuery: string) => {
+    setQuery(searchQuery);
     setIsChecking(true);
     
     // Simulate API call delay
@@ -40,10 +42,6 @@ export default function ComplianceChecker() {
       setIsChecking(false);
       setShowResults(true);
     }, 2000);
-  };
-
-  const handleSampleQuestion = (question: string) => {
-    setQuery(question);
   };
 
   return (
@@ -54,7 +52,7 @@ export default function ComplianceChecker() {
         {/* Hero Section */}
         <section className="py-16 md:py-24 bg-gradient-to-b from-primary/10 via-background to-muted">
           <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto text-center">
+            <div className="max-w-5xl mx-auto text-center">
               <h1 className="text-4xl md:text-5xl font-extrabold mb-6">
                 Instant GPSR Compliance Check
               </h1>
@@ -64,72 +62,9 @@ export default function ComplianceChecker() {
 
               {/* Search Form */}
               {!showResults ? (
-                <Card className="bg-white shadow-lg border-0 rounded-xl overflow-hidden">
-                  <CardContent className="p-0">
-                    <form onSubmit={handleSubmit}>
-                      <div className="flex flex-col md:flex-row p-2 gap-2">
-                        <div className="relative flex-grow">
-                          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
-                          <Input
-                            className="pl-12 pr-4 py-6 text-lg rounded-lg border-0 bg-muted/30 focus-visible:ring-primary"
-                            placeholder="Enter your product details for instant GPSR compliance check"
-                            value={query}
-                            onChange={(e) => setQuery(e.target.value)}
-                          />
-                        </div>
-
-                        <div className="flex md:flex-col lg:flex-row gap-2">
-                          <div className="relative">
-                            <input
-                              type="file"
-                              id="product-image"
-                              className="sr-only"
-                              onChange={handleFileChange}
-                              accept="image/*"
-                            />
-                            <label
-                              htmlFor="product-image"
-                              className="flex items-center justify-center gap-2 h-12 px-4 rounded-lg bg-muted hover:bg-muted/80 cursor-pointer text-sm font-medium"
-                            >
-                              <Upload className="h-4 w-4" />
-                              <span className="whitespace-nowrap">
-                                {file ? file.name : "Upload Image"}
-                              </span>
-                            </label>
-                          </div>
-
-                          <Button 
-                            type="submit" 
-                            className="h-12 px-6" 
-                            disabled={isChecking}
-                          >
-                            {isChecking ? (
-                              <>Checking...</>
-                            ) : (
-                              <>Check Compliance Now</>
-                            )}
-                          </Button>
-                        </div>
-                      </div>
-                    </form>
-
-                    {/* Sample Questions */}
-                    <div className="p-4 bg-muted/10 border-t">
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-2">
-                        {sampleQuestions.map((question, index) => (
-                          <button
-                            key={index}
-                            className="text-left text-sm text-muted-foreground hover:text-primary truncate transition-colors px-2 py-1 rounded-md hover:bg-muted/30"
-                            onClick={() => handleSampleQuestion(question)}
-                          >
-                            <Search className="inline-block h-3 w-3 mr-2 text-primary" />
-                            {question}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                <ComplianceSearchBar 
+                  onSearch={handleSearch} 
+                />
               ) : (
                 <ComplianceResults query={query} onReset={() => setShowResults(false)} />
               )}

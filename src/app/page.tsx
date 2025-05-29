@@ -1,13 +1,22 @@
+"use client";
+
 import Link from "next/link";
 import { useState } from "react";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Shield, Clock, FileCheck, CreditCard, CheckCircle2, ArrowRight, Gift, Search, Upload } from "lucide-react";
+import { Shield, Clock, FileCheck, CreditCard, CheckCircle2, ArrowRight, Gift } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ComplianceSearchBar } from "@/components/compliance-search-bar";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const router = useRouter();
+  
+  const handleSearch = (query: string) => {
+    router.push(`/compliance-checker?q=${encodeURIComponent(query)}`);
+  };
+  
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -24,68 +33,8 @@ export default function Home() {
                 Reduce compliance risks by 80% - Verify EU & UK product safety requirements in seconds
               </p>
 
-              {/* Search Form */}
-              <Card className="bg-white shadow-lg border-0 rounded-xl overflow-hidden">
-                <CardContent className="p-0">
-                  <form>
-                    <div className="flex flex-col md:flex-row p-2 gap-2">
-                      <div className="relative flex-grow">
-                        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
-                        <Input
-                          className="pl-12 pr-4 py-6 text-lg rounded-lg border-0 bg-muted/30 focus-visible:ring-primary"
-                          placeholder="Enter your product details for instant GPSR compliance check"
-                        />
-                      </div>
-
-                      <div className="flex md:flex-col lg:flex-row gap-2">
-                        <div className="relative">
-                          <input
-                            type="file"
-                            id="product-image"
-                            className="sr-only"
-                            accept="image/*"
-                          />
-                          <label
-                            htmlFor="product-image"
-                            className="flex items-center justify-center gap-2 h-12 px-4 rounded-lg bg-muted hover:bg-muted/80 cursor-pointer text-sm font-medium"
-                          >
-                            <Upload className="h-4 w-4" />
-                            <span className="whitespace-nowrap">Upload Image</span>
-                          </label>
-                        </div>
-
-                        <Link href="/compliance-checker">
-                          <Button className="h-12 px-6 w-full">
-                            Check Compliance Now
-                          </Button>
-                        </Link>
-                      </div>
-                    </div>
-                  </form>
-
-                  {/* Sample Questions */}
-                  <div className="p-4 bg-muted/10 border-t">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                      <Link href="/compliance-checker?q=Is+my+children's+toy+compliant+with+GPSR+safety+standards" className="text-left text-sm text-muted-foreground hover:text-primary truncate transition-colors px-2 py-1 rounded-md hover:bg-muted/30">
-                        <Search className="inline-block h-3 w-3 mr-2 text-primary" />
-                        Is my children's toy compliant with GPSR safety standards?
-                      </Link>
-                      <Link href="/compliance-checker?q=What+documentation+do+I+need+for+EU+market+access" className="text-left text-sm text-muted-foreground hover:text-primary truncate transition-colors px-2 py-1 rounded-md hover:bg-muted/30">
-                        <Search className="inline-block h-3 w-3 mr-2 text-primary" />
-                        What documentation do I need for EU market access?
-                      </Link>
-                      <Link href="/compliance-checker?q=Are+my+product+labels+GPSR+compliant" className="text-left text-sm text-muted-foreground hover:text-primary truncate transition-colors px-2 py-1 rounded-md hover:bg-muted/30">
-                        <Search className="inline-block h-3 w-3 mr-2 text-primary" />
-                        Are my product labels GPSR compliant?
-                      </Link>
-                      <Link href="/compliance-checker?q=Do+I+need+additional+testing+for+UK+market" className="text-left text-sm text-muted-foreground hover:text-primary truncate transition-colors px-2 py-1 rounded-md hover:bg-muted/30">
-                        <Search className="inline-block h-3 w-3 mr-2 text-primary" />
-                        Do I need additional testing for UK market?
-                      </Link>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              {/* Enhanced Search Bar Component */}
+              <ComplianceSearchBar onSearch={handleSearch} />
             </div>
           </div>
         </section>
@@ -323,11 +272,11 @@ export default function Home() {
                   <ul className="space-y-2">
                     <li className="flex items-start">
                       <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mr-2" />
-                      <span>EU REP compliance</span>
+                      <span>Everything in Starter</span>
                     </li>
                     <li className="flex items-start">
                       <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mr-2" />
-                      <span>GPSR compliance</span>
+                      <span>Priority support</span>
                     </li>
                   </ul>
                   <Link href="/pricing" className="block w-full mt-6">
@@ -350,11 +299,11 @@ export default function Home() {
                   <ul className="space-y-2">
                     <li className="flex items-start">
                       <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mr-2" />
-                      <span>EU REP compliance</span>
+                      <span>Everything in Growth</span>
                     </li>
                     <li className="flex items-start">
                       <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mr-2" />
-                      <span>GPSR compliance</span>
+                      <span>Advanced features</span>
                     </li>
                   </ul>
                   <Link href="/pricing" className="block w-full mt-6">
