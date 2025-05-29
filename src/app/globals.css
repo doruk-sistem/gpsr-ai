@@ -76,12 +76,12 @@
   * {
     @apply border-border;
   }
-  
+
   html {
     -webkit-tap-highlight-color: transparent;
     font-size: 16px;
   }
-  
+
   @media (max-width: 640px) {
     html {
       font-size: 14px;
@@ -93,14 +93,20 @@
     touch-action: manipulation;
   }
 
-  input, button, select, textarea {
+  input,
+  button,
+  select,
+  textarea {
     @apply text-base;
     /* Improve touch target sizes on mobile */
     min-height: 44px;
   }
 
   @media (min-width: 768px) {
-    input, button, select, textarea {
+    input,
+    button,
+    select,
+    textarea {
       min-height: auto;
     }
   }
@@ -176,4 +182,16 @@
   ::-webkit-scrollbar-thumb:hover {
     @apply bg-muted-foreground/30;
   }
+}
+
+/* Markdown table styling */
+.prose table {
+  @apply border-collapse border border-gray-300;
+}
+.prose th,
+.prose td {
+  @apply border border-gray-300 px-4 py-2 text-left;
+}
+.prose blockquote {
+  @apply border-l-4 pl-4 italic text-gray-600;
 }

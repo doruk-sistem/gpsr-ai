@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { openaiClient } from "@/lib/utils/openai";
+import { openai } from "@/lib/utils/openai";
 import { NextRequest, NextResponse } from "next/server";
 
 /**
@@ -114,7 +114,7 @@ export async function POST(
     const regionPromptString = getRegionPromptString();
 
     // Request compliance data from OpenAI
-    const result = await openaiClient.chat.completions.create({
+    const result = await openai.chat.completions.create({
       messages: [
         {
           role: "system",
