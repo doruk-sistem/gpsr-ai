@@ -52,6 +52,7 @@ export interface SaveDefaultDirectivesRegulationsStandardsRequest {
   userProductId: string;
   categoryName: string;
   productName: string;
+  regions: ("uk" | "eu")[];
 }
 
 export interface SaveDefaultDirectivesRegulationsStandardsResponse {
@@ -173,12 +174,14 @@ class ProductsService {
     userProductId,
     categoryName,
     productName,
+    regions,
   }: SaveDefaultDirectivesRegulationsStandardsRequest) {
     const response = await axios.post(
       `/api/user-products/${userProductId}/save-default-directives-regulations-standards`,
       {
         categoryName,
         productName,
+        regions,
       }
     );
 
