@@ -14,8 +14,7 @@ interface ComplianceSearchBarProps {
 
 export function ComplianceSearchBar({ className, onSearch }: ComplianceSearchBarProps) {
   const [query, setQuery] = useState("");
-  const [isFocused, setIsFocused] = useState(false);
-  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false); 
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -45,7 +44,6 @@ export function ComplianceSearchBar({ className, onSearch }: ComplianceSearchBar
 
   // Show suggestions when input is focused and either has content or user clicks the input
   const handleFocus = () => {
-    setIsFocused(true);
     setShowSuggestions(true);
   };
 
@@ -114,23 +112,26 @@ export function ComplianceSearchBar({ className, onSearch }: ComplianceSearchBar
           </div>
 
           {/* Suggestions Dropdown */}
-          {showSuggestions && (
-            <div className="absolute z-10 mt-1 w-full bg-white rounded-lg shadow-lg border overflow-hidden transition-all origin-top animate-in fade-in-0 zoom-in-95 slide-in-from-top-2 duration-200">
-              <div className="py-1">
-                {suggestionQuestions.map((suggestion, index) => (
-                  <button
-                    key={index}
-                    type="button"
-                    className="w-full text-left px-4 py-3 text-sm text-muted-foreground hover:text-primary hover:bg-muted/30 transition-colors flex items-start space-x-3 border-b last:border-b-0 border-muted/30"
-                    onClick={() => handleSuggestionClick(suggestion)}
-                  >
-                    <Search className="h-4 w-4 mt-0.5 text-primary flex-shrink-0" />
-                    <span>{suggestion}</span>
-                  </button>
-                ))}
-              </div>
+          <div className={cn(
+            "absolute z-10 mt-1 w-full bg-white rounded-lg shadow-lg border overflow-hidden transition-all origin-top",
+            showSuggestions 
+              ? "opacity-100 scale-100 translate-y-0 animate-in fade-in-0 zoom-in-95 slide-in-from-top-2 duration-200" 
+              : "opacity-0 scale-95 -translate-y-2 pointer-events-none"
+          )}>
+            <div className="py-1">
+              {suggestionQuestions.slice(0, 5).map((suggestion, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  className="w-full text-left px-4 py-3 text-sm text-muted-foreground hover:text-primary hover:bg-muted/30 transition-colors flex items-start space-x-3 border-b last:border-b-0 border-muted/30"
+                  onClick={() => handleSuggestionClick(suggestion)}
+                >
+                  <Search className="h-4 w-4 mt-0.5 text-primary flex-shrink-0" />
+                  <span>{suggestion}</span>
+                </button>
+              ))}
             </div>
-          )}
+          </div>
         </div>
       </form>
     </div>
