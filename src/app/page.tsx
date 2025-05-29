@@ -1,8 +1,10 @@
 import Link from "next/link";
+import { useState } from "react";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
-import { Shield, Clock, FileCheck, CreditCard, CheckCircle2, ArrowRight, Gift } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Shield, Clock, FileCheck, CreditCard, CheckCircle2, ArrowRight, Gift, Search, Upload } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function Home() {
@@ -11,14 +13,91 @@ export default function Home() {
       <Navbar />
       
       <main className="flex-grow">
+        {/* GPSR Compliance Checker Section */}
+        <section className="bg-gradient-to-b from-primary/10 via-background to-muted pt-16 pb-12">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-4xl mx-auto text-center">
+              <h1 className="text-4xl md:text-5xl font-extrabold mb-6">
+                Instant GPSR Compliance Check
+              </h1>
+              <p className="text-xl text-muted-foreground mb-8">
+                Reduce compliance risks by 80% - Verify EU & UK product safety requirements in seconds
+              </p>
+
+              {/* Search Form */}
+              <Card className="bg-white shadow-lg border-0 rounded-xl overflow-hidden">
+                <CardContent className="p-0">
+                  <form>
+                    <div className="flex flex-col md:flex-row p-2 gap-2">
+                      <div className="relative flex-grow">
+                        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                          className="pl-12 pr-4 py-6 text-lg rounded-lg border-0 bg-muted/30 focus-visible:ring-primary"
+                          placeholder="Enter your product details for instant GPSR compliance check"
+                        />
+                      </div>
+
+                      <div className="flex md:flex-col lg:flex-row gap-2">
+                        <div className="relative">
+                          <input
+                            type="file"
+                            id="product-image"
+                            className="sr-only"
+                            accept="image/*"
+                          />
+                          <label
+                            htmlFor="product-image"
+                            className="flex items-center justify-center gap-2 h-12 px-4 rounded-lg bg-muted hover:bg-muted/80 cursor-pointer text-sm font-medium"
+                          >
+                            <Upload className="h-4 w-4" />
+                            <span className="whitespace-nowrap">Upload Image</span>
+                          </label>
+                        </div>
+
+                        <Link href="/compliance-checker">
+                          <Button className="h-12 px-6 w-full">
+                            Check Compliance Now
+                          </Button>
+                        </Link>
+                      </div>
+                    </div>
+                  </form>
+
+                  {/* Sample Questions */}
+                  <div className="p-4 bg-muted/10 border-t">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      <Link href="/compliance-checker?q=Is+my+children's+toy+compliant+with+GPSR+safety+standards" className="text-left text-sm text-muted-foreground hover:text-primary truncate transition-colors px-2 py-1 rounded-md hover:bg-muted/30">
+                        <Search className="inline-block h-3 w-3 mr-2 text-primary" />
+                        Is my children's toy compliant with GPSR safety standards?
+                      </Link>
+                      <Link href="/compliance-checker?q=What+documentation+do+I+need+for+EU+market+access" className="text-left text-sm text-muted-foreground hover:text-primary truncate transition-colors px-2 py-1 rounded-md hover:bg-muted/30">
+                        <Search className="inline-block h-3 w-3 mr-2 text-primary" />
+                        What documentation do I need for EU market access?
+                      </Link>
+                      <Link href="/compliance-checker?q=Are+my+product+labels+GPSR+compliant" className="text-left text-sm text-muted-foreground hover:text-primary truncate transition-colors px-2 py-1 rounded-md hover:bg-muted/30">
+                        <Search className="inline-block h-3 w-3 mr-2 text-primary" />
+                        Are my product labels GPSR compliant?
+                      </Link>
+                      <Link href="/compliance-checker?q=Do+I+need+additional+testing+for+UK+market" className="text-left text-sm text-muted-foreground hover:text-primary truncate transition-colors px-2 py-1 rounded-md hover:bg-muted/30">
+                        <Search className="inline-block h-3 w-3 mr-2 text-primary" />
+                        Do I need additional testing for UK market?
+                      </Link>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </section>
+
         {/* Hero Section */}
-        <section className="bg-gradient-to-b from-primary/10 via-background to-muted py-24">
+        <section className="bg-gradient-to-b from-background to-muted/30 py-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center">
-              <h1 className="text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl md:text-6xl">
+              <h2 className="text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl md:text-6xl">
                 <span className="block">Simplify Your</span>
                 <span className="block text-primary">GPSR Compliance</span>
-              </h1>
+              </h2>
               <p className="mt-6 max-w-lg mx-auto text-xl text-muted-foreground sm:max-w-3xl">
                 Secure EU market access with our complete Authorized Representative and GPSR compliance services. Stay compliant, stay competitive.
               </p>
