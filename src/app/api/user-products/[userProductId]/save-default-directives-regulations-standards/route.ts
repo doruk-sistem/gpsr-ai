@@ -19,15 +19,30 @@ export async function POST(
 ) {
   try {
     const { userProductId } = await params;
-    const { productName, categoryName } = await request.json();
+    const { productName, categoryName, regions } = (await request.json()) as {
+      productName: string;
+      categoryName: string;
+      regions: ("uk" | "eu")[];
+    };
 
     // Validate required fields
-    if (!productName || !categoryName) {
+    if (!productName || !categoryName || !regions)
       return NextResponse.json(
-        { error: "Product name and category name are required" },
+        { error: "Product name, category name and region are required" },
         { status: 400 }
       );
-    }
+
+    if (!Array.isArray(regions))
+      return NextResponse.json(
+        { error: "Regions must be an array" },
+        { status: 400 }
+      );
+
+    if (regions.length === 0)
+      return NextResponse.json(
+        { error: "At least one region must be provided" },
+        { status: 400 }
+      );
 
     const supabase = await createClient();
 
@@ -81,17 +96,34 @@ export async function POST(
       ],
     };
 
+    const getRegionPromptString = () => {
+      const includesUK = regions.includes("uk");
+      const includesEU = regions.includes("eu");
+
+      if (includesUK && includesEU) {
+        return "EU and UK";
+      } else if (includesUK) {
+        return "UK";
+      } else if (includesEU) {
+        return "EU";
+      } else {
+        return "UK and EU";
+      }
+    };
+
+    const regionPromptString = getRegionPromptString();
+
     // Request compliance data from OpenAI
     const result = await openaiClient.chat.completions.create({
       messages: [
         {
           role: "system",
           content:
-            "You are an expert who provides detailed lists of directives, regulations, and standards that are valid for GPSR compliance of products in the specified category within the EU and UK scope.",
+            "You are an expert who provides detailed lists of directives, regulations, and standards that are valid for GPSR compliance of products in the specified category within the EU and UK scope. The user will tell you whether they want to request from the EU or the UK region or both.",
         },
         {
           role: "user",
-          content: `Please list the Directives, Regulations, and Standards data that are valid for GPSR compliance of "${productName}" products in the "${categoryName}" category in the EU and UK in the following format:\n${JSON.stringify(
+          content: `Please list the Directives, Regulations, and Standards data that are valid for GPSR compliance of "${productName}" products in the "${categoryName}" category in the "${regionPromptString}" in the following format:\n${JSON.stringify(
             schema
           )}\n Always return results in English and provide only the JSON data. Please return a valid string in JSON format and properly escape quotation marks.`,
         },

@@ -31,6 +31,7 @@ import {
   FileText,
   Plus,
   Building,
+  Shield,
 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -61,6 +62,7 @@ import {
 
 import { useProductForm } from "../../hooks/useProductForm";
 import { ProductQuestionAnswer } from "@/lib/services/product-question-answers-service";
+import { useRepresentativeAddresses } from "@/hooks/use-representative-addresses";
 
 export default function ProductStep1() {
   const { initialData, setInitialData, onNextStep, mode } = useProductForm();
@@ -81,11 +83,19 @@ export default function ProductStep1() {
   const [selectedManufacturerId, setSelectedManufacturerId] = useState<
     string | undefined
   >(initialData?.manufacturer_id);
+  const [selectedEuRepId, setSelectedEuRepId] = useState<string | undefined>(
+    initialData?.authorised_representative_eu_id
+  );
+  const [selectedUkRepId, setSelectedUkRepId] = useState<string | undefined>(
+    initialData?.authorised_representative_uk_id
+  );
 
   // Popover States
   const [openCategoryPopover, setOpenCategoryPopover] = useState(false);
   const [openSubcategoryPopover, setOpenSubcategoryPopover] = useState(false);
   const [openManufacturerPopover, setOpenManufacturerPopover] = useState(false);
+  const [openEuRepPopover, setOpenEuRepPopover] = useState(false);
+  const [openUkRepPopover, setOpenUkRepPopover] = useState(false);
 
   const { data: user } = useCurrentUser();
 
@@ -119,6 +129,8 @@ export default function ProductStep1() {
       question_description: true,
     },
   });
+  const { data: euAddresses = [] } = useRepresentativeAddresses("eu");
+  const { data: ukAddresses = [] } = useRepresentativeAddresses("uk");
 
   const handleImageChange = (imageDataUrl: string, index: number) => {
     const newPreviews = [...imagePreview];
@@ -151,7 +163,9 @@ export default function ProductStep1() {
     try {
       e.preventDefault();
 
-      // Form validation
+      // ===============================
+      // Form Validation
+      // ===============================
       if (!selectedCategoryId) {
         toast.error("Please select a category");
         return;
@@ -187,6 +201,13 @@ export default function ProductStep1() {
         return;
       }
 
+      if (!selectedEuRepId && !selectedUkRepId) {
+        toast.error(
+          "Please select an Authorised Representative for at least one region"
+        );
+        return;
+      }
+
       // Check if at least one product image is uploaded
       const hasExistingImages = (initialData?.image_urls || []).length > 0;
       const hasNewImages = imagePreview.some((preview) => preview);
@@ -195,6 +216,9 @@ export default function ProductStep1() {
         toast.error("Please upload at least one product image");
         return;
       }
+      // ===============================
+      // End - Form Validation
+      // ===============================
 
       const imageFiles =
         imagePreview.length > 0
@@ -226,7 +250,11 @@ export default function ProductStep1() {
         category_id: selectedCategoryId,
         product_type_id: selectedProductTypeId,
         manufacturer_id: selectedManufacturerId as string,
+        authorised_representative_eu_id: selectedEuRepId,
+        authorised_representative_uk_id: selectedUkRepId,
       };
+
+      console.log(data);
 
       let newProduct: Product | null = null;
       let newProductQuestionAnswers: ProductQuestionAnswer[] | null = null;
@@ -251,6 +279,11 @@ export default function ProductStep1() {
             });
         }
 
+        const regions = [];
+
+        if (selectedEuRepId) regions.push("eu");
+        if (selectedUkRepId) regions.push("uk");
+
         defaultDirectivesRegulationsStandards =
           await saveDefaultDirectivesRegulationsStandards.mutateAsync({
             userProductId: newProduct?.id as string,
@@ -260,6 +293,7 @@ export default function ProductStep1() {
             productName:
               productTypes.find((type) => type.id === selectedProductTypeId)
                 ?.product || "",
+            regions: regions as ("eu" | "uk")[],
           });
       }
 
@@ -689,6 +723,144 @@ export default function ProductStep1() {
               className="pl-12 bg-white min-h-[120px] text-lg resize-none"
             />
           </div>
+        </div>
+
+        {/* EU Representative */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <label className="block text-base font-medium text-gray-700">
+              EU Authorised Representative
+            </label>
+
+            <Link href="/dashboard/representative">
+              <Button
+                variant="ghost"
+                type="button"
+                className="text-sm text-primary hover:text-primary/80"
+              >
+                <Plus className="w-4 h-4 inline-block mr-1" />
+                Add EU Representative
+              </Button>
+            </Link>
+          </div>
+          <Popover open={openEuRepPopover} onOpenChange={setOpenEuRepPopover}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                role="combobox"
+                aria-expanded={openEuRepPopover}
+                className="w-full justify-between"
+              >
+                <div className="flex items-center gap-2">
+                  <Shield className="h-4 w-4 text-gray-400" />
+                  {selectedEuRepId
+                    ? euAddresses.find((a) => a.id === selectedEuRepId)
+                        ?.company_name || "Select EU representative"
+                    : "Select EU representative"}
+                </div>
+                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[300px] p-0">
+              <Command>
+                <CommandInput placeholder="Search EU representative..." />
+                <CommandEmpty>No EU representative found.</CommandEmpty>
+                <CommandList>
+                  <CommandGroup>
+                    {euAddresses.map((address) => (
+                      <CommandItem
+                        key={address.id}
+                        value={address.company_name}
+                        onSelect={() => {
+                          setSelectedEuRepId(address.id);
+                          setOpenEuRepPopover(false);
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            selectedEuRepId === address.id
+                              ? "opacity-100"
+                              : "opacity-0"
+                          )}
+                        />
+                        {address.company_name}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
+        </div>
+
+        {/* UK Representative */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <label className="block text-base font-medium text-gray-700">
+              UK Authorised Representative
+            </label>
+
+            <Link href="/dashboard/representative">
+              <Button
+                variant="ghost"
+                type="button"
+                className="text-sm text-primary hover:text-primary/80"
+              >
+                <Plus className="w-4 h-4 inline-block mr-1" />
+                Add UK Representative
+              </Button>
+            </Link>
+          </div>
+          <Popover open={openUkRepPopover} onOpenChange={setOpenUkRepPopover}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                role="combobox"
+                aria-expanded={openUkRepPopover}
+                className="w-full justify-between"
+              >
+                <div className="flex items-center gap-2">
+                  <Shield className="h-4 w-4 text-gray-400" />
+                  {selectedUkRepId
+                    ? ukAddresses.find((a) => a.id === selectedUkRepId)
+                        ?.company_name || "Select UK representative"
+                    : "Select UK representative"}
+                </div>
+                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[300px] p-0">
+              <Command>
+                <CommandInput placeholder="Search UK representative..." />
+                <CommandEmpty>No UK representative found.</CommandEmpty>
+                <CommandList>
+                  <CommandGroup>
+                    {ukAddresses.map((address) => (
+                      <CommandItem
+                        key={address.id}
+                        value={address.company_name}
+                        onSelect={() => {
+                          setSelectedUkRepId(address.id);
+                          setOpenUkRepPopover(false);
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            selectedUkRepId === address.id
+                              ? "opacity-100"
+                              : "opacity-0"
+                          )}
+                        />
+                        {address.company_name}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
         </div>
 
         <div className="flex justify-end">
