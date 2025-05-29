@@ -158,7 +158,7 @@ export function ComplianceSearchBar({
                   type="submit"
                   className="h-12 px-8 rounded-lg font-semibold text-base bg-primary hover:bg-primary/90 transition-colors shadow-md flex items-center gap-2"
                 >
-                  Check Compliance
+                  Check Compliance With AI
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </div>

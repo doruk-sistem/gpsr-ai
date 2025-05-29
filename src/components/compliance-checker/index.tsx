@@ -8,7 +8,6 @@ import { AILoading } from "./ai-loading";
 export default function ComplianceChecker() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState("");
-  const [isChecking, setIsChecking] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [isPending, startTransition] = useTransition();
 
@@ -16,7 +15,6 @@ export default function ComplianceChecker() {
     startTransition(async () => {
       try {
         setQuery(searchQuery);
-        setIsChecking(true);
 
         const formData = new FormData();
         formData.append("prompt", searchQuery);
@@ -27,11 +25,9 @@ export default function ComplianceChecker() {
         const response = await axios.post("/api/check-compliance", formData);
 
         setResults(response.data?.content);
-        setIsChecking(false);
         setShowResults(true);
       } catch (error) {
         console.error("Error checking compliance:", error);
-        setIsChecking(false);
       }
     });
   };
@@ -41,7 +37,7 @@ export default function ComplianceChecker() {
   };
 
   return (
-    <div className="min-h-screen transition-all duration-500 ease-in-out">
+    <div className="transition-all duration-500 ease-in-out">
       {/* Loading State */}
       {isPending && (
         <div className="animate-in fade-in-0 duration-500">
