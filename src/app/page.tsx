@@ -1,24 +1,52 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import { Shield, Clock, FileCheck, CreditCard, CheckCircle2, ArrowRight, Gift } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ComplianceSearchBar } from "@/components/compliance-search-bar";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const router = useRouter();
+  
+  const handleSearch = (query: string) => {
+    router.push(`/compliance-checker?q=${encodeURIComponent(query)}`);
+  };
+  
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
       
       <main className="flex-grow">
+        {/* GPSR Compliance Checker Section */}
+        <section className="bg-gradient-to-b from-primary/10 via-background to-muted pt-16 pb-12">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-4xl mx-auto text-center">
+              <h1 className="text-4xl md:text-5xl font-extrabold mb-6">
+                Instant GPSR Compliance Check
+              </h1>
+              <p className="text-xl text-muted-foreground mb-8">
+                Reduce compliance risks by 80% - Verify EU & UK product safety requirements in seconds
+              </p>
+
+              {/* Enhanced Search Bar Component */}
+              <ComplianceSearchBar onSearch={handleSearch} />
+            </div>
+          </div>
+        </section>
+
         {/* Hero Section */}
-        <section className="bg-gradient-to-b from-primary/10 via-background to-muted py-24">
+        <section className="bg-gradient-to-b from-background to-muted/30 py-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center">
-              <h1 className="text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl md:text-6xl">
+              <h2 className="text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl md:text-6xl">
                 <span className="block">Simplify Your</span>
                 <span className="block text-primary">GPSR Compliance</span>
-              </h1>
+              </h2>
               <p className="mt-6 max-w-lg mx-auto text-xl text-muted-foreground sm:max-w-3xl">
                 Secure EU market access with our complete Authorized Representative and GPSR compliance services. Stay compliant, stay competitive.
               </p>
@@ -244,11 +272,11 @@ export default function Home() {
                   <ul className="space-y-2">
                     <li className="flex items-start">
                       <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mr-2" />
-                      <span>EU REP compliance</span>
+                      <span>Everything in Starter</span>
                     </li>
                     <li className="flex items-start">
                       <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mr-2" />
-                      <span>GPSR compliance</span>
+                      <span>Priority support</span>
                     </li>
                   </ul>
                   <Link href="/pricing" className="block w-full mt-6">
@@ -271,11 +299,11 @@ export default function Home() {
                   <ul className="space-y-2">
                     <li className="flex items-start">
                       <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mr-2" />
-                      <span>EU REP compliance</span>
+                      <span>Everything in Growth</span>
                     </li>
                     <li className="flex items-start">
                       <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mr-2" />
-                      <span>GPSR compliance</span>
+                      <span>Advanced features</span>
                     </li>
                   </ul>
                   <Link href="/pricing" className="block w-full mt-6">
