@@ -5,7 +5,14 @@ import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { CheckCircle2, Shield, HelpCircle, ArrowRight, X, Gift } from "lucide-react";
+import {
+  CheckCircle2,
+  Shield,
+  HelpCircle,
+  ArrowRight,
+  X,
+  Gift,
+} from "lucide-react";
 import {
   Card,
   CardContent,
@@ -324,8 +331,12 @@ export default function Pricing() {
               <div className="flex items-center text-center md:text-left">
                 <Gift className="h-8 w-8 text-primary mr-3 flex-shrink-0" />
                 <div>
-                  <h3 className="text-lg font-bold text-primary">14-Day Free Trial</h3>
-                  <p className="text-muted-foreground">Try free for 14 days, no credit card required</p>
+                  <h3 className="text-lg font-bold text-primary">
+                    14-Day Free Trial
+                  </h3>
+                  <p className="text-muted-foreground">
+                    Try free for 14 days, no credit card required
+                  </p>
                 </div>
               </div>
               <Link href="/auth/register" className="md:ml-auto">
@@ -420,7 +431,7 @@ export default function Pricing() {
                             14 days free
                           </span>
                         </div>
-                        
+
                         <span className="text-4xl font-bold">
                           {billingCycle === "monthly"
                             ? `€${tier.monthlyPrice}`
@@ -538,7 +549,7 @@ export default function Pricing() {
                           14 days free
                         </span>
                       </div>
-                      
+
                       <span className="text-3xl font-bold">
                         {billingCycle === "monthly"
                           ? `€${tier.monthlyPrice}`
@@ -640,7 +651,7 @@ export default function Pricing() {
                           14 days free
                         </span>
                       </div>
-                      
+
                       <span className="text-3xl font-bold">
                         {billingCycle === "monthly"
                           ? `€${tier.monthlyPrice}`
@@ -842,13 +853,15 @@ export default function Pricing() {
                     <td className="py-4 px-6 text-primary font-medium">
                       14-Day Free Trial
                     </td>
-                    {Array(7).fill(true).map((value, index) => (
-                      <td key={index} className="py-4 px-3 text-center">
-                        <CheckCircle2 className="h-5 w-5 text-primary mx-auto" />
-                      </td>
-                    ))}
+                    {Array(7)
+                      .fill(true)
+                      .map((value, index) => (
+                        <td key={index} className="py-4 px-3 text-center">
+                          <CheckCircle2 className="h-5 w-5 text-primary mx-auto" />
+                        </td>
+                      ))}
                   </tr>
-                  
+
                   {featureComparison.map((feature, index) => (
                     <tr key={index} className="border-b">
                       <td className="py-4 px-6 text-muted-foreground font-medium">
@@ -896,7 +909,10 @@ export default function Pricing() {
                   How does the free trial work?
                 </h3>
                 <p className="text-muted-foreground">
-                  All our plans come with a 14-day free trial. You can explore all features with no limitations and no credit card required. If you decide to continue, you'll only be charged after the trial period ends.
+                  All our plans come with a 14-day free trial. You can explore
+                  all features with no limitations and no credit card required.
+                  If you decide to continue, you&apos;ll only be charged after
+                  the trial period ends.
                 </p>
               </div>
 
@@ -967,7 +983,8 @@ export default function Pricing() {
                 Ready to comply with GPSR?
               </h2>
               <p className="mt-4 max-w-2xl text-xl text-primary-foreground/80 mx-auto">
-                Try our 14-day free trial with no commitments, then choose a plan that matches your needs
+                Try our 14-day free trial with no commitments, then choose a
+                plan that matches your needs
               </p>
               <div className="mt-10 flex flex-wrap justify-center gap-4">
                 <Link href="/auth/register">
