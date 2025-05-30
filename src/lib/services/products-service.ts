@@ -10,7 +10,10 @@ import { type ProductType } from "./product-types-services";
 import { type Manufacturer } from "./manufacturers-service";
 import { type UserProductUserDirective } from "./user-product-user-directives-service";
 import { type UserProductUserRegulation } from "./user-product-user-regulations-service";
-import supabaseHelper, { SelectQuery } from "../utils/supabase-helper";
+import supabaseHelper, {
+  SelectQuery,
+  jsonSelect,
+} from "../utils/supabase-helper";
 
 export interface Product {
   id: string;
@@ -136,6 +139,16 @@ class ProductsService {
     const { count, error } = await supabase
       .from("user_products")
       .select("*", { count: "exact", head: true });
+
+    if (error) throw error;
+    return count;
+  }
+
+  public async getProductsCountByUserId(userId: string) {
+    const { count, error } = await supabase
+      .from("user_products")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", userId);
 
     if (error) throw error;
     return count;

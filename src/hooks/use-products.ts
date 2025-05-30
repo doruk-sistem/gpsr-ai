@@ -23,6 +23,14 @@ export const useProductsCount = () => {
   });
 };
 
+export const useProductsCountByUserId = (userId: string) => {
+  return useQuery({
+    queryKey: ["products-count-by-user-id", userId],
+    queryFn: () => productsService.getProductsCountByUserId(userId),
+    enabled: !!userId,
+  });
+};
+
 export const useProductById = (
   id: string,
   params: GetProductByIdParams = {}
