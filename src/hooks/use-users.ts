@@ -35,6 +35,7 @@ export const useGetUserProfileById = (id: string) => {
   return useQuery({
     queryKey: ["auth", "userProfile", id],
     queryFn: () => userService.getUserProfileById(id),
+    enabled: !!id,
   });
 };
 

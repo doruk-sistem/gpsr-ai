@@ -48,15 +48,16 @@ export interface Country {
 
 interface CountryDropdownProps {
   options?: Country[];
-  onChange?: (country: Country) => void;
+  onChange?: (country: Country | null) => void;
   defaultValue?: string;
   disabled?: boolean;
   placeholder?: string;
   slim?: boolean;
   className?: string;
+  showClearOption?: boolean;
 }
 
-// Önceden filtrelenmiş ülke listesi
+// Pre-filtered country list
 const filteredCountries = countries.all
   .filter(
     (country: Country) =>
@@ -67,15 +68,29 @@ const filteredCountries = countries.all
   )
   .sort((a, b) => a.name.localeCompare(b.name));
 
-const ITEM_HEIGHT = 36; // Her öğenin yüksekliği
-const LIST_HEIGHT = 270; // Liste container yüksekliği
+// Clear option to add at the beginning
+const clearOption = {
+  alpha2: "",
+  alpha3: "",
+  countryCallingCodes: [],
+  currencies: [],
+  ioc: "",
+  languages: [],
+  name: "All Countries",
+  status: "clear",
+} as Country;
 
-// Öğe render fonksiyonu
+const ITEM_HEIGHT = 36; // Each item height
+const LIST_HEIGHT = 270; // List container height
+
+// Item render function
 const CountryItem = React.memo(({ data, index, style }: any) => {
   const { items, selectedCountry, onSelect } = data;
   const country = items[index];
 
   if (!country) return null;
+
+  const isClearOption = country.status === "clear";
 
   return (
     <div style={style}>
@@ -85,19 +100,29 @@ const CountryItem = React.memo(({ data, index, style }: any) => {
       >
         <div className="flex flex-grow w-0 space-x-2 overflow-hidden">
           <div className="inline-flex items-center justify-center w-5 h-5 shrink-0 overflow-hidden rounded-full">
-            <CircleFlag
-              countryCode={country.alpha2.toLowerCase()}
-              height={20}
-            />
+            {isClearOption ? (
+              <Globe className="h-4 w-4 text-muted-foreground" />
+            ) : (
+              <CircleFlag
+                countryCode={country.alpha2.toLowerCase()}
+                height={20}
+              />
+            )}
           </div>
-          <span className="overflow-hidden text-ellipsis whitespace-nowrap">
+          <span
+            className={cn(
+              "overflow-hidden text-ellipsis whitespace-nowrap",
+              isClearOption && "text-muted-foreground font-medium"
+            )}
+          >
             {country.name}
           </span>
         </div>
         <CheckIcon
           className={cn(
             "ml-auto h-4 w-4 shrink-0",
-            country.alpha3 === selectedCountry?.alpha3
+            (isClearOption && !selectedCountry) ||
+              country.alpha3 === selectedCountry?.alpha3
               ? "opacity-100"
               : "opacity-0"
           )}
@@ -118,6 +143,7 @@ const CountryDropdownComponent = (
     placeholder = "Select a country",
     slim = false,
     className,
+    showClearOption = true,
     ...props
   }: CountryDropdownProps,
   ref: React.ForwardedRef<HTMLButtonElement>
@@ -128,18 +154,26 @@ const CountryDropdownComponent = (
   );
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Arama sonuçlarını filtrele
+  // Add clear option to the beginning if enabled
+  const optionsWithClear = useMemo(() => {
+    if (showClearOption) {
+      return [clearOption, ...options];
+    }
+    return options;
+  }, [options, showClearOption]);
+
+  // Filter search results
   const filteredOptions = useMemo(() => {
-    if (!searchQuery) return options;
+    if (!searchQuery) return optionsWithClear;
 
     const query = searchQuery.toLowerCase();
-    return options.filter(
+    return optionsWithClear.filter(
       (country) =>
         country.name.toLowerCase().includes(query) ||
         country.alpha2.toLowerCase().includes(query) ||
         country.alpha3.toLowerCase().includes(query)
     );
-  }, [options, searchQuery]);
+  }, [optionsWithClear, searchQuery]);
 
   // Set the selected country
   useEffect(() => {
@@ -157,8 +191,13 @@ const CountryDropdownComponent = (
   // Select handler
   const handleSelect = useCallback(
     (country: Country) => {
-      setSelectedCountry(country);
-      onChange?.(country);
+      if (country.status === "clear") {
+        setSelectedCountry(undefined);
+        onChange?.(null);
+      } else {
+        setSelectedCountry(country);
+        onChange?.(country);
+      }
       setOpen(false);
       setSearchQuery("");
     },

@@ -99,7 +99,7 @@ class UserService {
       .single();
 
     if (error) throw error;
-    return data;
+    return data as UserProfile;
   }
 
   /**

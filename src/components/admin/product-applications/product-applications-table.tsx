@@ -237,6 +237,7 @@ export function ProductApplicationsTable() {
               </TableBody>
             </Table>
           </div>
+
           {/* Pagination */}
           <DataTablePagination
             totalItems={totalItems}
