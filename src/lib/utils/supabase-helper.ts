@@ -19,6 +19,8 @@ type JoinQuery<T extends Record<string, any>> = {
 
 export type SelectQuery<T extends Record<string, any>> = {
   [K in keyof T]?: boolean | "*" | (keyof T[K])[] | JoinQuery<T[K]>;
+} & {
+  "*"?: boolean;
 };
 
 type SortOrder = "asc" | "desc";
@@ -43,9 +45,9 @@ export class SupabaseHelper {
    * // => "id, name"
    *
    * @example
-   * // Join usage
-   * formatSelectQuery({ id: true, products: "*" })
-   * // => "id, products(*)"
+   * // Select all fields
+   * formatSelectQuery({ "*": true })
+   * // => "*"
    *
    * @example
    * // Join with specific fields
@@ -68,8 +70,24 @@ export class SupabaseHelper {
   ): string => {
     if (!selectQueries) return "*";
 
-    return Object.entries(selectQueries)
+    const entries = Object.entries(selectQueries);
+
+    // If only "*": true exists, return "*"
+    if (
+      entries.length === 1 &&
+      entries[0][0] === "*" &&
+      entries[0][1] === true
+    ) {
+      return "*";
+    }
+
+    return entries
       .map(([key, value]) => {
+        // "*" key'ini özel olarak işle
+        if (key === "*") {
+          return value ? "*" : null;
+        }
+
         if (typeof value === "boolean") {
           return value ? key : null;
         }
