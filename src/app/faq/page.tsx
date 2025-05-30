@@ -303,40 +303,58 @@ export default function FAQ() {
             </div>
 
             <div className="mb-16" id="trial">
-              <h2 className="text-2xl font-bold mb-8">Free Trial Information</h2>
+              <h2 className="text-2xl font-bold mb-8">
+                Free Trial Information
+              </h2>
               <Accordion type="single" collapsible className="w-full">
                 <AccordionItem value="item-15a">
-                  <AccordionTrigger>How does the 14-day free trial work?</AccordionTrigger>
+                  <AccordionTrigger>
+                    How does the 14-day free trial work?
+                  </AccordionTrigger>
                   <AccordionContent>
-                    Our 14-day free trial gives you full access to all platform features with no limitations. 
-                    You can explore the dashboard, add products, upload documents, and test all compliance tools.
-                    No credit card is required to start your trial, and there's no obligation to continue after the trial period ends.
+                    Our 14-day free trial gives you full access to all platform
+                    features with no limitations. You can explore the dashboard,
+                    add products, upload documents, and test all compliance
+                    tools. No credit card is required to start your trial, and
+                    there&apos;s no obligation to continue after the trial
+                    period ends.
                   </AccordionContent>
                 </AccordionItem>
 
                 <AccordionItem value="item-15b">
-                  <AccordionTrigger>What happens when my trial ends?</AccordionTrigger>
+                  <AccordionTrigger>
+                    What happens when my trial ends?
+                  </AccordionTrigger>
                   <AccordionContent>
-                    When your trial period ends, you'll need to select a paid plan to continue using our services. 
-                    We'll send you reminders as your trial approaches its end date. If you choose not to subscribe, 
-                    your account will be limited but not deleted, so you can easily reactivate it in the future.
+                    When your trial period ends, you&apos;ll need to select a
+                    paid plan to continue using our services. We&apos;ll send
+                    you reminders as your trial approaches its end date. If you
+                    choose not to subscribe, your account will be limited but
+                    not deleted, so you can easily reactivate it in the future.
                   </AccordionContent>
                 </AccordionItem>
 
                 <AccordionItem value="item-15c">
                   <AccordionTrigger>Can I cancel my trial?</AccordionTrigger>
                   <AccordionContent>
-                    Yes, you can cancel your trial at any time without any charges. Since we don't collect payment information 
-                    during the trial signup, there's nothing to cancel from a billing perspective. You can simply stop using the service,
-                    or you can explicitly cancel your trial in your account settings if you wish.
+                    Yes, you can cancel your trial at any time without any
+                    charges. Since we don&apos;t collect payment information
+                    during the trial signup, there&apos;s nothing to cancel from
+                    a billing perspective. You can simply stop using the
+                    service, or you can explicitly cancel your trial in your
+                    account settings if you wish.
                   </AccordionContent>
                 </AccordionItem>
 
                 <AccordionItem value="item-15d">
-                  <AccordionTrigger>Can I extend my free trial?</AccordionTrigger>
+                  <AccordionTrigger>
+                    Can I extend my free trial?
+                  </AccordionTrigger>
                   <AccordionContent>
-                    The standard trial period is 14 days. In some cases, we may offer extensions for customers who need more
-                    time to evaluate our services. Contact our support team if you need to request an extension of your trial period.
+                    The standard trial period is 14 days. In some cases, we may
+                    offer extensions for customers who need more time to
+                    evaluate our services. Contact our support team if you need
+                    to request an extension of your trial period.
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>

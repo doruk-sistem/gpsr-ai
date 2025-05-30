@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { isSuperAdmin } from "@/lib/utils/admin-helpers";
+import { isAdminOrSuperAdmin } from "@/lib/utils/admin-helpers";
 import { createClient } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/supabase-admin";
 
@@ -13,7 +13,7 @@ export async function GET() {
      * So we need to check if the current user is a superadmin or admin
      * If not, we return a 401 Unauthorized error
      */
-    const isAuthorized = await isSuperAdmin(supabase);
+    const isAuthorized = await isAdminOrSuperAdmin(supabase);
 
     if (!isAuthorized) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

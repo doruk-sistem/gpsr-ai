@@ -21,6 +21,7 @@ export interface CreateUserProductUserRegulationRequest {
   regulation_edition_date: string;
   user_product_id: string;
   reference_regulation_id?: number | null;
+  user_id: string;
 }
 
 export interface UpdateUserProductUserRegulationRequest {
@@ -29,6 +30,7 @@ export interface UpdateUserProductUserRegulationRequest {
   regulation_description?: string;
   regulation_edition_date?: string;
   reference_regulation_id?: number | null;
+  user_id: string;
 }
 
 class UserProductUserRegulationsService {
@@ -58,7 +60,6 @@ class UserProductUserRegulationsService {
           ...input,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
-          user_id: (await supabase.auth.getUser()).data.user?.id,
         },
       ])
       .select()

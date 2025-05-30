@@ -257,7 +257,7 @@ export default function ProfilePage() {
                       <CountryDropdown
                         defaultValue={profileForm.watch("country")}
                         onChange={(country) =>
-                          profileForm.setValue("country", country.alpha2)
+                          profileForm.setValue("country", country?.name)
                         }
                         className="w-[200px] h-12"
                       />

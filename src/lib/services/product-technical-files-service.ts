@@ -14,6 +14,21 @@ export interface ProductTechnicalFile {
   user_id?: string | null;
 }
 
+export interface UploadProductTechnicalFileRequest {
+  productId: string;
+  fileType: string;
+  file: File;
+  fileName?: string;
+  userId: string;
+}
+
+export interface SetProductTechnicalFileNotRequiredRequest {
+  productId: string;
+  fileType: string;
+  reason?: string;
+  userId: string;
+}
+
 class ProductTechnicalFilesService {
   async getProductTechnicalFiles(productId: string) {
     const { data, error } = await supabase
@@ -25,17 +40,28 @@ class ProductTechnicalFilesService {
     return data as ProductTechnicalFile[];
   }
 
-  async uploadProductTechnicalFile(
-    productId: string,
-    fileType: string,
-    file: File,
-    fileName?: string
-  ) {
-    const userId = (await supabase.auth.getUser()).data.user?.id;
+  async getProductTechnicalFileById(id: string) {
+    const { data, error } = await supabase
+      .from("user_product_technical_files")
+      .select("*")
+      .eq("id", id)
+      .is("deleted_at", null)
+      .single();
 
+    if (error) throw error;
+    return data as ProductTechnicalFile;
+  }
+
+  async uploadProductTechnicalFile({
+    productId,
+    fileType,
+    file,
+    fileName,
+    userId,
+  }: UploadProductTechnicalFileRequest) {
     const { publicUrl } = await storageService.uploadProductTechnicalFile(
       file,
-      userId!,
+      userId,
       fileName
     );
     const { data, error } = await supabase
@@ -52,11 +78,12 @@ class ProductTechnicalFilesService {
     return data as ProductTechnicalFile;
   }
 
-  async setProductTechnicalFileNotRequired(
-    productId: string,
-    fileType: string,
-    reason?: string
-  ) {
+  async setProductTechnicalFileNotRequired({
+    productId,
+    fileType,
+    reason,
+    userId,
+  }: SetProductTechnicalFileNotRequiredRequest) {
     const { data, error } = await supabase
       .from("user_product_technical_files")
       .upsert(
@@ -66,7 +93,7 @@ class ProductTechnicalFilesService {
             file_type: fileType,
             not_required: true,
             not_required_reason: reason,
-            user_id: (await supabase.auth.getUser()).data.user?.id,
+            user_id: userId,
           },
         ],
         { onConflict: "user_product_id,file_type" }
@@ -84,6 +111,7 @@ class ProductTechnicalFilesService {
       .eq("id", id)
       .select()
       .single();
+
     if (error) throw error;
 
     if (!data.file_url) return;

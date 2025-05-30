@@ -1,7 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import productTechnicalFilesService from "@/lib/services/product-technical-files-service";
+import productTechnicalFilesService, {
+  SetProductTechnicalFileNotRequiredRequest,
+  UploadProductTechnicalFileRequest,
+} from "@/lib/services/product-technical-files-service";
 
-export const useProductTechnicalFiles = (productId: string) => {
+export const useGetProductTechnicalFilesByProductId = (productId: string) => {
   return useQuery({
     queryKey: ["product-technical-files", productId],
     queryFn: () =>
@@ -18,18 +21,15 @@ export const useUploadProductTechnicalFile = () => {
       fileType,
       file,
       fileName,
-    }: {
-      productId: string;
-      fileType: string;
-      file: File;
-      fileName?: string;
-    }) =>
-      productTechnicalFilesService.uploadProductTechnicalFile(
+      userId,
+    }: UploadProductTechnicalFileRequest) =>
+      productTechnicalFilesService.uploadProductTechnicalFile({
         productId,
         fileType,
         file,
-        fileName
-      ),
+        fileName,
+        userId,
+      }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
         queryKey: ["product-technical-files", variables.productId],
@@ -45,16 +45,14 @@ export const useSetProductTechnicalFileNotRequired = () => {
       productId,
       fileType,
       reason,
-    }: {
-      productId: string;
-      fileType: string;
-      reason?: string;
-    }) =>
-      productTechnicalFilesService.setProductTechnicalFileNotRequired(
+      userId,
+    }: SetProductTechnicalFileNotRequiredRequest) =>
+      productTechnicalFilesService.setProductTechnicalFileNotRequired({
         productId,
         fileType,
-        reason
-      ),
+        reason,
+        userId,
+      }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
         queryKey: ["product-technical-files", variables.productId],

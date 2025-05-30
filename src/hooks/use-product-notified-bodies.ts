@@ -3,11 +3,11 @@ import productNotifiedBodiesService, {
   ProductNotifiedBody,
 } from "@/lib/services/product-notified-bodies-service";
 
-export const useProductNotifiedBodies = (productId: string) => {
+export const useProductNotifiedBody = (productId: string) => {
   return useQuery({
-    queryKey: ["product-notified-bodies", productId],
+    queryKey: ["product-notified-body", productId],
     queryFn: () =>
-      productNotifiedBodiesService.getProductNotifiedBodies(productId),
+      productNotifiedBodiesService.getProductNotifiedBody(productId),
     enabled: !!productId,
   });
 };
@@ -32,7 +32,7 @@ export const useCreateProductNotifiedBody = () => {
       ),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
-        queryKey: ["product-notified-bodies", variables.productId],
+        queryKey: ["product-notified-body", variables.productId],
       });
     },
   });
@@ -50,7 +50,9 @@ export const useUpdateProductNotifiedBody = () => {
     }) =>
       productNotifiedBodiesService.updateProductNotifiedBody(id, notifiedBody),
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["product-notified-bodies"] });
+      queryClient.invalidateQueries({
+        queryKey: ["product-notified-body", variables.id],
+      });
     },
   });
 };
@@ -60,8 +62,10 @@ export const useDeleteProductNotifiedBody = () => {
   return useMutation({
     mutationFn: (id: string) =>
       productNotifiedBodiesService.deleteProductNotifiedBody(id),
-    onSuccess: (_, id, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["product-notified-bodies"] });
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({
+        queryKey: ["product-notified-body", id],
+      });
     },
   });
 };

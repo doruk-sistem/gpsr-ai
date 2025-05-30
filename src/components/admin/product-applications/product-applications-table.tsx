@@ -37,16 +37,19 @@ import {
 import { format } from "date-fns";
 import { ProductApplicationModal } from "@/components/admin/product-applications/product-application-modal";
 import { type Product } from "@/lib/services/products-service";
-import { useAdminProducts } from "@/hooks/admin/use-admin-products";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useCategories } from "@/hooks/use-product-categories";
 import { useDebounce } from "@/hooks/use-debounce";
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
+import { useProducts } from "@/hooks/use-products";
 
 export function ProductApplicationsTable() {
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState<Product["status"] | "all">(
+    "all"
+  );
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
 
@@ -60,11 +63,25 @@ export function ProductApplicationsTable() {
     data: productsData,
     isLoading: isLoadingProducts,
     refetch,
-  } = useAdminProducts({
+  } = useProducts({
     search: debouncedSearchQuery,
     categoryId: categoryFilter !== "all" ? categoryFilter : undefined,
     page: currentPage,
     pageSize,
+    status: statusFilter !== "all" ? statusFilter : undefined,
+    select: {
+      "*": true,
+      product_categories: {
+        name: true,
+      },
+      manufacturers: {
+        name: true,
+        country: true,
+      },
+      product_types: {
+        product: true,
+      },
+    },
   });
 
   const { data: productCategories, isLoading: isLoadingProductCategories } =
@@ -78,11 +95,47 @@ export function ProductApplicationsTable() {
   const products = productsData?.data;
   const totalItems = productsData?.count || 0;
 
-  const statusColors: Record<NonNullable<Product["status"]>, string> = {
-    pending: "bg-yellow-500",
-    completed: "bg-green-500",
-    incomplete: "bg-blue-500",
-    reject: "bg-red-500",
+  const renderStatusBadge = (status: Product["status"]) => {
+    switch (status) {
+      case "pending":
+        return (
+          <Badge
+            variant="outline"
+            className="bg-amber-50 text-amber-700 border-amber-200"
+          >
+            Pending
+          </Badge>
+        );
+      case "completed":
+        return (
+          <Badge
+            variant="outline"
+            className="bg-green-50 text-green-700 border-green-200"
+          >
+            Completed
+          </Badge>
+        );
+      case "rejected":
+        return (
+          <Badge
+            variant="outline"
+            className="bg-red-50 text-red-700 border-red-200"
+          >
+            Rejected
+          </Badge>
+        );
+      case "incomplete":
+        return (
+          <Badge
+            variant="outline"
+            className="bg-gray-100 text-gray-700 border-gray-200"
+          >
+            Incomplete
+          </Badge>
+        );
+      default:
+        return <Badge variant="outline">{status}</Badge>;
+    }
   };
 
   const handleViewProduct = (id: string) => {
@@ -91,7 +144,7 @@ export function ProductApplicationsTable() {
 
   return (
     <>
-      <div className="flex flex-col md:flex-row gap-4 mb-6">
+      <div className="flex flex-col md:flex-row gap-4 mb-4">
         <div className="flex-1 relative">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
@@ -101,7 +154,9 @@ export function ProductApplicationsTable() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
+      </div>
 
+      <div className="flex flex-col md:flex-row gap-4 mb-6">
         <div className="flex flex-wrap gap-2">
           <Select value={categoryFilter} onValueChange={setCategoryFilter}>
             <SelectTrigger className="w-[180px]">
@@ -115,6 +170,27 @@ export function ProductApplicationsTable() {
                   {category.name}
                 </SelectItem>
               ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          <Select
+            value={statusFilter}
+            onValueChange={(value) =>
+              setStatusFilter(value as Product["status"])
+            }
+          >
+            <SelectTrigger className="w-[180px]">
+              <Filter className="mr-2 h-4 w-4" />
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Statuses</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="completed">Completed</SelectItem>
+              <SelectItem value="rejected">Rejected</SelectItem>
+              <SelectItem value="incomplete">Incomplete</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -199,12 +275,7 @@ export function ProductApplicationsTable() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge
-                          variant="default"
-                          className={`${statusColors[product?.status!]}`}
-                        >
-                          {product?.status}
-                        </Badge>
+                        {renderStatusBadge(product?.status || "pending")}
                       </TableCell>
                       <TableCell>
                         {format(
@@ -237,6 +308,7 @@ export function ProductApplicationsTable() {
               </TableBody>
             </Table>
           </div>
+
           {/* Pagination */}
           <DataTablePagination
             totalItems={totalItems}

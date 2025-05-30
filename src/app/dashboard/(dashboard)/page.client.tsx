@@ -26,7 +26,7 @@ import {
 import Link from "next/link";
 import { TrialStatus } from "@/components/dashboard/trial-status";
 import { useActivePlan, useSubscription } from "@/hooks/use-stripe";
-import { useProducts } from "@/hooks/use-products";
+import { useProductsCount } from "@/hooks/use-products";
 import { useManufacturers } from "@/hooks/use-manufacturers";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
@@ -43,14 +43,15 @@ export default function DashboardPageClient() {
         current_period_end: true,
       },
     });
-  const { data: products, isLoading: isLoadingProducts } = useProducts();
+  const { data: productsCountData, isLoading: isLoadingProducts } =
+    useProductsCount();
   const { data: manufacturers, isLoading: isLoadingManufacturers } =
     useManufacturers();
   const { data: activePlan, isLoading: isLoadingActivePlan } = useActivePlan();
 
+  const productsCount = productsCountData || 0;
   // Check user subscription
   const hasActiveSubscription = subscription?.has_active_subscription;
-  const productsCount = products?.length || 0;
   const manufacturersCount = manufacturers?.length || 0;
 
   const handleAddProduct = () => {

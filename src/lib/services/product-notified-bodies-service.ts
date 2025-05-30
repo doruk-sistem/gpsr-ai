@@ -15,13 +15,21 @@ export interface ProductNotifiedBody {
 }
 
 class ProductNotifiedBodiesService {
-  async getProductNotifiedBodies(productId: string) {
+  async getProductNotifiedBody(productId: string) {
     const { data, error } = await supabase
       .from("user_product_notified_bodies")
       .select("*")
       .eq("user_product_id", productId)
       .is("deleted_at", null)
       .single();
+
+    if (error) {
+      if (error.code === "PGRST116") {
+        // No rows returned - this is fine for this method
+        return null;
+      }
+      throw error;
+    }
 
     if (error) throw error;
     return data as ProductNotifiedBody;

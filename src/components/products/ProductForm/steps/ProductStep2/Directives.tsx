@@ -30,7 +30,7 @@ import { UserProductUserDirective } from "@/lib/services/user-product-user-direc
 import { Directive } from "@/lib/services/directives-service";
 
 export default function Directives() {
-  const { initialData, setInitialData } = useProductForm();
+  const { initialData, setInitialData, user } = useProductForm();
 
   const [openPopover, setOpenPopover] = useState(false);
 
@@ -71,6 +71,7 @@ export default function Directives() {
         directive_edition_date: directive.directive_edition_date!,
         reference_directive_id: directive.id,
         user_product_id: initialData?.id!,
+        user_id: user?.id!,
       });
 
       setSelectedDirectives([...selectedDirectives, newDirective]);

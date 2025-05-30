@@ -52,7 +52,6 @@ class StripeService {
     select,
   }: SubscriptionRequest = {}): Promise<Subscription | null> {
     try {
-      console.log("Fetching subscription data");
       const selectQuery = formatSelectQuery<keyof Subscription>(select);
 
       const { data, error } = await supabase
@@ -65,7 +64,6 @@ class StripeService {
         throw error;
       }
 
-      console.log("Subscription data:", data ? "Found" : "Not found");
       return data as Subscription | null;
     } catch (error) {
       console.error("Subscription fetch exception:", error);

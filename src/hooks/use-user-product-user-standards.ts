@@ -8,6 +8,7 @@ export function useUserProductUserStandards(productId: string) {
   return useQuery({
     queryKey: ["user-product-user-standards", productId],
     queryFn: () => userProductUserStandardsService.getAllByProductId(productId),
+    enabled: !!productId,
   });
 }
 

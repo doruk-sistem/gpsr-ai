@@ -58,8 +58,8 @@ export default function ManufacturerForm({
     setSignaturePreview(imageDataUrl);
   };
 
-  const handleCountryChange = (country: Country) => {
-    setCountry(country.alpha2);
+  const handleCountryChange = (country: Country | null) => {
+    setCountry(country?.name || "");
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
