@@ -19,6 +19,7 @@ export interface CreateUserProductUserStandardRequest {
   title: string;
   user_product_id: string;
   reference_standard_id?: string | null;
+  user_id: string;
 }
 
 export interface UpdateUserProductUserStandardRequest {
@@ -26,6 +27,7 @@ export interface UpdateUserProductUserStandardRequest {
   edition_date?: string;
   title?: string;
   reference_standard_id?: string | null;
+  user_id: string;
 }
 
 class UserProductUserStandardsService {
@@ -55,7 +57,6 @@ class UserProductUserStandardsService {
           ...input,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
-          user_id: (await supabase.auth.getUser()).data.user?.id,
         },
       ])
       .select()

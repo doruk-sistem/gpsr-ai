@@ -43,7 +43,6 @@ import storageService from "@/lib/services/storage-service";
 import { useCategories } from "@/hooks/use-product-categories";
 import { useProductTypesByCategory } from "@/hooks/use-product-types";
 import { useQuestionsByCategoryAndProductType } from "@/hooks/use-product-questions";
-import { useCurrentUser } from "@/hooks/use-auth";
 import {
   useCreateProduct,
   useSaveDefaultDirectivesRegulationsStandards,
@@ -65,7 +64,8 @@ import { ProductQuestionAnswer } from "@/lib/services/product-question-answers-s
 import { useRepresentativeAddresses } from "@/hooks/use-representative-addresses";
 
 export default function ProductStep1() {
-  const { initialData, setInitialData, onNextStep, mode } = useProductForm();
+  const { initialData, setInitialData, onNextStep, mode, user } =
+    useProductForm();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -96,8 +96,6 @@ export default function ProductStep1() {
   const [openManufacturerPopover, setOpenManufacturerPopover] = useState(false);
   const [openEuRepPopover, setOpenEuRepPopover] = useState(false);
   const [openUkRepPopover, setOpenUkRepPopover] = useState(false);
-
-  const { data: user } = useCurrentUser();
 
   const updateProduct = useUpdateProduct();
   const createProduct = useCreateProduct();
@@ -252,9 +250,8 @@ export default function ProductStep1() {
         manufacturer_id: selectedManufacturerId as string,
         authorised_representative_eu_id: selectedEuRepId,
         authorised_representative_uk_id: selectedUkRepId,
+        user_id: user?.id,
       };
-
-      console.log(data);
 
       let newProduct: Product | null = null;
       let newProductQuestionAnswers: ProductQuestionAnswer[] | null = null;

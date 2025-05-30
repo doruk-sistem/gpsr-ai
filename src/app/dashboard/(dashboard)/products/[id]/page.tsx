@@ -7,19 +7,27 @@ import ProductForm from "@/components/products/ProductForm";
 
 import Spinner from "@/components/ui/spinner";
 
-import { useProduct } from "@/hooks/use-products";
+import { useProductById } from "@/hooks/use-products";
 import { useProductQuestionAnswers } from "@/hooks/use-product-question-answers";
 import { useUserProductUserStandards } from "@/hooks/use-user-product-user-standards";
-import { useProductTechnicalFiles } from "@/hooks/use-product-technical-files";
-import { useProductNotifiedBodies } from "@/hooks/use-product-notified-bodies";
+import { useGetProductTechnicalFilesByProductId } from "@/hooks/use-product-technical-files";
+import { useProductNotifiedBody } from "@/hooks/use-product-notified-bodies";
 import { useUserProductUserDirectives } from "@/hooks/use-user-product-user-directives";
 import { useUserProductUserRegulations } from "@/hooks/use-user-product-user-regulations";
 
 export default function EditProductPage() {
   const { id } = useParams();
 
-  const { data: product, isLoading: isProductLoading } = useProduct(
-    id as string
+  const { data: product, isLoading: isProductLoading } = useProductById(
+    id as string,
+    {
+      select: {
+        "*": true,
+        product_categories: "*",
+        product_types: "*",
+        manufacturers: "*",
+      },
+    }
   );
   const {
     data: productQuestionAnswers,
@@ -28,11 +36,11 @@ export default function EditProductPage() {
   const {
     data: productTechnicalFiles,
     isLoading: isProductTechnicalFilesLoading,
-  } = useProductTechnicalFiles(id as string);
+  } = useGetProductTechnicalFilesByProductId(id as string);
   const {
     data: productNotifiedBodies,
     isLoading: isProductNotifiedBodiesLoading,
-  } = useProductNotifiedBodies(id as string);
+  } = useProductNotifiedBody(id as string);
   const {
     data: productUserProductUserDirectives,
     isLoading: isProductUserProductUserDirectivesLoading,

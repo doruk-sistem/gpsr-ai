@@ -16,7 +16,7 @@ import {
 import { useProductForm } from "../../hooks/useProductForm";
 
 export default function Standards() {
-  const { initialData, setInitialData } = useProductForm();
+  const { initialData, setInitialData, user } = useProductForm();
 
   const deleteUserStandard = useDeleteUserProductUserStandard();
   const addUserStandard = useAddUserProductUserStandard();
@@ -79,6 +79,7 @@ export default function Standards() {
         edition_date: newStandard.edition_date,
         title: newStandard.title,
         user_product_id: initialData?.id || "",
+        user_id: user?.id!,
       });
 
       setSelectedStandards([...selectedStandards, addedStandard]);

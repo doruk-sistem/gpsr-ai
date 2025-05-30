@@ -21,6 +21,7 @@ export interface CreateUserProductUserDirectiveRequest {
   directive_edition_date: string;
   user_product_id: string;
   reference_directive_id?: number | null;
+  user_id: string;
 }
 
 export interface UpdateUserProductUserDirectiveRequest {
@@ -29,6 +30,7 @@ export interface UpdateUserProductUserDirectiveRequest {
   directive_description?: string;
   directive_edition_date?: string;
   reference_directive_id?: number | null;
+  user_id: string;
 }
 
 class UserProductUserDirectivesService {
@@ -58,7 +60,6 @@ class UserProductUserDirectivesService {
           ...input,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
-          user_id: (await supabase.auth.getUser()).data.user?.id,
         },
       ])
       .select()

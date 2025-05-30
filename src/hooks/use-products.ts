@@ -2,15 +2,17 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import productsService, {
-  CreateProductRequest,
-  SaveDefaultDirectivesRegulationsStandardsRequest,
-  UpdateProductRequest,
+  GetProductByIdParams,
+  type CreateProductRequest,
+  type GetProductsParams,
+  type SaveDefaultDirectivesRegulationsStandardsRequest,
+  type UpdateProductRequest,
 } from "@/lib/services/products-service";
 
-export const useProducts = () => {
+export const useProducts = (params: GetProductsParams = {}) => {
   return useQuery({
-    queryKey: ["products"],
-    queryFn: () => productsService.getProducts(),
+    queryKey: ["products", params],
+    queryFn: () => productsService.getProducts(params),
   });
 };
 
@@ -21,10 +23,13 @@ export const useProductsCount = () => {
   });
 };
 
-export const useProduct = (id: string) => {
+export const useProductById = (
+  id: string,
+  params: GetProductByIdParams = {}
+) => {
   return useQuery({
-    queryKey: ["product", id],
-    queryFn: () => productsService.getProductById(id),
+    queryKey: ["product", id, params],
+    queryFn: () => productsService.getProductById(id, params),
     enabled: !!id,
   });
 };
@@ -98,10 +103,6 @@ export const useDeleteProduct = () => {
         refetchType: "all",
       });
       queryClient.invalidateQueries({
-        queryKey: ["product", id],
-        refetchType: "all",
-      });
-      queryClient.invalidateQueries({
         queryKey: ["product-question-answers", id],
         refetchType: "all",
       });
@@ -118,7 +119,7 @@ export const useSaveDefaultDirectivesRegulationsStandards = () => {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
         queryKey: ["product", variables.userProductId],
-        refetchType: "all",
+        refetchType: "active",
       });
     },
   });

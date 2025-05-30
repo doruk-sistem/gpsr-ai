@@ -44,20 +44,16 @@ const TECHNICAL_FILE_TYPES = [
     key: "general_supporting",
     label: "General Supporting Documentation (Optional)",
   },
-];
+] as const;
 
 export default function ProductStep3() {
-  const { initialData, setInitialData, onNextStep } = useProductForm();
+  const { initialData, setInitialData, onNextStep, user } = useProductForm();
   const productId = initialData?.id;
 
   // DoC question state
-  const [hasDoc, setHasDoc] = useState<string>("yes");
+  const [hasDoc, setHasDoc] = useState<string>("no");
   // Notified body question state
   const [needsNotifiedBody, setNeedsNotifiedBody] = useState<string>("no");
-  // Not required checkboxes state
-  const [notRequiredStates, setNotRequiredStates] = useState<
-    Record<string, boolean>
-  >({});
 
   // Notified body form state
   const [notifiedBody, setNotifiedBody] = useState({
@@ -131,17 +127,6 @@ export default function ProductStep3() {
   }, [needsNotifiedBody, initialData?.selectedNotifiedBody]);
 
   // Initialize not required states from initialData
-  useEffect(() => {
-    if (initialData?.selectedTechnicalFiles) {
-      const states: Record<string, boolean> = {};
-      initialData.selectedTechnicalFiles.forEach(
-        (file: ProductTechnicalFile) => {
-          states[file.file_type] = !!file.not_required;
-        }
-      );
-      setNotRequiredStates(states);
-    }
-  }, [initialData?.selectedTechnicalFiles]);
 
   // File upload handler
   const handleFileChange = async (
@@ -151,7 +136,24 @@ export default function ProductStep3() {
     const file = e.target.files?.[0];
     if (!file || !productId) return;
     try {
-      await uploadFile.mutateAsync({ productId, fileType, file });
+      const uploadedFile = await uploadFile.mutateAsync({
+        productId,
+        fileType,
+        file,
+        userId: user?.id!,
+      });
+
+      // Update initialData state to refresh UI
+      const updatedFiles = initialData?.selectedTechnicalFiles
+        ? initialData.selectedTechnicalFiles
+            .filter((f) => f.file_type !== fileType)
+            .concat([uploadedFile])
+        : [uploadedFile];
+
+      setInitialData({
+        ...initialData,
+        selectedTechnicalFiles: updatedFiles,
+      });
     } catch (err) {
       toast.error("File upload failed");
     }
@@ -166,21 +168,22 @@ export default function ProductStep3() {
         const newFile = await setNotRequired.mutateAsync({
           productId,
           fileType,
+          userId: user?.id!,
         });
-        setNotRequiredStates((prev) => ({ ...prev, [fileType]: true }));
 
         // Update initialData with the new file data
         const updatedFiles = initialData?.selectedTechnicalFiles
-          ? [...initialData.selectedTechnicalFiles, newFile]
+          ? [
+              ...initialData.selectedTechnicalFiles.filter(
+                (f) => f.file_type !== fileType
+              ),
+              newFile,
+            ]
           : [newFile];
 
         setInitialData({
           ...initialData,
-          ...(updatedFiles
-            ? {
-                selectedTechnicalFiles: updatedFiles,
-              }
-            : {}),
+          selectedTechnicalFiles: updatedFiles,
         });
       } else {
         // When unchecked, we need to find the file in initialData
@@ -190,21 +193,17 @@ export default function ProductStep3() {
 
         if (existingFile?.id) {
           await deleteFile.mutateAsync(existingFile.id);
-          setNotRequiredStates((prev) => ({ ...prev, [fileType]: false }));
 
-          // Update initialData by removing the not_required flag
-          if (initialData?.selectedTechnicalFiles) {
-            const updatedFiles = initialData.selectedTechnicalFiles.map(
-              (file) =>
-                file.file_type === fileType
-                  ? { ...file, not_required: false }
-                  : file
-            );
-            setInitialData({
-              ...initialData,
-              selectedTechnicalFiles: updatedFiles,
-            });
-          }
+          // Update initialData by removing the file completely
+          const updatedFiles =
+            initialData?.selectedTechnicalFiles?.filter(
+              (file) => file.file_type !== fileType
+            ) || [];
+
+          setInitialData({
+            ...initialData,
+            selectedTechnicalFiles: updatedFiles,
+          });
         }
       }
     } catch (err) {
@@ -217,6 +216,16 @@ export default function ProductStep3() {
   const handleDeleteFile = async (id: string) => {
     try {
       await deleteFile.mutateAsync(id);
+
+      // Update initialData state to refresh UI
+      const updatedFiles =
+        initialData?.selectedTechnicalFiles?.filter((f) => f.id !== id) || [];
+
+      setInitialData({
+        ...initialData,
+        selectedTechnicalFiles: updatedFiles,
+      });
+
       toast.success("File deleted successfully");
     } catch (err) {
       toast.error("File deletion failed");
@@ -374,7 +383,7 @@ export default function ProductStep3() {
               <div className="flex items-center gap-4">
                 <Checkbox
                   id={`not-required-${key}`}
-                  checked={notRequiredStates[key] || false}
+                  checked={!!fileData?.not_required}
                   onCheckedChange={(checked) =>
                     handleNotRequired(key, !!checked)
                   }

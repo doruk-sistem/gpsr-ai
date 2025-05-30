@@ -19,6 +19,10 @@ import type { Manufacturer } from "@/lib/services/manufacturers-service";
 import type { UserProductUserDirective } from "@/lib/services/user-product-user-directives-service";
 import type { UserProductUserRegulation } from "@/lib/services/user-product-user-regulations-service";
 
+import { User } from "@/lib/api/endpoints";
+
+import { useCurrentUser } from "@/hooks/use-auth";
+
 import ProductStep1 from "./steps/ProductStep1";
 import ProductStep2 from "./steps/ProductStep2";
 import ProductStep3 from "./steps/ProductStep3";
@@ -29,6 +33,7 @@ type ProductFormContextType = {
   setInitialData: (data: ProductFormProps["initialData"]) => void;
   onNextStep: () => void;
   mode: "create" | "edit";
+  user: User | null;
 } | null;
 
 export const ProductFormContext = createContext<ProductFormContextType>(null);
@@ -76,6 +81,9 @@ const STEPS = [
 export default function ProductForm({ initialData, mode }: ProductFormProps) {
   const [initialDataState, setInitialDataState] = useState(initialData);
   const [currentStep, setCurrentStep] = useState<number>(1);
+
+  const { data: user } = useCurrentUser();
+
   const totalSteps = STEPS.length;
 
   const StepComponent = STEPS[currentStep - 1].component;
@@ -146,6 +154,7 @@ export default function ProductForm({ initialData, mode }: ProductFormProps) {
         setInitialData: setInitialDataState,
         mode,
         onNextStep: handleNextStep,
+        user,
       }}
     >
       <Card className="border shadow-sm">

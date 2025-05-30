@@ -30,18 +30,34 @@ import Image from "next/image";
 import Spinner from "@/components/ui/spinner";
 import { useActivePlan } from "@/hooks/use-stripe";
 import { Progress } from "@/components/ui/progress";
+import { Product } from "@/lib/services/products-service";
+import { Badge } from "@/components/ui/badge";
 
 export default function ProductsPage() {
   const router = useRouter();
   const deleteProduct = useDeleteProduct();
-  const { data: products = [], isLoading: isProductsLoading } = useProducts();
+  const { data: productsData, isLoading: isProductsLoading } = useProducts({
+    select: {
+      "*": true,
+      product_categories: "*",
+      product_types: "*",
+    },
+  });
   const { data: activePlan, isLoading: isActivePlanLoading } = useActivePlan();
   const { data: productsCount, isLoading: isProductsCountLoading } =
     useProductsCount();
 
+  const products = productsData?.data || [];
   const productLimit = activePlan?.product_limit || 0;
   const currentProductCount = productsCount || 0;
   const isLimitReached = currentProductCount >= productLimit;
+
+  const statusColors: Record<NonNullable<Product["status"]>, string> = {
+    pending: "bg-yellow-500 hover:bg-yellow-600",
+    completed: "bg-green-500 hover:bg-green-600",
+    incomplete: "bg-blue-500 hover:bg-blue-600",
+    rejected: "bg-red-500 hover:bg-red-600",
+  };
 
   const handleAddProduct = () => {
     if (isLimitReached) {
@@ -178,7 +194,7 @@ export default function ProductsPage() {
                     <TableHead>Name</TableHead>
                     <TableHead>Category</TableHead>
                     <TableHead>Product Type</TableHead>
-                    <TableHead>CE/UKCA</TableHead>
+                    <TableHead>Status</TableHead>
                     <TableHead className="w-[100px]">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -211,15 +227,12 @@ export default function ProductsPage() {
                         {product.product_types.product}
                       </TableCell>
                       <TableCell>
-                        {product.require_ce_ukca_marking ? (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            Required
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                            Not Required
-                          </span>
-                        )}
+                        <Badge
+                          variant="default"
+                          className={`${statusColors[product?.status!]}`}
+                        >
+                          {product?.status}
+                        </Badge>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">

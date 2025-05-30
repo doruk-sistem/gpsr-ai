@@ -29,7 +29,7 @@ import {
 import { useRegulations } from "@/hooks/use-regulations";
 
 export default function Regulations() {
-  const { initialData, setInitialData } = useProductForm();
+  const { initialData, setInitialData, user } = useProductForm();
 
   const [openPopover, setOpenPopover] = useState(false);
 
@@ -70,6 +70,7 @@ export default function Regulations() {
         regulation_edition_date: regulation.regulation_edition_date!,
         reference_regulation_id: regulation.id,
         user_product_id: initialData?.id!,
+        user_id: user?.id!,
       });
 
       setSelectedRegulations([...selectedRegulations, newRegulation]);

@@ -9,6 +9,7 @@ export function useUserProductUserRegulations(productId: string) {
     queryKey: ["user-product-user-regulations", productId],
     queryFn: () =>
       userProductUserRegulationsService.getAllByProductId(productId),
+    enabled: !!productId,
   });
 }
 

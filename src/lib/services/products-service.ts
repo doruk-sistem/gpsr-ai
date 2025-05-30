@@ -10,6 +10,7 @@ import { type ProductType } from "./product-types-services";
 import { type Manufacturer } from "./manufacturers-service";
 import { type UserProductUserDirective } from "./user-product-user-directives-service";
 import { type UserProductUserRegulation } from "./user-product-user-regulations-service";
+import supabaseHelper, { SelectQuery } from "../utils/supabase-helper";
 
 export interface Product {
   id: string;
@@ -28,7 +29,14 @@ export interface Product {
   // Fields for relations
   category_id?: number;
   product_type_id?: number;
-  status?: "pending" | "reject" | "completed" | "incomplete";
+  status?: "pending" | "rejected" | "completed" | "incomplete";
+}
+
+// Extended type for all tables related to Product
+export interface ProductWithRelations extends Product {
+  product_categories?: ProductCategory;
+  product_types?: ProductType;
+  manufacturers?: Manufacturer;
 }
 
 export interface CreateProductRequest {
@@ -43,7 +51,8 @@ export interface CreateProductRequest {
   authorised_representative_uk_id?: string;
   category_id?: number;
   product_type_id?: number;
-  status?: "pending" | "reject" | "completed" | "incomplete";
+  status?: Product["status"];
+  user_id?: string;
 }
 
 export type UpdateProductRequest = Partial<CreateProductRequest>;
@@ -55,6 +64,21 @@ export interface SaveDefaultDirectivesRegulationsStandardsRequest {
   regions: ("uk" | "eu")[];
 }
 
+export interface GetProductsParams {
+  search?: string;
+  categoryId?: string;
+  sort?: string;
+  order?: "asc" | "desc";
+  select?: SelectQuery<ProductWithRelations>;
+  page?: number;
+  pageSize?: number;
+  status?: Product["status"];
+}
+
+export interface GetProductByIdParams {
+  select?: SelectQuery<ProductWithRelations>;
+}
+
 export interface SaveDefaultDirectivesRegulationsStandardsResponse {
   directives: UserProductUserDirective[];
   regulations: UserProductUserRegulation[];
@@ -62,18 +86,50 @@ export interface SaveDefaultDirectivesRegulationsStandardsResponse {
 }
 
 class ProductsService {
-  public async getProducts() {
-    const { data, error } = await supabase
-      .from("user_products")
-      .select("*, product_categories(*), product_types(*)")
-      .order("created_at", { ascending: false });
+  private table = "user_products";
 
-    if (error) throw error;
-    return data as (Product & {
-      product_categories: ProductCategory;
-      product_types: ProductType;
-      manufacturers: Manufacturer;
-    })[];
+  public async getProducts(params: GetProductsParams = {}) {
+    let query = supabase
+      .from(this.table)
+      .select(supabaseHelper.formatSelectQuery(params.select), {
+        count: "exact",
+      });
+
+    // Apply search filter
+    if (params.search) {
+      query = query.or(
+        `name.ilike.%${params.search}%,model_name.ilike.%${params.search}%,batch_number.ilike.%${params.search}%`
+      );
+    }
+
+    // Apply category filter
+    if (params.categoryId) {
+      query = query.eq("category_id", params.categoryId);
+    }
+
+    // Apply status filter
+    if (params.status) {
+      query = query.eq("status", params.status);
+    }
+
+    // Apply sorting
+    supabaseHelper.applySort(query, {
+      sort: params.sort,
+      order: params.order,
+      defaultSort: "created_at",
+      defaultOrder: "desc",
+    });
+
+    return supabaseHelper.getPaginationResult<
+      Product & {
+        product_categories: ProductCategory;
+        product_types: ProductType;
+        manufacturers: Manufacturer;
+      }
+    >(query, {
+      page: params.page,
+      pageSize: params.pageSize,
+    });
   }
 
   public async getProductsCount() {
@@ -85,19 +141,16 @@ class ProductsService {
     return count;
   }
 
-  public async getProductById(id: string) {
+  public async getProductById(id: string, params: GetProductByIdParams = {}) {
     const { data, error } = await supabase
       .from("user_products")
-      .select("*, product_categories(*), product_types(*), manufacturers(*)")
+      .select(supabaseHelper.formatSelectQuery(params.select))
       .eq("id", id)
       .single();
 
     if (error) throw error;
-    return data as Product & {
-      product_categories: ProductCategory;
-      product_types: ProductType;
-      manufacturers: Manufacturer;
-    };
+
+    return data as unknown as ProductWithRelations;
   }
 
   public async updateProduct(id: string, product: Partial<Product>) {
@@ -126,7 +179,6 @@ class ProductsService {
         ...product,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-        user_id: (await supabase.auth.getUser()).data.user?.id,
       })
       .select("*, product_categories(*), product_types(*), manufacturers(*)")
       .single();
@@ -140,7 +192,11 @@ class ProductsService {
   }
 
   public async deleteProduct(id: string) {
-    const product = await this.getProductById(id);
+    const product = await this.getProductById(id, {
+      select: {
+        image_urls: true,
+      },
+    });
 
     // Delete product
     const { error } = await supabase
